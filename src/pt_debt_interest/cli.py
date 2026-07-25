@@ -8,7 +8,13 @@ from pathlib import Path
 import typer
 
 from .config import Settings, load_settings
-from .pipeline import build_dataset, fetch_ameco, fetch_eurostat, fetch_eurostat_panel
+from .pipeline import (
+    build_dataset,
+    clear_ameco_interim,
+    fetch_ameco,
+    fetch_eurostat,
+    fetch_eurostat_panel,
+)
 from .plotting import generate_all_plots
 from .reporting import generate_report
 from .sources.ameco import AmecoArchiveClient
@@ -118,6 +124,9 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
         try:
             fetch_ameco(settings)
         except Exception as exc:
+            stale_path = clear_ameco_interim(settings)
+            if stale_path is not None:
+                typer.echo(f"Removed stale AMECO interim data: {stale_path}", err=True)
             typer.echo(f"AMECO extension skipped: {exc}", err=True)
     frame = build_dataset(settings)
     result = validate_dataset(

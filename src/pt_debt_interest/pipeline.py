@@ -87,6 +87,20 @@ def fetch_ameco(settings: Settings, root: Path = Path(".")) -> Path | None:
     return destination
 
 
+def ameco_interim_path(settings: Settings, root: Path = Path(".")) -> Path:
+    """Return the configured AMECO interim output path."""
+    return root / settings.paths.interim / "ameco_linked.csv"
+
+
+def clear_ameco_interim(settings: Settings, root: Path = Path(".")) -> Path | None:
+    """Remove stale optional AMECO interim data if it exists."""
+    path = ameco_interim_path(settings, root)
+    if path.exists():
+        path.unlink()
+        return path
+    return None
+
+
 def fetch_eurostat_panel(settings: Settings, root: Path = Path(".")) -> Path:
     """Fetch configured Eurostat series for all comparator geographies."""
     raw_dir = root / settings.paths.raw
@@ -167,8 +181,8 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     eurostat = pd.read_csv(eurostat_path)
 
     frames = [eurostat]
-    ameco_path = interim_dir / "ameco_linked.csv"
-    if ameco_path.exists():
+    ameco_path = ameco_interim_path(settings, root)
+    if settings.ameco.enabled and ameco_path.exists():
         extension = _build_ameco_pre1995(
             pd.read_csv(ameco_path), settings.project.main_start_year
         )
