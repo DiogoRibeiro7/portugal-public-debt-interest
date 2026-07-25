@@ -1,0 +1,103 @@
+project:
+  country_name: Portugal
+  eurostat_geo: PT
+  ameco_geo: PRT
+  main_start_year: 1995
+  extended_start_year: 1960
+  end_year: 2025
+  comparison_geographies: [PT, ES, IT, EL, IE, EA20, DE, NL]
+
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  figures: reports/figures
+  reports: reports
+
+storage:
+  backend: both  # csv, sqlite, or both
+  sqlite_filename: portugal_debt_interest.sqlite
+  table_name: annual_debt_interest
+
+http:
+  timeout_seconds: 60
+  max_retries: 3
+  backoff_seconds: 1.0
+
+eurostat:
+  base_url: https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data
+  series:
+    interest_mio_eur:
+      dataset: gov_10a_main
+      filters: {freq: A, unit: MIO_EUR, sector: S13, na_item: D41PAY, geo: PT}
+      value_name: interest_mio_eur
+    interest_pct_gdp_official:
+      dataset: gov_10a_main
+      filters: {freq: A, unit: PC_GDP, sector: S13, na_item: D41PAY, geo: PT}
+      value_name: interest_pct_gdp_official
+    overall_balance_pct_gdp:
+      dataset: gov_10a_main
+      filters: {freq: A, unit: PC_GDP, sector: S13, na_item: B9, geo: PT}
+      value_name: overall_balance_pct_gdp
+    debt_mio_eur:
+      dataset: gov_10dd_edpt1
+      filters: {freq: A, unit: MIO_EUR, sector: S13, na_item: GD, geo: PT}
+      value_name: debt_mio_eur
+    debt_pct_gdp_official:
+      dataset: gov_10dd_edpt1
+      filters: {freq: A, unit: PC_GDP, sector: S13, na_item: GD, geo: PT}
+      value_name: debt_pct_gdp_official
+    nominal_gdp_mio_eur:
+      dataset: nama_10_gdp
+      filters: {freq: A, unit: CP_MEUR, na_item: B1GQ, geo: PT}
+      value_name: nominal_gdp_mio_eur
+    real_gdp_growth_pct:
+      dataset: nama_10_gdp
+      filters: {freq: A, unit: CLV_PCH_PRE, na_item: B1GQ, geo: PT}
+      value_name: real_gdp_growth_pct
+    ten_year_yield_pct:
+      dataset: irt_lt_mcby_a
+      filters: {freq: A, int_rt: MCBY, geo: PT}
+      value_name: ten_year_yield_pct
+
+ameco:
+  enabled: true
+  archive_url: https://ec.europa.eu/economy_finance/db_indicators/ameco/documents/ameco0_csv.zip
+  forecast_cutoff_year: 2025
+  selectors:
+    interest_pct_gdp:
+      variable_code: UYIG
+      unit_code: 319
+      output_name: interest_pct_gdp_ameco
+    interest_bn_eur:
+      variable_code: UYIG
+      unit_code: 99
+      output_name: interest_bn_eur_ameco
+    debt_pct_gdp:
+      variable_code: UDGG
+      unit_code: 319
+      output_name: debt_pct_gdp_ameco
+    overall_balance_pct_gdp:
+      variable_code: UBLG
+      unit_code: 319
+      output_name: overall_balance_pct_gdp_ameco
+    implicit_interest_rate_pct:
+      variable_code: AYIGD
+      unit_code: 0
+      output_name: implicit_interest_rate_pct_ameco
+
+analysis:
+  ratio_tolerance_pp: 0.15
+  identity_tolerance_pp: 0.05
+  implicit_rate_denominator: average_debt
+  static_rate_shocks_bps: [50, 100, 200]
+  default_refinancing_shares: [0.12, 0.13, 0.14, 0.15, 0.16, 0.15, 0.15]
+  observed_only_by_default: true
+  regime_boundaries:
+    - {start: 1995, end: 1998, label: Euro convergence}
+    - {start: 1999, end: 2007, label: Early euro period}
+    - {start: 2008, end: 2010, label: Global financial crisis}
+    - {start: 2011, end: 2014, label: Sovereign-debt crisis and adjustment}
+    - {start: 2015, end: 2019, label: ECB intervention and refinancing}
+    - {start: 2020, end: 2021, label: Pandemic}
+    - {start: 2022, end: 2025, label: Inflation and monetary tightening}

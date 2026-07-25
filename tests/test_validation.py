@@ -1,0 +1,23 @@
+import pandas as pd
+
+from pt_debt_interest.validation import validate_dataset
+
+
+def test_validation_passes_accounting_identity() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1995, 1996],
+            "accounting_basis": ["ESA2010", "ESA2010"],
+            "source": ["Eurostat", "Eurostat"],
+            "observation_status": ["observed", "observed"],
+            "interest_pct_gdp_official": [4.0, 3.8],
+            "interest_pct_gdp_calculated": [4.0, 3.81],
+            "debt_pct_gdp_official": [60.0, 61.0],
+            "debt_pct_gdp_calculated": [60.01, 61.0],
+            "interest_pct_gdp": [4.0, 3.8],
+            "overall_balance_pct_gdp": [-4.0, -3.0],
+            "primary_balance_pct_gdp": [0.0, 0.8],
+        }
+    )
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    assert result["passed"] is True
