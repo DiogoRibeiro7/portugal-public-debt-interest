@@ -41,6 +41,18 @@ Nominal GDP growth is calculated from current-price GDP. Real GDP growth is read
 1+\pi_t^{GDP} = \frac{1+g_t^{nominal}}{1+g_t^{real}}.
 \]
 
+## Debt dynamics
+
+Debt dynamics are reported using a discrete approximation:
+
+\[
+\Delta d_t =
+\frac{r_t-g_t}{1+g_t}d_{t-1}
+-pb_t+sfa_t.
+\]
+
+Ratios are used internally and percentage-point outputs are written to the processed dataset. The stock-flow adjustment is calculated as the residual required to reconcile observed debt-ratio changes with the interest-growth term and primary balance.
+
 ## Historical extension
 
 The main ESA 2010 series begins in 1995. Earlier AMECO observations are permitted only as a linked extension. Rows preserve:

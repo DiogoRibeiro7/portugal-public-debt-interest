@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
 REQUIRED_BASE_COLUMNS = {
     "year",
     "interest_mio_eur",
@@ -17,9 +16,26 @@ REQUIRED_BASE_COLUMNS = {
 def assign_regime(year: int, boundaries: list[dict[str, object]]) -> str | None:
     """Return the configured regime label for a year."""
     for boundary in boundaries:
-        if int(boundary["start"]) <= year <= int(boundary["end"]):
+        if int(str(boundary["start"])) <= year <= int(str(boundary["end"])):
             return str(boundary["label"])
     return None
+
+
+def _validate_percentage_scale(frame: pd.DataFrame) -> None:
+    """Detect likely decimal-ratio inputs in persisted percentage columns."""
+    if "debt_pct_gdp_official" not in frame.columns:
+        return
+    debt_ratio = pd.to_numeric(frame["debt_pct_gdp_official"], errors="coerce").dropna()
+    if not debt_ratio.empty and debt_ratio.abs().median() <= 2.0:
+        raise ValueError("debt_pct_gdp_official must be expressed as a percentage, not a ratio")
+
+
+def _same_accounting_basis_as_previous(output: pd.DataFrame) -> pd.Series:
+    """Return rows whose lagged calculations stay within one accounting basis."""
+    if "accounting_basis" not in output.columns:
+        return pd.Series(True, index=output.index)
+    basis = output["accounting_basis"].astype("string")
+    return basis.eq(basis.shift(1)).fillna(False)
 
 
 def calculate_metrics(
@@ -45,6 +61,8 @@ def calculate_metrics(
     if denominator not in {"average_debt", "previous_debt"}:
         raise ValueError("unsupported implicit-rate denominator")
 
+    _validate_percentage_scale(frame)
+
     output = frame.sort_values("year").copy()
     output["interest_pct_gdp_calculated"] = (
         output["interest_mio_eur"] / output["nominal_gdp_mio_eur"] * 100.0
@@ -52,16 +70,26 @@ def calculate_metrics(
     output["debt_pct_gdp_calculated"] = (
         output["debt_mio_eur"] / output["nominal_gdp_mio_eur"] * 100.0
     )
+    same_basis = _same_accounting_basis_as_previous(output)
     output["nominal_gdp_growth_pct"] = output["nominal_gdp_mio_eur"].pct_change() * 100.0
+    output.loc[~same_basis, "nominal_gdp_growth_pct"] = np.nan
 
     previous_debt = output["debt_mio_eur"].shift(1)
-    if denominator == "average_debt":
-        debt_denominator = (previous_debt + output["debt_mio_eur"]) / 2.0
-    else:
-        debt_denominator = previous_debt
-    output["implicit_interest_rate_pct"] = (
-        output["interest_mio_eur"] / debt_denominator * 100.0
+    average_debt = (previous_debt + output["debt_mio_eur"]) / 2.0
+    output["implicit_interest_rate_previous_debt_pct"] = (
+        output["interest_mio_eur"] / previous_debt * 100.0
     )
+    output["implicit_interest_rate_average_debt_pct"] = (
+        output["interest_mio_eur"] / average_debt * 100.0
+    )
+    output.loc[~same_basis, "implicit_interest_rate_previous_debt_pct"] = np.nan
+    output.loc[~same_basis, "implicit_interest_rate_average_debt_pct"] = np.nan
+    selected_rate = (
+        "implicit_interest_rate_average_debt_pct"
+        if denominator == "average_debt"
+        else "implicit_interest_rate_previous_debt_pct"
+    )
+    output["implicit_interest_rate_pct"] = output[selected_rate]
 
     if "real_gdp_growth_pct" in output.columns:
         nominal_factor = 1.0 + output["nominal_gdp_growth_pct"] / 100.0
@@ -86,6 +114,33 @@ def calculate_metrics(
         output["primary_balance_pct_gdp"] = (
             output["overall_balance_pct_gdp"] + output["interest_pct_gdp"]
         )
+
+    debt_ratio_lag = output["debt_pct_gdp"].shift(1) / 100.0
+    debt_ratio = output["debt_pct_gdp"] / 100.0
+    rate = output["implicit_interest_rate_pct"] / 100.0
+    growth = output["nominal_gdp_growth_pct"] / 100.0
+    output["interest_growth_differential_pct"] = (rate - growth) * 100.0
+    output["debt_stabilising_primary_balance_pct_gdp"] = (
+        ((rate - growth) / (1.0 + growth)) * debt_ratio_lag * 100.0
+    )
+    if "primary_balance_pct_gdp" in output.columns:
+        debt_change_pct_gdp = (debt_ratio - debt_ratio_lag) * 100.0
+        automatic_debt_dynamics = (
+            ((rate - growth) / (1.0 + growth)) * debt_ratio_lag * 100.0
+        )
+        output["stock_flow_adjustment_pct_gdp"] = (
+            debt_change_pct_gdp
+            - automatic_debt_dynamics
+            + output["primary_balance_pct_gdp"]
+        )
+    output.loc[
+        ~same_basis,
+        [
+            "interest_growth_differential_pct",
+            "debt_stabilising_primary_balance_pct_gdp",
+            "stock_flow_adjustment_pct_gdp",
+        ],
+    ] = np.nan
 
     output["interest_eur"] = output["interest_mio_eur"] * 1_000_000.0
     output["debt_eur"] = output["debt_mio_eur"] * 1_000_000.0
