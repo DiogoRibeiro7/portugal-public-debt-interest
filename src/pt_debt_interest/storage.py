@@ -10,7 +10,11 @@ import pandas as pd
 from .config import Settings
 
 
-def save_processed(frame: pd.DataFrame, settings: Settings, root: Path = Path(".")) -> dict[str, Path]:
+def save_processed(
+    frame: pd.DataFrame,
+    settings: Settings,
+    root: Path = Path("."),
+) -> dict[str, Path]:
     """Save the analytical table using the configured backend."""
     processed_dir = root / settings.paths.processed
     processed_dir.mkdir(parents=True, exist_ok=True)
@@ -30,8 +34,9 @@ def save_processed(frame: pd.DataFrame, settings: Settings, root: Path = Path(".
                 if_exists="replace",
                 index=False,
             )
+            table_name = settings.storage.table_name
             connection.execute(
-                f'CREATE UNIQUE INDEX IF NOT EXISTS idx_year ON "{settings.storage.table_name}" (year)'
+                f'CREATE UNIQUE INDEX IF NOT EXISTS idx_year ON "{table_name}" (year)'
             )
         outputs["sqlite"] = sqlite_path
 
