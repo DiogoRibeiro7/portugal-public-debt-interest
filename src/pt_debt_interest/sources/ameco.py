@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import io
+import json
 import re
 import time
 import zipfile
@@ -16,6 +18,31 @@ from ..config import AmecoSelector, HttpSection
 from ..exceptions import SourceError
 
 YEAR_RE = re.compile(r"^(19|20)\d{2}$")
+
+
+def _sha256(content: bytes) -> str:
+    return hashlib.sha256(content).hexdigest()
+
+
+def _validate_selectors(selectors: dict[str, AmecoSelector]) -> None:
+    output_names = [selector.output_name for selector in selectors.values()]
+    duplicates = sorted({name for name in output_names if output_names.count(name) > 1})
+    if duplicates:
+        raise SourceError(f"duplicate AMECO output columns configured: {duplicates}")
+
+
+def _matches_selector(
+    item: tuple[str, int, str] | None,
+    country_code: str,
+    unit_code: int,
+    variable_code: str,
+) -> bool:
+    return bool(
+        item
+        and item[0] == country_code
+        and item[1] == unit_code
+        and item[2] == variable_code
+    )
 
 
 class AmecoArchiveClient:
@@ -43,6 +70,19 @@ class AmecoArchiveClient:
                 stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
                 destination = self.raw_dir / f"ameco_csv_{stamp}.zip"
                 destination.write_bytes(response.content)
+                manifest = {
+                    "source": "AMECO",
+                    "url": str(response.url),
+                    "retrieval_time_utc": stamp,
+                    "http_status": response.status_code,
+                    "payload_size_bytes": len(response.content),
+                    "sha256": _sha256(response.content),
+                    "raw_file": destination.name,
+                }
+                (self.raw_dir / f"ameco_csv_{stamp}.manifest.json").write_text(
+                    json.dumps(manifest, indent=2),
+                    encoding="utf-8",
+                )
                 return destination
             except httpx.HTTPError as exc:
                 last_error = exc
@@ -106,7 +146,9 @@ class AmecoArchiveClient:
         forecast_cutoff_year: int,
     ) -> pd.DataFrame:
         """Extract configured series from every compatible CSV member in an archive."""
+        _validate_selectors(selectors)
         pieces: list[pd.DataFrame] = []
+        found_outputs: set[str] = set()
         with zipfile.ZipFile(archive_path) as archive:
             for member in archive.namelist():
                 if not member.lower().endswith(".csv"):
@@ -115,19 +157,25 @@ class AmecoArchiveClient:
                 code_column = self._series_code_column(frame)
                 if code_column is None:
                     continue
-                year_columns = [str(column) for column in frame.columns if YEAR_RE.match(str(column))]
+                year_columns = [
+                    str(column) for column in frame.columns if YEAR_RE.match(str(column))
+                ]
                 if not year_columns:
                     continue
 
                 metadata = frame[code_column].astype(str).map(self._parse_code)
                 for selector in selectors.values():
-                    mask = metadata.map(
-                        lambda item: bool(
-                            item
-                            and item[0] == country_code
-                            and item[1] == selector.unit_code
-                            and item[2] == selector.variable_code
-                        )
+                    mask = pd.Series(
+                        [
+                            _matches_selector(
+                                item,
+                                country_code,
+                                selector.unit_code,
+                                selector.variable_code,
+                            )
+                            for item in metadata
+                        ],
+                        index=metadata.index,
                     )
                     if not mask.any():
                         continue
@@ -141,13 +189,33 @@ class AmecoArchiveClient:
                     long[selector.output_name] = pd.to_numeric(
                         long[selector.output_name], errors="coerce"
                     )
-                    pieces.append(long.loc[:, ["year", selector.output_name]])
+                    long[f"{selector.output_name}_series_code"] = selected[code_column].iloc[0]
+                    long[f"{selector.output_name}_source_member"] = member
+                    found_outputs.add(selector.output_name)
+                    pieces.append(
+                        long.loc[
+                            :,
+                            [
+                                "year",
+                                selector.output_name,
+                                f"{selector.output_name}_series_code",
+                                f"{selector.output_name}_source_member",
+                            ],
+                        ]
+                    )
 
         if not pieces:
             raise SourceError(
                 "none of the configured AMECO selectors were found; run the discovery command "
                 "and verify country/unit codes"
             )
+        missing = sorted(
+            selector.output_name
+            for selector in selectors.values()
+            if selector.output_name not in found_outputs
+        )
+        if missing:
+            raise SourceError(f"configured AMECO selectors were not found: {missing}")
 
         merged: pd.DataFrame | None = None
         for piece in pieces:

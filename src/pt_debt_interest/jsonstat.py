@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from itertools import product
 from typing import Any
 
 import numpy as np
@@ -71,9 +70,11 @@ def jsonstat_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
         if flat_index not in values and flat_index not in statuses:
             continue
         coordinates = np.unravel_index(flat_index, tuple(int(size) for size in sizes))
-        row = {
+        row: dict[str, object] = {
             dimension: categories[position][coordinate]
-            for position, (dimension, coordinate) in enumerate(zip(dimensions, coordinates))
+            for position, (dimension, coordinate) in enumerate(
+                zip(dimensions, coordinates, strict=True)
+            )
         }
         row["value"] = values.get(flat_index)
         row["status"] = statuses.get(flat_index)

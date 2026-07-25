@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import time
+from collections.abc import Sequence
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -16,6 +19,56 @@ from ..exceptions import SourceError
 from ..jsonstat import jsonstat_to_frame
 
 
+@dataclass(frozen=True)
+class EurostatResponse:
+    """Parsed Eurostat response with request provenance."""
+
+    payload: dict[str, Any]
+    content: bytes
+    url: str
+    status_code: int
+
+
+def _sha256(content: bytes) -> str:
+    return hashlib.sha256(content).hexdigest()
+
+
+def _category_values(payload: dict[str, Any], dimension: str) -> set[str]:
+    try:
+        index = payload["dimension"][dimension]["category"]["index"]
+    except (KeyError, TypeError) as exc:
+        raise SourceError(f"Eurostat response is missing dimension {dimension}") from exc
+    if isinstance(index, list):
+        return {str(value) for value in index}
+    if isinstance(index, dict):
+        return {str(value) for value in index}
+    raise SourceError(f"Eurostat dimension {dimension} has unsupported category index")
+
+
+def _validate_requested_dimensions(
+    payload: dict[str, Any],
+    filters: dict[str, str],
+    dataset: str,
+) -> None:
+    dimensions = payload.get("id")
+    sizes = payload.get("size")
+    if not isinstance(dimensions, list) or not isinstance(sizes, list):
+        raise SourceError(f"Eurostat {dataset} response is missing id or size")
+    dimension_sizes = dict(zip((str(item) for item in dimensions), sizes, strict=True))
+    for dimension, expected in filters.items():
+        if dimension not in dimension_sizes:
+            raise SourceError(
+                f"Eurostat {dataset} response omitted requested dimension {dimension}"
+            )
+        values = _category_values(payload, dimension)
+        if values != {expected}:
+            raise SourceError(
+                f"Eurostat {dataset} returned {dimension}={sorted(values)}; expected {expected}"
+            )
+        if int(dimension_sizes[dimension]) != 1:
+            raise SourceError(f"Eurostat {dataset} returned multiple values for {dimension}")
+
+
 class EurostatClient:
     """Fetch and cache annual Eurostat series from the JSON-stat API."""
 
@@ -25,7 +78,11 @@ class EurostatClient:
         self.raw_dir = raw_dir
         self.raw_dir.mkdir(parents=True, exist_ok=True)
 
-    def _request(self, dataset: str, params: list[tuple[str, str]]) -> dict[str, Any]:
+    def _request(
+        self,
+        dataset: str,
+        params: Sequence[tuple[str, str | int | float | bool | None]],
+    ) -> EurostatResponse:
         url = f"{self.base_url}/{dataset}"
         headers = {"Accept": "application/json"}
         last_error: Exception | None = None
@@ -33,7 +90,7 @@ class EurostatClient:
             try:
                 response = httpx.get(
                     url,
-                    params=params,
+                    params=list(params),
                     headers=headers,
                     timeout=self.http.timeout_seconds,
                     follow_redirects=True,
@@ -42,7 +99,12 @@ class EurostatClient:
                 payload = response.json()
                 if not isinstance(payload, dict):
                     raise SourceError(f"Eurostat {dataset} did not return a JSON object")
-                return payload
+                return EurostatResponse(
+                    payload=payload,
+                    content=response.content,
+                    url=str(response.url),
+                    status_code=response.status_code,
+                )
             except (httpx.HTTPError, ValueError, SourceError) as exc:
                 last_error = exc
                 if attempt + 1 < self.http.max_retries:
@@ -63,11 +125,27 @@ class EurostatClient:
             ("untilTimePeriod", str(end_year)),
         ]
         params.extend((dimension, value) for dimension, value in spec.filters.items())
-        payload = self._request(spec.dataset, params)
+        source_response = self._request(spec.dataset, params)
+        payload = source_response.payload
+        _validate_requested_dimensions(payload, spec.filters, spec.dataset)
 
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         cache_path = self.raw_dir / f"eurostat_{name}_{stamp}.json"
-        cache_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+        cache_path.write_bytes(source_response.content)
+        manifest_path = self.raw_dir / f"eurostat_{name}_{stamp}.manifest.json"
+        manifest = {
+            "source": "Eurostat",
+            "dataset": spec.dataset,
+            "url": source_response.url,
+            "dimensions": list(spec.filters.keys()),
+            "filters": spec.filters,
+            "retrieval_time_utc": stamp,
+            "http_status": source_response.status_code,
+            "payload_size_bytes": len(source_response.content),
+            "sha256": _sha256(source_response.content),
+            "raw_file": cache_path.name,
+        }
+        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
         frame = jsonstat_to_frame(payload)
         if frame.empty:

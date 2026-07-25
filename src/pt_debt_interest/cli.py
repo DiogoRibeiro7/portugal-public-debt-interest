@@ -7,10 +7,11 @@ from pathlib import Path
 
 import typer
 
-from .config import load_settings
+from .config import Settings, load_settings
 from .pipeline import build_dataset, fetch_ameco, fetch_eurostat
 from .plotting import generate_all_plots
 from .reporting import generate_report
+from .sources.ameco import AmecoArchiveClient
 from .storage import load_processed
 from .validation import validate_dataset
 
@@ -18,7 +19,7 @@ app = typer.Typer(no_args_is_help=True, help="Portugal public-debt interest anal
 DEFAULT_CONFIG = Path("config/default.yaml")
 
 
-def _settings(config: Path):
+def _settings(config: Path) -> Settings:
     settings = load_settings(config)
     settings.ensure_directories()
     return settings
@@ -36,6 +37,19 @@ def fetch_ameco_command(config: Path = DEFAULT_CONFIG) -> None:
     """Download and extract the optional AMECO linked extension."""
     destination = fetch_ameco(_settings(config))
     typer.echo(destination or "AMECO disabled")
+
+
+@app.command("discover-ameco")
+def discover_ameco_command(
+    archive: Path,
+    patterns: list[str],
+    config: Path = DEFAULT_CONFIG,
+) -> None:
+    """Search an AMECO archive for rows matching all text patterns."""
+    settings = _settings(config)
+    client = AmecoArchiveClient(settings.ameco.archive_url, settings.http, settings.paths.raw)
+    matches = client.discover(archive, patterns)
+    typer.echo(matches.to_csv(index=False))
 
 
 @app.command("build")

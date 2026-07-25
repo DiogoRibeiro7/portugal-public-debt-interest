@@ -40,3 +40,7 @@
 - Unit code `99`: billion ECU/euro
 
 AMECO includes observations and European Commission forecasts. It can link ESA 2010, ESA 95, and ESA 79 portions. It is therefore used for historical context, not as a silent replacement for Eurostat.
+
+## Raw cache and manifests
+
+Each live source download is preserved in `data/raw/` with a UTC timestamp in the filename. A neighbouring `.manifest.json` file records the request URL, retrieval time, HTTP status, payload size, checksum, and source-specific selection metadata where available. These manifests are intended to make parser inputs auditable without editing raw files.
