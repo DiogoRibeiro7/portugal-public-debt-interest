@@ -8,7 +8,7 @@ from pathlib import Path
 import typer
 
 from .config import Settings, load_settings
-from .pipeline import build_dataset, fetch_ameco, fetch_eurostat
+from .pipeline import build_dataset, fetch_ameco, fetch_eurostat, fetch_eurostat_panel
 from .plotting import generate_all_plots
 from .reporting import generate_report
 from .sources.ameco import AmecoArchiveClient
@@ -37,6 +37,13 @@ def fetch_ameco_command(config: Path = DEFAULT_CONFIG) -> None:
     """Download and extract the optional AMECO linked extension."""
     destination = fetch_ameco(_settings(config))
     typer.echo(destination or "AMECO disabled")
+
+
+@app.command("fetch-panel")
+def fetch_panel_command(config: Path = DEFAULT_CONFIG) -> None:
+    """Download the configured Eurostat comparator panel."""
+    destination = fetch_eurostat_panel(_settings(config))
+    typer.echo(destination)
 
 
 @app.command("discover-ameco")

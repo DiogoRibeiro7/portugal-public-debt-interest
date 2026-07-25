@@ -3,6 +3,10 @@
 | Column | Unit | Definition |
 |---|---:|---|
 | `year` | year | Calendar year |
+| `geo` | category | Eurostat geography code in comparator panels |
+| `geo_name` | category | Display name for comparator panels |
+| `is_aggregate` | boolean | Marks euro-area or other aggregate rows in comparator panels |
+| `aggregate_composition` | category | Aggregate code identifying the composition where applicable |
 | `interest_mio_eur` | € million | General-government interest payable, `D41PAY` |
 | `interest_pct_gdp_official` | % GDP | Official Eurostat ratio |
 | `interest_pct_gdp_calculated` | % GDP | Interest in euros divided by current-price GDP |

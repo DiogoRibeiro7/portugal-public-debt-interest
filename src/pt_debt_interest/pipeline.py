@@ -8,6 +8,7 @@ import pandas as pd
 
 from .config import Settings
 from .metrics import calculate_metrics
+from .panel import geography_metadata, series_specs_for_geo, validate_country_year_panel
 from .sources.ameco import AmecoArchiveClient
 from .sources.eurostat import EurostatClient
 from .storage import save_processed
@@ -83,6 +84,33 @@ def fetch_ameco(settings: Settings, root: Path = Path(".")) -> Path | None:
     )
     destination = interim_dir / "ameco_linked.csv"
     frame.to_csv(destination, index=False)
+    return destination
+
+
+def fetch_eurostat_panel(settings: Settings, root: Path = Path(".")) -> Path:
+    """Fetch configured Eurostat series for all comparator geographies."""
+    raw_dir = root / settings.paths.raw
+    interim_dir = root / settings.paths.interim
+    interim_dir.mkdir(parents=True, exist_ok=True)
+    client = EurostatClient(settings.eurostat.base_url, settings.http, raw_dir)
+    pieces: list[pd.DataFrame] = []
+    for geo in settings.project.comparison_geographies:
+        frame = client.fetch_all(
+            series_specs_for_geo(settings.eurostat.series, geo),
+            settings.project.main_start_year,
+            settings.project.end_year,
+        )
+        metadata = geography_metadata(geo)
+        for column, value in metadata.items():
+            frame[column] = pd.Series([value] * len(frame), index=frame.index)
+        frame["source"] = "Eurostat"
+        frame["accounting_basis"] = "ESA2010"
+        frame["observation_status"] = "observed"
+        pieces.append(frame)
+    panel = pd.concat(pieces, ignore_index=True, sort=False)
+    validate_country_year_panel(panel)
+    destination = interim_dir / "eurostat_panel.csv"
+    panel.to_csv(destination, index=False)
     return destination
 
 

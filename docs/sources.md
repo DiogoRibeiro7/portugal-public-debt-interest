@@ -29,6 +29,10 @@
 - Dataset: `irt_lt_mcby_a`
 - Indicator: `MCBY`
 
+## European comparison panel
+
+The comparator panel uses the same Eurostat datasets, items, units, sector filters, and time ranges as the Portugal series. Geography codes are configured in `project.comparison_geographies`. Aggregate rows such as `EA20` remain labelled as aggregates and should not be counted as countries in cross-sectional statistics unless explicitly requested.
+
 ## AMECO
 
 - Current all-CSV archive: `ameco0_csv.zip`
