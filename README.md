@@ -4,6 +4,10 @@ A reproducible analysis of the interest paid by Portugal's general government, i
 
 The authoritative series begins in 1995 and uses harmonised ESA 2010 data from Eurostat. An optional AMECO extension can add earlier observations, while preserving an explicit accounting-basis and observed/forecast distinction.
 
+## Description
+
+This project builds a transparent annual dataset for Portugal's public-debt interest burden. It downloads official Eurostat and AMECO data, reconciles interest, debt, GDP, and balance ratios, calculates derived metrics, and produces validation checks, charts, and a Markdown report suitable for research or publication workflows.
+
 ## Research questions
 
 - How much interest does Portugal's general government pay each year?
@@ -57,7 +61,7 @@ pt-debt plot
 pt-debt report
 ```
 
-The default pipeline writes CSV files. Set `storage.backend: sqlite` or `storage.backend: both` in the configuration to create a SQLite database as well.
+The default pipeline writes both CSV and SQLite outputs. Set `storage.backend: csv` or `storage.backend: sqlite` in the configuration to write only one format.
 
 ## Offline development
 
@@ -75,8 +79,8 @@ data/         Raw, interim, and processed data
 notebooks/    Guided exploratory analysis
 reports/      Generated figures, tables, and reports
 src/          Python package
- tests/       Unit and integration tests with fixtures
- docs/        Methodology, source registry, and data dictionary
+tests/       Unit and integration tests with fixtures
+docs/        Methodology, source registry, and data dictionary
 ```
 
 ## Reproducibility rules
