@@ -9,7 +9,11 @@ def test_validation_passes_accounting_identity() -> None:
             "year": [1995, 1996],
             "accounting_basis": ["ESA2010", "ESA2010"],
             "source": ["Eurostat", "Eurostat"],
+            "source_vintage": ["", ""],
             "observation_status": ["observed", "observed"],
+            "retrieval_timestamp_utc": ["", ""],
+            "source_flags": ["", ""],
+            "basis_break": [True, False],
             "interest_pct_gdp_official": [4.0, 3.8],
             "interest_pct_gdp_calculated": [4.0, 3.81],
             "debt_pct_gdp_official": [60.0, 61.0],
@@ -21,3 +25,24 @@ def test_validation_passes_accounting_identity() -> None:
     )
     result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
     assert result["passed"] is True
+
+
+def test_validation_fails_observed_forecast_collision() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2025, 2025],
+            "accounting_basis": ["ESA2010", "ESA2010"],
+            "source": ["Eurostat", "AMECO"],
+            "source_vintage": ["", ""],
+            "observation_status": ["observed", "forecast"],
+            "retrieval_timestamp_utc": ["", ""],
+            "source_flags": ["", ""],
+            "basis_break": [False, False],
+        }
+    )
+    result = validate_dataset(frame, 1995, 2025, 0.15, 0.05)
+    assert result["passed"] is False
+    check = next(
+        item for item in result["checks"] if item["name"] == "observed_forecast_separation"
+    )
+    assert check["affected_years"] == [2025]

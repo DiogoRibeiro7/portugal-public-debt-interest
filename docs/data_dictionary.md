@@ -20,6 +20,10 @@
 | `primary_balance_pct_gdp` | % GDP | Overall balance plus interest expenditure |
 | `ten_year_yield_pct` | % | EMU convergence-criterion long-term yield |
 | `source` | category | Eurostat or AMECO |
+| `source_vintage` | category | Source release or vintage identifier when available |
 | `accounting_basis` | category | ESA2010 or linked historical basis |
 | `observation_status` | category | observed or forecast |
+| `retrieval_timestamp_utc` | timestamp | UTC retrieval timestamp when available |
+| `source_flags` | category | Source observation flags or selected source codes |
+| `basis_break` | boolean | Marks the first authoritative ESA 2010 main-series year |
 | `regime` | category | Configured historical period |

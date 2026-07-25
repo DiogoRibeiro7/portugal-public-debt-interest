@@ -7,6 +7,16 @@ from typing import Any
 
 import pandas as pd
 
+PROVENANCE_COLUMNS = [
+    "source",
+    "source_vintage",
+    "accounting_basis",
+    "observation_status",
+    "retrieval_timestamp_utc",
+    "source_flags",
+    "basis_break",
+]
+
 
 @dataclass(frozen=True)
 class CheckResult:
@@ -40,6 +50,19 @@ def validate_dataset(
         )
     )
 
+    missing_provenance = [
+        column for column in PROVENANCE_COLUMNS if column not in frame.columns
+    ]
+    checks.append(
+        CheckResult(
+            name="provenance_columns_present",
+            passed=not missing_provenance,
+            severity="warning",
+            detail=f"Missing provenance columns: {missing_provenance}",
+            affected_years=[],
+        )
+    )
+
     expected = set(range(expected_start_year, expected_end_year + 1))
     actual = set(frame.loc[frame["accounting_basis"] == "ESA2010", "year"].astype(int))
     missing_years = sorted(expected.difference(actual))
@@ -63,7 +86,10 @@ def validate_dataset(
                 name="interest_ratio_reconciliation",
                 passed=not affected,
                 severity="warning",
-                detail=f"Official and calculated interest ratios differ by more than {ratio_tolerance_pp} pp.",
+                detail=(
+                    "Official and calculated interest ratios differ by more than "
+                    f"{ratio_tolerance_pp} pp."
+                ),
                 affected_years=affected,
             )
         )
@@ -76,7 +102,10 @@ def validate_dataset(
                 name="debt_ratio_reconciliation",
                 passed=not affected,
                 severity="warning",
-                detail=f"Official and calculated debt ratios differ by more than {ratio_tolerance_pp} pp.",
+                detail=(
+                    "Official and calculated debt ratios differ by more than "
+                    f"{ratio_tolerance_pp} pp."
+                ),
                 affected_years=affected,
             )
         )
@@ -104,17 +133,35 @@ def validate_dataset(
 
     observed_forecast_overlap: list[int] = []
     if {"year", "observation_status", "source"}.issubset(frame.columns):
-        grouped = frame.groupby("year")["observation_status"].agg(lambda x: set(x.dropna()))
-        observed_forecast_overlap = [
-            int(year) for year, statuses in grouped.items() if {"observed", "forecast"}.issubset(statuses)
-        ]
+        for year, group in frame.groupby("year"):
+            statuses = set(group["observation_status"].dropna().astype(str))
+            if {"observed", "forecast"}.issubset(statuses):
+                observed_forecast_overlap.append(int(str(year)))
     checks.append(
         CheckResult(
             name="observed_forecast_separation",
             passed=not observed_forecast_overlap,
             severity="error",
-            detail="A year must not be represented simultaneously as observed and forecast after harmonisation.",
+            detail=(
+                "A year must not be represented simultaneously as observed and "
+                "forecast after harmonisation."
+            ),
             affected_years=observed_forecast_overlap,
+        )
+    )
+
+    missing_basis_break: list[int] = []
+    if {"year", "basis_break"}.issubset(frame.columns):
+        boundary_rows = frame.loc[frame["year"].astype(int).eq(expected_start_year)]
+        if boundary_rows.empty or not boundary_rows["basis_break"].fillna(False).astype(bool).any():
+            missing_basis_break = [expected_start_year]
+    checks.append(
+        CheckResult(
+            name="basis_boundary_marked",
+            passed=not missing_basis_break,
+            severity="warning",
+            detail="The main-series accounting-basis boundary should be marked.",
+            affected_years=missing_basis_break,
         )
     )
 

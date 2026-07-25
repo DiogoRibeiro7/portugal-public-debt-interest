@@ -12,6 +12,31 @@ from .sources.ameco import AmecoArchiveClient
 from .sources.eurostat import EurostatClient
 from .storage import save_processed
 
+CANONICAL_PROVENANCE_COLUMNS = [
+    "source",
+    "source_vintage",
+    "accounting_basis",
+    "observation_status",
+    "retrieval_timestamp_utc",
+    "source_flags",
+    "basis_break",
+]
+
+
+def _join_row_values(frame: pd.DataFrame, columns: list[str]) -> pd.Series:
+    """Join unique non-null row values from selected columns."""
+    values: list[str] = []
+    for _, row in frame.loc[:, columns].iterrows():
+        unique = sorted(
+            {
+                str(value)
+                for value in row.tolist()
+                if pd.notna(value) and str(value) != ""
+            }
+        )
+        values.append(";".join(unique))
+    return pd.Series(values, index=frame.index, dtype="string")
+
 
 def fetch_eurostat(settings: Settings, root: Path = Path(".")) -> Path:
     """Fetch all configured Eurostat series and save the joined source table."""
@@ -25,8 +50,15 @@ def fetch_eurostat(settings: Settings, root: Path = Path(".")) -> Path:
         settings.project.end_year,
     )
     frame["source"] = "Eurostat"
+    frame["source_vintage"] = pd.NA
     frame["accounting_basis"] = "ESA2010"
     frame["observation_status"] = "observed"
+    frame["retrieval_timestamp_utc"] = pd.NA
+    status_columns = [column for column in frame.columns if column.endswith("_status")]
+    if status_columns:
+        frame["source_flags"] = _join_row_values(frame.astype("string"), status_columns)
+    else:
+        frame["source_flags"] = pd.NA
     destination = interim_dir / "eurostat_main.csv"
     frame.to_csv(destination, index=False)
     return destination
@@ -73,11 +105,29 @@ def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFr
             extension["nominal_gdp_mio_eur"] * extension["debt_pct_gdp_official"] / 100.0
         )
     extension["source"] = "AMECO"
+    extension["source_vintage"] = pd.NA
     extension["accounting_basis"] = extension.get(
         "accounting_basis_ameco", "linked_ESA2010_ESA95_ESA79"
     )
     extension["observation_status"] = extension.get("observation_status_ameco", "observed")
+    extension["retrieval_timestamp_utc"] = pd.NA
+    code_columns = [column for column in extension.columns if column.endswith("_series_code")]
+    if code_columns:
+        extension["source_flags"] = _join_row_values(extension.astype("string"), code_columns)
+    else:
+        extension["source_flags"] = pd.NA
     return extension
+
+
+def _canonicalise_annual_table(frame: pd.DataFrame, main_start_year: int) -> pd.DataFrame:
+    """Apply canonical annual-table ordering and provenance defaults."""
+    canonical = frame.copy()
+    for column in CANONICAL_PROVENANCE_COLUMNS:
+        if column not in canonical.columns:
+            canonical[column] = pd.NA
+    canonical["basis_break"] = canonical["year"].astype(int).eq(main_start_year)
+    canonical = canonical.sort_values(["year", "source"]).reset_index(drop=True)
+    return canonical
 
 
 def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
@@ -97,7 +147,10 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
         if not extension.empty:
             frames.insert(0, extension)
 
-    combined = pd.concat(frames, ignore_index=True, sort=False)
+    combined = _canonicalise_annual_table(
+        pd.concat(frames, ignore_index=True, sort=False),
+        settings.project.main_start_year,
+    )
     boundaries = [boundary.model_dump() for boundary in settings.analysis.regime_boundaries]
     analytical = calculate_metrics(
         combined,
