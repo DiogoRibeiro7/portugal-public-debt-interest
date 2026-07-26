@@ -63,6 +63,24 @@ def test_ameco_archive_extract_rejects_missing_selector(tmp_path: Path) -> None:
         client.extract(archive_path, "PRT", selectors, 1960, 2026, 2025)
 
 
+def test_ameco_archive_extract_rejects_empty_requested_range(tmp_path: Path) -> None:
+    archive_path = tmp_path / "ameco.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.write("tests/fixtures/ameco/UYIG.csv", arcname="UYIG.csv")
+
+    client = AmecoArchiveClient("https://example.invalid", HttpSection(), tmp_path)
+    selectors = {
+        "interest": AmecoSelector(
+            variable_code="UYIG",
+            unit_code=319,
+            output_name="interest_pct_gdp_ameco",
+        )
+    }
+
+    with pytest.raises(SourceError, match="no observations"):
+        client.extract(archive_path, "PRT", selectors, 1900, 1901, 2025)
+
+
 def test_ameco_archive_extract_rejects_duplicate_selector_rows(tmp_path: Path) -> None:
     source = pd.read_csv("tests/fixtures/ameco/UYIG.csv")
     duplicated = pd.concat([source, source.iloc[[0]]], ignore_index=True)

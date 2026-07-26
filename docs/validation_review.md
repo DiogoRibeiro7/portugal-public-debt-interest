@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
+- Reproduction procedure: call `extract` with valid selectors but a requested year range outside the selected AMECO row's year columns, such as 1900-1901 against the fixture.
+- Risk: a configured AMECO source can be reported as successfully extracted even though no observations survive the requested time window, weakening source coverage diagnostics.
+- Minimal correction: raise a `SourceError` when matched AMECO selectors produce no observations after year-range filtering.
+- Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_empty_requested_range`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.config.HttpSection` and `src/pt_debt_interest.config.AnalysisSection`
 - Reproduction procedure: instantiate `HttpSection(max_retries=0)` or `AnalysisSection(identity_tolerance_pp=-0.1)`.
 - Risk: zero retries makes source clients skip all attempts and report a low-information `None` failure; negative validation tolerances make ordinary non-null identity differences fail every comparison.
 - Minimal correction: require positive HTTP timeout, at least one retry, non-negative retry backoff, and non-negative validation tolerances.
 - Regression test: `tests/test_config.py::test_http_config_rejects_invalid_retry_settings` and `tests/test_config.py::test_analysis_config_rejects_negative_tolerances`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.config.ProjectSection`
@@ -18,7 +27,7 @@
 - Minimal correction: validate the project year ordering as `extended_start_year <= main_start_year <= end_year`.
 - Regression test: `tests/test_config.py::test_project_config_rejects_extended_start_after_main_start` and `tests/test_config.py::test_project_config_rejects_main_start_after_end`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.config.Settings`

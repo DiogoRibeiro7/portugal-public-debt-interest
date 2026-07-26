@@ -238,6 +238,11 @@ class AmecoArchiveClient:
         merged = merged.drop_duplicates(subset=["year"]).copy()
         merged["year"] = merged["year"].astype(int)
         merged = merged.loc[merged["year"].between(start_year, end_year)]
+        if merged.empty:
+            raise SourceError(
+                "configured AMECO selectors returned no observations in the requested "
+                f"year range {start_year}-{end_year}"
+            )
         merged["observation_status_ameco"] = merged["year"].map(
             lambda year: "observed" if year <= forecast_cutoff_year else "forecast"
         )
