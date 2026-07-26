@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.validation.validate_dataset`
+- Reproduction procedure: call `validate_dataset` with a row whose `year` is null while the required `year` column exists.
+- Risk: validation can crash during integer conversion instead of returning a structured failed check, making malformed processed datasets harder to diagnose through the CLI.
+- Minimal correction: validate that core key values are non-null before duplicate-year, coverage, and identity checks.
+- Regression test: `tests/test_validation.py::test_validation_reports_missing_core_values_without_crashing` and `tests/test_validation.py::test_validation_reports_missing_accounting_basis_values`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.panel.validate_country_year_panel`
 - Reproduction procedure: pass a comparator panel row with a missing `geo` or `year` key into `validate_country_year_panel`.
 - Risk: rows with incomplete country-year keys can pass validation, then be dropped from grouped metric calculations or produce ambiguous missingness diagnostics.
 - Minimal correction: reject null country-year keys before duplicate-key validation and report the affected key records.
 - Regression test: `tests/test_panel.py::test_validate_country_year_panel_rejects_missing_keys`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.pipeline._fetch_available_panel_series`

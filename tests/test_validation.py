@@ -49,6 +49,37 @@ def test_validation_reports_missing_accounting_basis_without_crashing() -> None:
     assert check["detail"] == "Missing core columns: ['accounting_basis']"
 
 
+def test_validation_reports_missing_core_values_without_crashing() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1995, None],
+            "accounting_basis": ["ESA2010", "ESA2010"],
+        }
+    )
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "core_values_present")
+
+    assert result["passed"] is False
+    assert check["passed"] is False
+    assert check["severity"] == "error"
+
+
+def test_validation_reports_missing_accounting_basis_values() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1995, 1996],
+            "accounting_basis": ["ESA2010", None],
+        }
+    )
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "core_values_present")
+
+    assert result["passed"] is False
+    assert check["affected_years"] == [1996]
+
+
 def test_validation_fails_observed_forecast_collision() -> None:
     frame = pd.DataFrame(
         {

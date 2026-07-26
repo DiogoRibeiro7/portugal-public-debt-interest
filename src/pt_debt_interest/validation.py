@@ -57,6 +57,28 @@ def validate_dataset(
             "checks": payload,
         }
 
+    missing_key_values = frame.loc[
+        frame[CORE_COLUMNS].isna().any(axis=1),
+        "year",
+    ].dropna()
+    affected_key_years = missing_key_values.astype(int).tolist()
+    checks.append(
+        CheckResult(
+            name="core_values_present",
+            passed=affected_key_years == []
+            and not frame[CORE_COLUMNS].isna().any(axis=1).any(),
+            severity="error",
+            detail="Core columns must not contain missing values.",
+            affected_years=affected_key_years,
+        )
+    )
+    if not checks[-1].passed:
+        payload = [asdict(check) for check in checks]
+        return {
+            "passed": False,
+            "checks": payload,
+        }
+
     duplicated = frame.loc[frame["year"].duplicated(), "year"].astype(int).tolist()
     checks.append(
         CheckResult(
