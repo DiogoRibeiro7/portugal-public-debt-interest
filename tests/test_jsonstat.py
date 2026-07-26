@@ -112,3 +112,37 @@ def test_eurostat_client_returns_raw_provenance(tmp_path: Path) -> None:
     assert "interest_mio_eur_source_sha256" in frame.columns
     assert "interest_mio_eur_raw_file" in frame.columns
     assert list(tmp_path.glob("eurostat_interest_*.manifest.json"))
+
+
+def test_eurostat_client_rejects_duplicate_time_labels(tmp_path: Path) -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["dimension"]["time"]["category"]["index"] = ["2021", "2021", "2022"]
+    client = EurostatClient("https://example.invalid", HttpSection(), tmp_path)
+    spec = EurostatSeriesSpec(
+        dataset="gov_10a_main",
+        filters={
+            "freq": "A",
+            "unit": "MIO_EUR",
+            "sector": "S13",
+            "na_item": "D41PAY",
+            "geo": "PT",
+        },
+        value_name="interest_mio_eur",
+    )
+
+    def fake_request(dataset: str, params: list[tuple[str, str]]):
+        return type(
+            "Response",
+            (),
+            {
+                "payload": payload,
+                "content": json.dumps(payload).encode("utf-8"),
+                "url": "https://example.invalid",
+                "status_code": 200,
+            },
+        )()
+
+    client._request = fake_request
+
+    with pytest.raises(SourceError, match="duplicate years"):
+        client.fetch_series("interest", spec, 2021, 2023)

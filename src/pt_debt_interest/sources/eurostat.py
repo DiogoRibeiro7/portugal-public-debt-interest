@@ -157,6 +157,14 @@ class EurostatClient:
 
         output = frame.loc[:, ["time", "value", "status"]].copy()
         output["year"] = pd.to_numeric(output["time"], errors="raise").astype(int)
+        duplicated_years = output.loc[
+            output["year"].duplicated(keep=False),
+            "year",
+        ].tolist()
+        if duplicated_years:
+            raise SourceError(
+                f"Eurostat series {name} returned duplicate years: {duplicated_years}"
+            )
         output[spec.value_name] = pd.to_numeric(output["value"], errors="coerce")
         output[f"{spec.value_name}_status"] = output["status"].astype("string")
         output[f"{spec.value_name}_retrieval_timestamp_utc"] = stamp

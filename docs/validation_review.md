@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: high
+- File and symbol: `src/pt_debt_interest.sources.eurostat.EurostatClient.fetch_series`
+- Reproduction procedure: return a JSON-stat response whose time category labels contain the same year twice, then call `fetch_series`.
+- Risk: duplicate annual labels could enter the source table and later outer joins as ambiguous annual observations, corrupting lagged calculations or causing later failures away from the source boundary.
+- Minimal correction: reject duplicate converted `year` values immediately after parsing one Eurostat series.
+- Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_duplicate_time_labels`.
+
+## Previous confirmed finding
+
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`
 - Reproduction procedure: call `validate_dataset` with a frame missing `year` or `accounting_basis`.
@@ -9,7 +18,7 @@
 - Minimal correction: add an explicit core-column validation check and return a failed validation payload before running checks that depend on those columns.
 - Regression test: `tests/test_validation.py::test_validation_reports_missing_core_columns` and `tests/test_validation.py::test_validation_reports_missing_accounting_basis_without_crashing`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting`
@@ -18,7 +27,7 @@
 - Minimal correction: select Matplotlib's noninteractive `Agg` backend before importing `pyplot`.
 - Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` exercises file-based figure generation under the test runner.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting.plot_european_comparison` and `src/pt_debt_interest.reporting._panel_summary`
@@ -27,7 +36,7 @@
 - Minimal correction: select the latest comparator year where Portugal has a valid observed non-aggregate interest-burden value, then compare all available non-aggregate rows in that year.
 - Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` and `tests/test_outputs.py::test_generate_report_uses_latest_panel_year_with_portugal`.
 
-## Prior confirmed finding
+## Earlier comparison finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting.refinancing_shock_paths`
