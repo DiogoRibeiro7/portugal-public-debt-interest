@@ -44,6 +44,20 @@ def test_calculate_metrics_rejects_decimal_debt_ratio() -> None:
         calculate_metrics(frame)
 
 
+def test_calculate_metrics_rejects_duplicate_years() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021, 2021],
+            "interest_mio_eur": [5000.0, 4800.0],
+            "nominal_gdp_mio_eur": [220000.0, 245000.0],
+            "debt_mio_eur": [270000.0, 272000.0],
+        }
+    )
+
+    with pytest.raises(ValueError, match="unique years"):
+        calculate_metrics(frame)
+
+
 def test_calculate_metrics_nulls_lagged_values_across_basis_break() -> None:
     frame = pd.DataFrame(
         {

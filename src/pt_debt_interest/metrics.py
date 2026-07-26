@@ -30,6 +30,15 @@ def _validate_percentage_scale(frame: pd.DataFrame) -> None:
         raise ValueError("debt_pct_gdp_official must be expressed as a percentage, not a ratio")
 
 
+def _validate_annual_input(frame: pd.DataFrame) -> None:
+    """Reject inputs that make lagged annual calculations ambiguous."""
+    duplicate_years = (
+        frame.loc[frame["year"].duplicated(keep=False), "year"].dropna().astype(int).tolist()
+    )
+    if duplicate_years:
+        raise ValueError(f"annual metrics require unique years: {duplicate_years}")
+
+
 def _same_accounting_basis_as_previous(output: pd.DataFrame) -> pd.Series:
     """Return rows whose lagged calculations stay within one accounting basis."""
     if "accounting_basis" not in output.columns:
@@ -62,6 +71,7 @@ def calculate_metrics(
         raise ValueError("unsupported implicit-rate denominator")
 
     _validate_percentage_scale(frame)
+    _validate_annual_input(frame)
 
     output = frame.sort_values("year").copy()
     output["interest_pct_gdp_calculated"] = (

@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
+- Reproduction procedure: call `calculate_metrics` with two rows for the same `year` and valid interest, GDP, and debt columns.
+- Risk: lagged calculations such as nominal GDP growth and implicit interest rates can be computed across two observations for the same calendar year, producing misleading rates before later storage validation has a chance to reject duplicate annual keys.
+- Minimal correction: reject duplicate annual years at the start of metric calculation.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_duplicate_years`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
 - Reproduction procedure: pass a JSON-stat payload whose `size` says a dimension has more categories than `dimension.*.category.index`, or whose sparse `value`/`status` map contains an index outside the declared product of sizes.
 - Risk: a malformed or changed API response could be partially parsed or fail later with a generic indexing error, making source-schema corruption harder to distinguish from ordinary missing data.
 - Minimal correction: validate category counts against declared dimension sizes and reject sparse `value` or `status` indexes that are non-integer or outside the declared cube.
 - Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_dimension_size_mismatch`, `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_out_of_range_sparse_index`, and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_non_integer_sparse_index`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.storage.save_processed`
@@ -18,7 +27,7 @@
 - Minimal correction: validate that processed annual outputs include a `year` column and contain no duplicate years before creating output directories or writing any backend.
 - Regression test: `tests/test_storage.py::test_save_processed_rejects_duplicate_years_before_writing` and `tests/test_storage.py::test_save_processed_requires_year_column`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.config.AnalysisSection`
@@ -27,7 +36,7 @@
 - Minimal correction: validate that configured refinancing shares sum to no more than one and that regime boundaries have non-reversed, non-overlapping year ranges.
 - Regression test: `tests/test_config.py::test_analysis_config_rejects_excess_refinancing_shares`, `tests/test_config.py::test_analysis_config_rejects_overlapping_regimes`, and `tests/test_config.py::test_analysis_config_rejects_reversed_regime`.
 
-## Prior confirmed finding
+## Earlier config finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
@@ -36,7 +45,7 @@
 - Minimal correction: reject selectors that match more than one row in a member or more than one archive member.
 - Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_duplicate_selector_rows` and `tests/test_ameco.py::test_ameco_archive_extract_rejects_duplicate_selector_members`.
 
-## Earlier source finding
+## Earlier provenance finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.pipeline.fetch_eurostat`
