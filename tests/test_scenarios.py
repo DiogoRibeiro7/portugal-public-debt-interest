@@ -15,6 +15,11 @@ def test_static_rate_shock_table_labels_assumptions() -> None:
     assert result.loc[0, "baseline_debt_pct_gdp"] == 90.0
 
 
+def test_static_rate_shock_table_rejects_non_positive_debt() -> None:
+    with pytest.raises(ValueError, match="latest_debt_pct_gdp must be positive"):
+        static_rate_shock_table(0.0, [100])
+
+
 def test_refinancing_pass_through_supports_negative_shock() -> None:
     result = refinancing_pass_through(2.0, 100.0, -100, [0.25, 0.25])
 
@@ -27,6 +32,16 @@ def test_refinancing_pass_through_rejects_invalid_shares() -> None:
         refinancing_pass_through(2.0, 100.0, 100, [0.8, 0.3])
 
 
+def test_refinancing_pass_through_rejects_non_positive_debt() -> None:
+    with pytest.raises(ValueError, match="debt_pct_gdp must be positive"):
+        refinancing_pass_through(2.0, -100.0, 100, [0.2])
+
+
 def test_refinancing_path_requires_matching_gdp_path() -> None:
     with pytest.raises(ValueError, match="same length"):
         refinancing_path_from_gdp(5000.0, 250000.0, 100, [0.2, 0.2], [250000.0])
+
+
+def test_refinancing_path_rejects_non_positive_debt_stock() -> None:
+    with pytest.raises(ValueError, match="debt_stock_mio_eur must be positive"):
+        refinancing_path_from_gdp(5000.0, 0.0, 100, [0.2], [250000.0])
