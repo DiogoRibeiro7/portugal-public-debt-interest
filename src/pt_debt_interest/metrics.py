@@ -48,6 +48,18 @@ def _validate_positive_denominators(frame: pd.DataFrame) -> None:
             raise ValueError(f"{column} must be positive for years: {affected_years}")
 
 
+def _validate_growth_factors(frame: pd.DataFrame) -> None:
+    """Reject growth values that make factor-based calculations undefined."""
+    if "real_gdp_growth_pct" not in frame.columns:
+        return
+    values = pd.to_numeric(frame["real_gdp_growth_pct"], errors="coerce")
+    affected_years = frame.loc[values.notna() & values.le(-100), "year"].astype(int).tolist()
+    if affected_years:
+        raise ValueError(
+            f"real_gdp_growth_pct must be greater than -100 for years: {affected_years}"
+        )
+
+
 def _same_accounting_basis_as_previous(output: pd.DataFrame) -> pd.Series:
     """Return rows whose lagged calculations stay within one accounting basis."""
     if "accounting_basis" not in output.columns:
@@ -82,6 +94,7 @@ def calculate_metrics(
     _validate_percentage_scale(frame)
     _validate_annual_input(frame)
     _validate_positive_denominators(frame)
+    _validate_growth_factors(frame)
 
     output = frame.sort_values("year").copy()
     output["interest_pct_gdp_calculated"] = (

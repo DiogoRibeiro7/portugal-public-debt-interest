@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
+- Reproduction procedure: call `calculate_metrics` with `real_gdp_growth_pct` equal to `-100` while nominal GDP growth is present.
+- Risk: GDP-deflator growth can be calculated by dividing through a zero or negative real-GDP factor, yielding infinite or undefined values that are later masked.
+- Minimal correction: reject real GDP growth values less than or equal to `-100%` before factor-based GDP-deflator calculations.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_invalid_real_growth_factor`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.scenarios`
 - Reproduction procedure: call `static_rate_shock_table`, `refinancing_pass_through`, or `refinancing_path_from_gdp` with a zero or negative debt stock.
 - Risk: interest-burden scenario outputs can silently report zero or inverted effects from invalid debt inputs, making a source-data error look like an analytical result.
 - Minimal correction: reject non-positive debt stocks before calculating static or refinancing shock effects.
 - Regression test: `tests/test_scenarios.py::test_static_rate_shock_table_rejects_non_positive_debt`, `tests/test_scenarios.py::test_refinancing_pass_through_rejects_non_positive_debt`, and `tests/test_scenarios.py::test_refinancing_path_rejects_non_positive_debt_stock`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`

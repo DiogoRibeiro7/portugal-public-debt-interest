@@ -86,6 +86,21 @@ def test_calculate_metrics_rejects_non_positive_debt() -> None:
         calculate_metrics(frame)
 
 
+def test_calculate_metrics_rejects_invalid_real_growth_factor() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": [220000.0],
+            "debt_mio_eur": [270000.0],
+            "real_gdp_growth_pct": [-100.0],
+        }
+    )
+
+    with pytest.raises(ValueError, match="real_gdp_growth_pct must be greater than -100"):
+        calculate_metrics(frame)
+
+
 def test_calculate_metrics_nulls_lagged_values_across_basis_break() -> None:
     frame = pd.DataFrame(
         {
