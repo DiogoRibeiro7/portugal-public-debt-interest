@@ -33,6 +33,8 @@
 
 The comparator panel uses the same Eurostat datasets, items, units, sector filters, and time ranges as the Portugal series. Geography codes are configured in `project.comparison_geographies`. Aggregate rows such as `EA20` remain labelled as aggregates and should not be counted as countries in cross-sectional statistics unless explicitly requested.
 
+The `build-panel` command calculates the same fiscal metrics by geography, writes `data/processed/eurostat_panel_metrics.csv`, and records source coverage in `reports/eurostat_panel_missingness.csv`. Optional missing comparator series, such as unavailable aggregate bond-yield rows, are retained as nulls with a missing-reason column.
+
 ## AMECO
 
 - Current all-CSV archive: `ameco0_csv.zip`

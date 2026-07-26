@@ -10,6 +10,7 @@ import typer
 from .config import Settings, load_settings
 from .pipeline import (
     build_dataset,
+    build_eurostat_panel,
     clear_ameco_interim,
     fetch_ameco,
     fetch_eurostat,
@@ -50,6 +51,14 @@ def fetch_panel_command(config: Path = DEFAULT_CONFIG) -> None:
     """Download the configured Eurostat comparator panel."""
     destination = fetch_eurostat_panel(_settings(config))
     typer.echo(destination)
+
+
+@app.command("build-panel")
+def build_panel_command(config: Path = DEFAULT_CONFIG) -> None:
+    """Build processed comparator-panel metrics and missingness diagnostics."""
+    outputs = build_eurostat_panel(_settings(config))
+    for path in outputs.values():
+        typer.echo(path)
 
 
 @app.command("discover-ameco")

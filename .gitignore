@@ -16,3 +16,4 @@ reports/figures/*
 !reports/figures/.gitkeep
 reports/summary.md
 reports/validation.json
+reports/eurostat_panel_missingness.csv

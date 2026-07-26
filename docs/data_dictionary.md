@@ -22,6 +22,8 @@
 | `implicit_interest_rate_previous_debt_pct` | % | Interest divided by previous-year debt |
 | `implicit_interest_rate_average_debt_pct` | % | Interest divided by average of previous and current debt |
 | `implicit_interest_rate_pct` | % | Interest divided by configured debt denominator |
+| `interest_burden_rank` | rank | Per-year rank among non-aggregate comparator countries by interest burden |
+| `implicit_rate_rank` | rank | Per-year rank among non-aggregate comparator countries by implicit rate |
 | `interest_growth_differential_pct` | percentage points | Implicit interest rate minus nominal GDP growth |
 | `debt_stabilising_primary_balance_pct_gdp` | % GDP | Primary balance needed to stabilise debt absent stock-flow effects |
 | `stock_flow_adjustment_pct_gdp` | % GDP | Residual in the discrete debt-dynamics equation |

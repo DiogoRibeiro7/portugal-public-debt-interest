@@ -9,7 +9,14 @@ import pandas as pd
 from .config import EurostatSeriesSpec, Settings
 from .exceptions import SourceError
 from .metrics import calculate_metrics
-from .panel import geography_metadata, series_specs_for_geo, validate_country_year_panel
+from .panel import (
+    PANEL_MISSINGNESS_COLUMNS,
+    build_panel_metrics,
+    geography_metadata,
+    panel_missingness,
+    series_specs_for_geo,
+    validate_country_year_panel,
+)
 from .sources.ameco import AmecoArchiveClient
 from .sources.eurostat import EurostatClient
 from .storage import save_processed
@@ -131,6 +138,34 @@ def fetch_eurostat_panel(settings: Settings, root: Path = Path(".")) -> Path:
     destination = interim_dir / "eurostat_panel.csv"
     panel.to_csv(destination, index=False)
     return destination
+
+
+def build_eurostat_panel(settings: Settings, root: Path = Path(".")) -> dict[str, Path]:
+    """Build processed comparator-panel metrics and missingness diagnostics."""
+    interim_path = root / settings.paths.interim / "eurostat_panel.csv"
+    if not interim_path.exists():
+        raise FileNotFoundError("Eurostat panel table not found; run fetch-panel")
+    processed_dir = root / settings.paths.processed
+    reports_dir = root / settings.paths.reports
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    raw_panel = pd.read_csv(interim_path)
+    boundaries = [boundary.model_dump() for boundary in settings.analysis.regime_boundaries]
+    metrics = build_panel_metrics(
+        raw_panel,
+        denominator=settings.analysis.implicit_rate_denominator,
+        regime_boundaries=boundaries,
+    )
+    validate_country_year_panel(metrics)
+    metrics_path = processed_dir / "eurostat_panel_metrics.csv"
+    missingness_path = reports_dir / "eurostat_panel_missingness.csv"
+    metrics.to_csv(metrics_path, index=False)
+    panel_missingness(metrics, PANEL_MISSINGNESS_COLUMNS).to_csv(
+        missingness_path,
+        index=False,
+    )
+    return {"metrics": metrics_path, "missingness": missingness_path}
 
 
 def _concat_preserving_columns(pieces: list[pd.DataFrame]) -> pd.DataFrame:

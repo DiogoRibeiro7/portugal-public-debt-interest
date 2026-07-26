@@ -9,6 +9,7 @@ from pt_debt_interest.pipeline import (
     _canonicalise_annual_table,
     _concat_preserving_columns,
     _fetch_available_panel_series,
+    build_eurostat_panel,
     clear_ameco_interim,
 )
 
@@ -89,3 +90,27 @@ def test_concat_preserving_columns_avoids_all_null_warning() -> None:
 
     assert result["geo"].tolist() == ["PT", "EA20"]
     assert "optional" in result.columns
+
+
+def test_build_eurostat_panel_writes_metrics_and_missingness(tmp_path: Path) -> None:
+    settings = load_settings("config/default.yaml")
+    interim_dir = tmp_path / settings.paths.interim
+    interim_dir.mkdir(parents=True)
+    pd.DataFrame(
+        {
+            "geo": ["PT", "PT", "ES", "ES"],
+            "year": [2021, 2022, 2021, 2022],
+            "interest_mio_eur": [5.0, 6.0, 4.0, 5.0],
+            "nominal_gdp_mio_eur": [100.0, 120.0, 100.0, 125.0],
+            "debt_mio_eur": [100.0, 110.0, 90.0, 95.0],
+            "source": ["Eurostat"] * 4,
+            "accounting_basis": ["ESA2010"] * 4,
+            "observation_status": ["observed"] * 4,
+            "is_aggregate": [False] * 4,
+        }
+    ).to_csv(interim_dir / "eurostat_panel.csv", index=False)
+
+    outputs = build_eurostat_panel(settings, tmp_path)
+
+    assert outputs["metrics"].exists()
+    assert outputs["missingness"].exists()

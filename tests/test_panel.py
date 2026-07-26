@@ -4,6 +4,7 @@ import pytest
 from pt_debt_interest.config import EurostatSeriesSpec
 from pt_debt_interest.exceptions import ValidationError
 from pt_debt_interest.panel import (
+    build_panel_metrics,
     geography_metadata,
     panel_missingness,
     series_specs_for_geo,
@@ -48,3 +49,28 @@ def test_panel_missingness_reports_missing_columns() -> None:
 
     assert result.loc[result["column"] == "value", "missing_count"].iloc[0] == 1
     assert result.loc[result["column"] == "missing_value", "missing_count"].iloc[0] == 2
+
+
+def test_build_panel_metrics_adds_country_ranks() -> None:
+    frame = pd.DataFrame(
+        {
+            "geo": ["PT", "PT", "ES", "ES", "EA20", "EA20"],
+            "year": [2021, 2022, 2021, 2022, 2021, 2022],
+            "interest_mio_eur": [5.0, 6.0, 4.0, 5.0, 20.0, 21.0],
+            "nominal_gdp_mio_eur": [100.0, 120.0, 100.0, 125.0, 500.0, 550.0],
+            "debt_mio_eur": [100.0, 110.0, 90.0, 95.0, 400.0, 410.0],
+            "source": ["Eurostat"] * 6,
+            "accounting_basis": ["ESA2010"] * 6,
+            "observation_status": ["observed"] * 6,
+            "is_aggregate": [False, False, False, False, True, True],
+        }
+    )
+
+    result = build_panel_metrics(frame, denominator="average_debt")
+
+    pt_2022 = result.loc[(result["geo"] == "PT") & (result["year"] == 2022)].iloc[0]
+    es_2022 = result.loc[(result["geo"] == "ES") & (result["year"] == 2022)].iloc[0]
+    ea_2022 = result.loc[(result["geo"] == "EA20") & (result["year"] == 2022)].iloc[0]
+    assert pt_2022["interest_burden_rank"] == 1
+    assert es_2022["interest_burden_rank"] == 2
+    assert pd.isna(ea_2022["interest_burden_rank"])
