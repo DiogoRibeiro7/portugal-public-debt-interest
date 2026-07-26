@@ -118,8 +118,8 @@ def add_panel_ranks(frame: pd.DataFrame) -> pd.DataFrame:
         country_mask = ~output["is_aggregate"].fillna(False).astype(bool)
     else:
         country_mask = pd.Series(True, index=output.index)
-    output["interest_burden_rank"] = pd.NA
-    output["implicit_rate_rank"] = pd.NA
+    output["interest_burden_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
+    output["implicit_rate_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
     rank_columns = {
         "interest_burden_rank": "interest_pct_gdp",
         "implicit_rate_rank": "implicit_interest_rate_pct",

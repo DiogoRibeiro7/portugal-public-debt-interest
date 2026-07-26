@@ -74,3 +74,5 @@ def test_build_panel_metrics_adds_country_ranks() -> None:
     assert pt_2022["interest_burden_rank"] == 1
     assert es_2022["interest_burden_rank"] == 2
     assert pd.isna(ea_2022["interest_burden_rank"])
+    assert str(result["interest_burden_rank"].dtype) == "Int64"
+    assert str(result["implicit_rate_rank"].dtype) == "Int64"

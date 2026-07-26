@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: low
+- File and symbol: `src/pt_debt_interest.panel.add_panel_ranks`
+- Reproduction procedure: call `build_panel_metrics` with aggregate rows and inspect the `interest_burden_rank` or `implicit_rate_rank` dtype.
+- Risk: rank outputs can be stored as generic object columns, making downstream CSV/SQLite consumers and tests less predictable even though the semantic type is nullable integer rank.
+- Minimal correction: initialise rank columns as nullable `Int64` columns before assigning per-year ranks.
+- Regression test: `tests/test_panel.py::test_build_panel_metrics_adds_country_ranks`.
+
+## Previous confirmed finding
+
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
 - Reproduction procedure: call `extract` with valid selectors but a requested year range outside the selected AMECO row's year columns, such as 1900-1901 against the fixture.
@@ -9,7 +18,7 @@
 - Minimal correction: raise a `SourceError` when matched AMECO selectors produce no observations after year-range filtering.
 - Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_empty_requested_range`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.config.HttpSection` and `src/pt_debt_interest.config.AnalysisSection`
