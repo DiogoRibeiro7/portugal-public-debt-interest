@@ -5,8 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import cast
 
-import matplotlib.pyplot as plt
+import matplotlib
 import pandas as pd
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
@@ -201,7 +205,10 @@ def plot_european_comparison(
     panel = panel.dropna(subset=["interest_pct_gdp"])
     if panel.empty:
         return None
-    latest_year = int(panel["year"].max())
+    portugal_years = panel.loc[panel["geo"].astype(str).eq("PT"), "year"]
+    if portugal_years.empty:
+        return None
+    latest_year = int(portugal_years.max())
     latest = panel.loc[panel["year"].eq(latest_year)].copy()
     if latest.empty:
         return None

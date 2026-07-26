@@ -3,13 +3,31 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.plotting`
+- Reproduction procedure: run output-generation tests in an environment where Matplotlib defaults to the Tk backend but Tk is unavailable or partially configured.
+- Risk: chart generation can fail for environmental GUI reasons even though the project only writes PNG/SVG files, making reporting outputs less reproducible in CI or headless automation.
+- Minimal correction: select Matplotlib's noninteractive `Agg` backend before importing `pyplot`.
+- Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` exercises file-based figure generation under the test runner.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.plotting.plot_european_comparison` and `src/pt_debt_interest.reporting._panel_summary`
+- Reproduction procedure: pass a comparator panel where Spain has a valid 2024 row, while Portugal's latest valid row is 2023.
+- Risk: the European comparison can be generated for a year without Portugal, losing the highlighted country in the figure, while the report can suppress the comparison despite a valid earlier Portugal comparator year.
+- Minimal correction: select the latest comparator year where Portugal has a valid observed non-aggregate interest-burden value, then compare all available non-aggregate rows in that year.
+- Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` and `tests/test_outputs.py::test_generate_report_uses_latest_panel_year_with_portugal`.
+
+## Earlier confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting.refinancing_shock_paths`
 - Reproduction procedure: call `generate_all_plots` with configured shocks and shares when the latest observed row has `debt_pct_gdp` or `interest_pct_gdp` missing.
 - Risk: the refinancing figure can be generated from an incomplete baseline, producing `NaN` scenario paths or a blank analytical chart without a clear data-quality signal.
 - Minimal correction: build refinancing scenarios only from observed rows with complete baseline interest and debt metrics, and skip the optional scenario output if no such row exists.
 - Regression test: `tests/test_outputs.py::test_refinancing_shock_paths_uses_latest_complete_observed_row` and `tests/test_outputs.py::test_refinancing_shock_paths_skips_incomplete_baseline`.
 
-## Previous confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.reporting.generate_report`
@@ -18,7 +36,7 @@
 - Minimal correction: require the report input to include all headline columns and at least one observed row with complete headline metrics before rendering.
 - Regression test: `tests/test_outputs.py::test_generate_report_rejects_missing_required_columns` and `tests/test_outputs.py::test_generate_report_rejects_incomplete_headline_rows`.
 
-## Earlier confirmed finding
+## Earlier reporting finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
@@ -27,7 +45,7 @@
 - Minimal correction: reject duplicate annual years at the start of metric calculation.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_duplicate_years`.
 
-## Prior confirmed finding
+## Earlier metrics finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`

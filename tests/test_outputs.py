@@ -45,6 +45,21 @@ def _panel_fixture_frame() -> pd.DataFrame:
     )
 
 
+def _panel_with_newer_non_portugal_year() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "geo": ["PT", "ES", "IT", "ES"],
+            "geo_name": ["Portugal", "Spain", "Italy", "Spain"],
+            "year": [2023, 2023, 2023, 2024],
+            "interest_pct_gdp": [2.1, 2.4, 3.6, 2.5],
+            "source": ["Eurostat"] * 4,
+            "accounting_basis": ["ESA2010"] * 4,
+            "observation_status": ["observed"] * 4,
+            "is_aggregate": [False] * 4,
+        }
+    )
+
+
 def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     paths = generate_all_plots(
         _fixture_frame(),
@@ -60,6 +75,17 @@ def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
     assert "figures_manifest.csv" in names
+
+
+def test_generate_all_plots_uses_latest_panel_year_with_portugal(tmp_path: Path) -> None:
+    paths = generate_all_plots(
+        _fixture_frame(),
+        tmp_path,
+        panel_frame=_panel_with_newer_non_portugal_year(),
+    )
+    names = {path.name for path in paths}
+
+    assert "08_european_comparison.png" in names
 
 
 def test_refinancing_shock_paths_uses_latest_complete_observed_row() -> None:
@@ -100,6 +126,20 @@ def test_generate_report_writes_generated_values(tmp_path: Path) -> None:
     assert "Portugal ranked" in content
     assert "Static full-pass-through sensitivities" in content
     assert "01_interest_pct_gdp.png" in content
+
+
+def test_generate_report_uses_latest_panel_year_with_portugal(tmp_path: Path) -> None:
+    destination = generate_report(
+        _fixture_frame(),
+        tmp_path / "summary.md",
+        1995,
+        [100],
+        panel_frame=_panel_with_newer_non_portugal_year(),
+    )
+    content = destination.read_text(encoding="utf-8")
+
+    assert "In **2023**" in content
+    assert "Portugal ranked" in content
 
 
 def test_generate_report_rejects_missing_required_columns(tmp_path: Path) -> None:

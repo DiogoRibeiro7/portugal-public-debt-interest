@@ -159,7 +159,8 @@ def _panel_summary(panel_frame: pd.DataFrame | None) -> dict[str, int | None]:
             "portugal_interest_rank": None,
             "comparator_count": None,
         }
-    latest_year = int(panel["year"].max())
+    portugal_years = panel.loc[panel["geo"].astype(str).eq("PT"), "year"]
+    latest_year = int(portugal_years.max())
     latest = panel.loc[panel["year"].eq(latest_year)].copy()
     if "PT" not in set(latest["geo"].astype(str)):
         return {
