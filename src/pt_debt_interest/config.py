@@ -110,6 +110,24 @@ class AnalysisSection(BaseModel):
     def validate_refinancing_shares(cls, values: list[float]) -> list[float]:
         if any(value < 0 or value > 1 for value in values):
             raise ValueError("refinancing shares must lie between zero and one")
+        if sum(values) > 1.0:
+            raise ValueError("refinancing shares must not exceed the outstanding stock")
+        return values
+
+    @field_validator("regime_boundaries")
+    @classmethod
+    def validate_regime_boundaries(
+        cls,
+        values: list[RegimeBoundary],
+    ) -> list[RegimeBoundary]:
+        ordered = sorted(values, key=lambda boundary: (boundary.start, boundary.end))
+        previous_end: int | None = None
+        for boundary in ordered:
+            if boundary.start > boundary.end:
+                raise ValueError("regime boundary start must be before or equal to end")
+            if previous_end is not None and boundary.start <= previous_end:
+                raise ValueError("regime boundaries must not overlap")
+            previous_end = boundary.end
         return values
 
 
