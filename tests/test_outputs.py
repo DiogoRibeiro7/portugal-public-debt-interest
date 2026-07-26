@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from pt_debt_interest.plotting import generate_all_plots
+from pt_debt_interest.plotting import generate_all_plots, refinancing_shock_paths
 from pt_debt_interest.reporting import generate_report
 
 
@@ -60,6 +60,25 @@ def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
     assert "figures_manifest.csv" in names
+
+
+def test_refinancing_shock_paths_uses_latest_complete_observed_row() -> None:
+    frame = _fixture_frame()
+    frame.loc[frame["year"] == 2023, "debt_pct_gdp"] = pd.NA
+
+    result = refinancing_shock_paths(frame, [100], [0.25])
+
+    assert result.loc[0, "baseline_year"] == 2022
+    assert result.loc[0, "interest_pct_gdp_scenario"] > 2.0
+
+
+def test_refinancing_shock_paths_skips_incomplete_baseline() -> None:
+    frame = _fixture_frame()
+    frame["debt_pct_gdp"] = pd.NA
+
+    result = refinancing_shock_paths(frame, [100], [0.25])
+
+    assert result.empty
 
 
 def test_generate_report_writes_generated_values(tmp_path: Path) -> None:

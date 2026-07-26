@@ -229,10 +229,15 @@ def refinancing_shock_paths(
     """Build configured refinancing-shock paths from the latest observed row."""
     if not shocks_bps or not refinancing_shares:
         return pd.DataFrame()
-    required = {"interest_pct_gdp", "debt_pct_gdp", "observation_status", "year"}
+    baseline_columns = ["interest_pct_gdp", "debt_pct_gdp"]
+    required = {*baseline_columns, "observation_status", "year"}
     if not required.issubset(frame.columns):
         return pd.DataFrame()
-    observed = frame.loc[frame["observation_status"] == "observed"].sort_values("year")
+    observed = (
+        frame.loc[frame["observation_status"] == "observed"]
+        .dropna(subset=baseline_columns)
+        .sort_values("year")
+    )
     if observed.empty:
         return pd.DataFrame()
     latest = observed.iloc[-1]

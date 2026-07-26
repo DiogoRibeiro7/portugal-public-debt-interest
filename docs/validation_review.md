@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.plotting.refinancing_shock_paths`
+- Reproduction procedure: call `generate_all_plots` with configured shocks and shares when the latest observed row has `debt_pct_gdp` or `interest_pct_gdp` missing.
+- Risk: the refinancing figure can be generated from an incomplete baseline, producing `NaN` scenario paths or a blank analytical chart without a clear data-quality signal.
+- Minimal correction: build refinancing scenarios only from observed rows with complete baseline interest and debt metrics, and skip the optional scenario output if no such row exists.
+- Regression test: `tests/test_outputs.py::test_refinancing_shock_paths_uses_latest_complete_observed_row` and `tests/test_outputs.py::test_refinancing_shock_paths_skips_incomplete_baseline`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.reporting.generate_report`
 - Reproduction procedure: call `generate_report` with observed rows where `implicit_interest_rate_pct` is missing, or with that column absent.
 - Risk: the generated report could render headline values such as `nan%` or fail with an uninformative column error, making missing mandatory report inputs look like analytical results.
 - Minimal correction: require the report input to include all headline columns and at least one observed row with complete headline metrics before rendering.
 - Regression test: `tests/test_outputs.py::test_generate_report_rejects_missing_required_columns` and `tests/test_outputs.py::test_generate_report_rejects_incomplete_headline_rows`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
@@ -18,7 +27,7 @@
 - Minimal correction: reject duplicate annual years at the start of metric calculation.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_duplicate_years`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
@@ -27,7 +36,7 @@
 - Minimal correction: validate category counts against declared dimension sizes and reject sparse `value` or `status` indexes that are non-integer or outside the declared cube.
 - Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_dimension_size_mismatch`, `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_out_of_range_sparse_index`, and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_non_integer_sparse_index`.
 
-## Prior confirmed finding
+## Earlier parser finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.storage.save_processed`
