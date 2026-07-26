@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pandas as pd
 import typer
 
 from .config import Settings, load_settings
@@ -30,6 +31,21 @@ def _settings(config: Path) -> Settings:
     settings = load_settings(config)
     settings.ensure_directories()
     return settings
+
+
+def _load_optional_panel_metrics(settings: Settings) -> pd.DataFrame | None:
+    panel_path = settings.paths.processed / "eurostat_panel_metrics.csv"
+    if not panel_path.exists():
+        return None
+    return pd.read_csv(panel_path)
+
+
+def _existing_figure_paths(settings: Settings) -> list[Path]:
+    if not settings.paths.figures.exists():
+        return []
+    return sorted(
+        path for path in settings.paths.figures.iterdir() if path.suffix.lower() in {".png", ".svg"}
+    )
 
 
 @app.command("fetch-eurostat")
@@ -105,7 +121,13 @@ def plot_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate all available charts."""
     settings = _settings(config)
     frame = load_processed(settings)
-    paths = generate_all_plots(frame, settings.paths.figures)
+    paths = generate_all_plots(
+        frame,
+        settings.paths.figures,
+        panel_frame=_load_optional_panel_metrics(settings),
+        shocks_bps=settings.analysis.static_rate_shocks_bps,
+        refinancing_shares=settings.analysis.default_refinancing_shares,
+    )
     for path in paths:
         typer.echo(path)
 
@@ -120,6 +142,8 @@ def report_command(config: Path = DEFAULT_CONFIG) -> None:
         settings.paths.reports / "summary.md",
         settings.project.main_start_year,
         settings.analysis.static_rate_shocks_bps,
+        panel_frame=_load_optional_panel_metrics(settings),
+        figure_paths=_existing_figure_paths(settings),
     )
     typer.echo(destination)
 
@@ -148,12 +172,20 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
     (settings.paths.reports / "validation.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
     )
-    generate_all_plots(frame, settings.paths.figures)
+    figure_paths = generate_all_plots(
+        frame,
+        settings.paths.figures,
+        panel_frame=_load_optional_panel_metrics(settings),
+        shocks_bps=settings.analysis.static_rate_shocks_bps,
+        refinancing_shares=settings.analysis.default_refinancing_shares,
+    )
     generate_report(
         frame,
         settings.paths.reports / "summary.md",
         settings.project.main_start_year,
         settings.analysis.static_rate_shocks_bps,
+        panel_frame=_load_optional_panel_metrics(settings),
+        figure_paths=figure_paths,
     )
     if not result["passed"]:
         raise typer.Exit(code=1)

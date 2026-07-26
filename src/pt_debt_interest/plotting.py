@@ -3,18 +3,28 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from .scenarios import refinancing_pass_through
+
 
 def _source_note(frame: pd.DataFrame) -> str:
-    sources = ", ".join(sorted(frame["source"].dropna().astype(str).unique()))
-    bases = ", ".join(sorted(frame["accounting_basis"].dropna().astype(str).unique()))
-    statuses = ", ".join(sorted(frame["observation_status"].dropna().astype(str).unique()))
+    sources = _metadata_values(frame, "source", "processed data")
+    bases = _metadata_values(frame, "accounting_basis", "not applicable")
+    statuses = _metadata_values(frame, "observation_status", "not applicable")
     return f"Source: {sources}; basis: {bases}; status: {statuses}"
+
+
+def _metadata_values(frame: pd.DataFrame, column: str, default: str) -> str:
+    if column not in frame.columns:
+        return default
+    values = sorted(frame[column].dropna().astype(str).unique())
+    return ", ".join(values) if values else default
 
 
 def _save(fig: Figure, path: Path) -> list[Path]:
@@ -173,6 +183,115 @@ def plot_debt_dynamics(frame: pd.DataFrame, output_dir: Path) -> list[Path] | No
     return _save(fig, output_dir / "07_debt_dynamics")
 
 
+def plot_european_comparison(
+    panel_frame: pd.DataFrame | None,
+    output_dir: Path,
+) -> list[Path] | None:
+    """Plot latest cross-country interest burdens from the comparator panel."""
+    if panel_frame is None or panel_frame.empty:
+        return None
+    required = {"geo", "year", "interest_pct_gdp"}
+    if not required.issubset(panel_frame.columns):
+        return None
+    panel = panel_frame.copy()
+    if "observation_status" in panel.columns:
+        panel = panel.loc[panel["observation_status"] == "observed"]
+    if "is_aggregate" in panel.columns:
+        panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
+    panel = panel.dropna(subset=["interest_pct_gdp"])
+    if panel.empty:
+        return None
+    latest_year = int(panel["year"].max())
+    latest = panel.loc[panel["year"].eq(latest_year)].copy()
+    if latest.empty:
+        return None
+    latest["label"] = latest.get("geo_name", latest["geo"]).fillna(latest["geo"])
+    latest = latest.sort_values("interest_pct_gdp", ascending=True)
+    colors = ["#2563eb" if geo == "PT" else "#6b7280" for geo in latest["geo"].astype(str)]
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+    ax.barh(latest["label"], latest["interest_pct_gdp"], color=colors)
+    ax.set_title(f"European comparison of interest burden, {latest_year}")
+    ax.set_xlabel("Interest expenditure, percentage of GDP")
+    ax.set_ylabel("")
+    ax.grid(axis="x", alpha=0.25)
+    for index, value in enumerate(latest["interest_pct_gdp"]):
+        ax.text(float(value), index, f" {float(value):.2f}", va="center", fontsize=8)
+    _annotate_source(ax, latest)
+    return _save(fig, output_dir / "08_european_comparison")
+
+
+def refinancing_shock_paths(
+    frame: pd.DataFrame,
+    shocks_bps: list[int],
+    refinancing_shares: list[float],
+) -> pd.DataFrame:
+    """Build configured refinancing-shock paths from the latest observed row."""
+    if not shocks_bps or not refinancing_shares:
+        return pd.DataFrame()
+    required = {"interest_pct_gdp", "debt_pct_gdp", "observation_status", "year"}
+    if not required.issubset(frame.columns):
+        return pd.DataFrame()
+    observed = frame.loc[frame["observation_status"] == "observed"].sort_values("year")
+    if observed.empty:
+        return pd.DataFrame()
+    latest = observed.iloc[-1]
+    pieces = [
+        refinancing_pass_through(
+            float(latest["interest_pct_gdp"]),
+            float(latest["debt_pct_gdp"]),
+            shock,
+            refinancing_shares,
+        ).assign(baseline_year=int(latest["year"]))
+        for shock in shocks_bps
+    ]
+    return pd.concat(pieces, ignore_index=True)
+
+
+def plot_refinancing_shock_paths(
+    scenario_frame: pd.DataFrame | None,
+    output_dir: Path,
+) -> list[Path] | None:
+    """Plot gradual interest-burden paths under configured refinancing shocks."""
+    if scenario_frame is None or scenario_frame.empty:
+        return None
+    required = {"horizon_year", "shock_bps", "interest_pct_gdp_scenario"}
+    if not required.issubset(scenario_frame.columns):
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for shock, group in scenario_frame.sort_values(["shock_bps", "horizon_year"]).groupby(
+        "shock_bps"
+    ):
+        shock_value = cast(float, shock)
+        ax.plot(
+            group["horizon_year"],
+            group["interest_pct_gdp_scenario"],
+            marker="o",
+            markersize=3,
+            label=f"+{shock_value:.0f} bps",
+        )
+    baseline_year: int | str = "latest"
+    if (
+        "baseline_year" in scenario_frame.columns
+        and not scenario_frame["baseline_year"].dropna().empty
+    ):
+        baseline_year = int(cast(float, scenario_frame["baseline_year"].dropna().iloc[0]))
+    ax.set_title(f"Refinancing shock paths from {baseline_year} baseline")
+    ax.set_xlabel("Years after shock")
+    ax.set_ylabel("Interest expenditure, percentage of GDP")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Shock")
+    ax.text(
+        0.0,
+        -0.16,
+        "Source: deterministic arithmetic simulation from processed data",
+        transform=ax.transAxes,
+        fontsize=8,
+        alpha=0.75,
+    )
+    return _save(fig, output_dir / "09_refinancing_shock_paths")
+
+
 def _write_manifest(paths: list[Path], frame: pd.DataFrame, output_dir: Path) -> Path:
     manifest = pd.DataFrame(
         {
@@ -185,8 +304,19 @@ def _write_manifest(paths: list[Path], frame: pd.DataFrame, output_dir: Path) ->
     return manifest_path
 
 
-def generate_all_plots(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
+def generate_all_plots(
+    frame: pd.DataFrame,
+    output_dir: Path,
+    panel_frame: pd.DataFrame | None = None,
+    shocks_bps: list[int] | None = None,
+    refinancing_shares: list[float] | None = None,
+) -> list[Path]:
     """Generate all available charts."""
+    scenario_frame = refinancing_shock_paths(
+        frame,
+        shocks_bps or [],
+        refinancing_shares or [],
+    )
     candidates = [
         plot_interest_burden(frame, output_dir),
         plot_interest_euros(frame, output_dir),
@@ -195,6 +325,8 @@ def generate_all_plots(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
         plot_yield_pass_through(frame, output_dir),
         plot_growth_decomposition(frame, output_dir),
         plot_debt_dynamics(frame, output_dir),
+        plot_european_comparison(panel_frame, output_dir),
+        plot_refinancing_shock_paths(scenario_frame, output_dir),
     ]
     paths = [path for group in candidates if group is not None for path in group]
     paths.append(_write_manifest(paths, frame, output_dir))

@@ -29,19 +29,54 @@ def _fixture_frame() -> pd.DataFrame:
     )
 
 
+def _panel_fixture_frame() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "geo": ["PT", "ES", "IT", "EA20"],
+            "geo_name": ["Portugal", "Spain", "Italy", "Euro area"],
+            "year": [2023, 2023, 2023, 2023],
+            "interest_pct_gdp": [2.1, 2.4, 3.6, 2.0],
+            "source": ["Eurostat"] * 4,
+            "accounting_basis": ["ESA2010"] * 4,
+            "observation_status": ["observed"] * 4,
+            "is_aggregate": [False, False, False, True],
+        }
+    )
+
+
 def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
-    paths = generate_all_plots(_fixture_frame(), tmp_path)
+    paths = generate_all_plots(
+        _fixture_frame(),
+        tmp_path,
+        panel_frame=_panel_fixture_frame(),
+        shocks_bps=[100, 200],
+        refinancing_shares=[0.25, 0.25],
+    )
     names = {path.name for path in paths}
 
     assert "01_interest_pct_gdp.png" in names
     assert "01_interest_pct_gdp.svg" in names
+    assert "08_european_comparison.png" in names
+    assert "09_refinancing_shock_paths.svg" in names
     assert "figures_manifest.csv" in names
 
 
 def test_generate_report_writes_generated_values(tmp_path: Path) -> None:
-    destination = generate_report(_fixture_frame(), tmp_path / "summary.md", 1995, [100])
+    figure = tmp_path / "01_interest_pct_gdp.png"
+    figure.write_text("placeholder", encoding="utf-8")
+    destination = generate_report(
+        _fixture_frame(),
+        tmp_path / "summary.md",
+        1995,
+        [100],
+        panel_frame=_panel_fixture_frame(),
+        figure_paths=[figure],
+    )
     content = destination.read_text(encoding="utf-8")
 
     assert "2023" in content
     assert "5.5 billion" in content
+    assert "European comparison" in content
+    assert "Portugal ranked" in content
     assert "Static full-pass-through sensitivities" in content
+    assert "01_interest_pct_gdp.png" in content

@@ -20,6 +20,7 @@ This project builds a transparent annual dataset for Portugal's public-debt inte
 
 - `data/processed/portugal_debt_interest.csv`: annual analytical dataset.
 - `data/processed/portugal_debt_interest.sqlite`: optional SQL copy.
+- `data/processed/eurostat_panel_metrics.csv`: optional comparator-panel metrics.
 - `reports/figures/`: publication-ready charts.
 - `reports/summary.md`: automatically generated analytical summary.
 - `reports/validation.json`: data-quality and identity checks.
@@ -55,11 +56,17 @@ Individual stages:
 ```bash
 pt-debt fetch-eurostat
 pt-debt fetch-ameco
+pt-debt fetch-panel
+pt-debt build-panel
 pt-debt build
 pt-debt validate
 pt-debt plot
 pt-debt report
 ```
+
+When `data/processed/eurostat_panel_metrics.csv` exists, `pt-debt plot` and
+`pt-debt report` include the European comparison outputs. Scenario-path charts
+use the refinancing shares and rate shocks configured in `config/default.yaml`.
 
 The default pipeline writes both CSV and SQLite outputs. Set `storage.backend: csv` or `storage.backend: sqlite` in the configuration to write only one format.
 
