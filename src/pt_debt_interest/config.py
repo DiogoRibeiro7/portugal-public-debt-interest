@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class ProjectSection(BaseModel):
@@ -26,6 +26,14 @@ class ProjectSection(BaseModel):
         if value < 1995:
             raise ValueError("end_year must be at least 1995")
         return value
+
+    @field_validator("comparison_geographies")
+    @classmethod
+    def validate_comparison_geographies(cls, values: list[str]) -> list[str]:
+        duplicates = sorted({geo for geo in values if values.count(geo) > 1})
+        if duplicates:
+            raise ValueError(f"comparison geographies must be unique: {duplicates}")
+        return values
 
 
 class PathsSection(BaseModel):
@@ -141,6 +149,20 @@ class Settings(BaseModel):
     eurostat: EurostatSection
     ameco: AmecoSection
     analysis: AnalysisSection
+
+    @model_validator(mode="after")
+    def validate_main_eurostat_geography(self) -> Settings:
+        mismatches = {
+            name: spec.filters["geo"]
+            for name, spec in self.eurostat.series.items()
+            if "geo" in spec.filters and spec.filters["geo"] != self.project.eurostat_geo
+        }
+        if mismatches:
+            raise ValueError(
+                "Eurostat series geography filters must match project.eurostat_geo: "
+                f"{mismatches}"
+            )
+        return self
 
     def ensure_directories(self, root: Path = Path(".")) -> None:
         """Create configured directories relative to the repository root."""

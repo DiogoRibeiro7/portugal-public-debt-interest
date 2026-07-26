@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.config.Settings`
+- Reproduction procedure: load settings where `project.eurostat_geo` is `PT` but one configured Eurostat series has `filters.geo = ES`; separately, set `project.comparison_geographies` to include the same geography twice.
+- Risk: the analysis could silently mix a non-Portugal source series into the Portugal dataset, or duplicate comparator panel rows after repeated downloads for the same geography.
+- Minimal correction: validate that Eurostat series geography filters match `project.eurostat_geo` and that comparator geography codes are unique.
+- Regression test: `tests/test_config.py::test_settings_rejects_eurostat_main_geo_mismatch` and `tests/test_config.py::test_project_config_rejects_duplicate_comparison_geographies`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.sources.eurostat.EurostatClient.fetch_series`
 - Reproduction procedure: return a JSON-stat response whose time category labels contain the same year twice, then call `fetch_series`.
 - Risk: duplicate annual labels could enter the source table and later outer joins as ambiguous annual observations, corrupting lagged calculations or causing later failures away from the source boundary.
 - Minimal correction: reject duplicate converted `year` values immediately after parsing one Eurostat series.
 - Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_duplicate_time_labels`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`
@@ -18,7 +27,7 @@
 - Minimal correction: add an explicit core-column validation check and return a failed validation payload before running checks that depend on those columns.
 - Regression test: `tests/test_validation.py::test_validation_reports_missing_core_columns` and `tests/test_validation.py::test_validation_reports_missing_accounting_basis_without_crashing`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting`
@@ -27,7 +36,7 @@
 - Minimal correction: select Matplotlib's noninteractive `Agg` backend before importing `pyplot`.
 - Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` exercises file-based figure generation under the test runner.
 
-## Prior confirmed finding
+## Earlier validation finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting.plot_european_comparison` and `src/pt_debt_interest.reporting._panel_summary`
