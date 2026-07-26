@@ -46,3 +46,28 @@ def test_validation_fails_observed_forecast_collision() -> None:
         item for item in result["checks"] if item["name"] == "observed_forecast_separation"
     )
     assert check["affected_years"] == [2025]
+
+
+def test_validation_warns_on_missing_retrieval_timestamp() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2024],
+            "accounting_basis": ["ESA2010"],
+            "source": ["Eurostat"],
+            "source_vintage": ["eurostat_interest_20260726T010000Z.json"],
+            "observation_status": ["observed"],
+            "retrieval_timestamp_utc": [""],
+            "source_flags": [""],
+            "basis_break": [False],
+        }
+    )
+
+    result = validate_dataset(frame, 2024, 2024, 0.15, 0.05)
+    check = next(
+        item for item in result["checks"] if item["name"] == "retrieval_timestamps_present"
+    )
+
+    assert result["passed"] is True
+    assert check["passed"] is False
+    assert check["severity"] == "warning"
+    assert check["affected_years"] == [2024]

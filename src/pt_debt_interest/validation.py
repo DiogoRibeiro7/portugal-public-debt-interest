@@ -63,6 +63,23 @@ def validate_dataset(
         )
     )
 
+    missing_retrieval: list[int] = []
+    if {"year", "retrieval_timestamp_utc", "source"}.issubset(frame.columns):
+        source_rows = frame.loc[frame["source"].notna()]
+        missing_mask = source_rows["retrieval_timestamp_utc"].isna() | source_rows[
+            "retrieval_timestamp_utc"
+        ].astype(str).str.strip().eq("")
+        missing_retrieval = source_rows.loc[missing_mask, "year"].astype(int).tolist()
+    checks.append(
+        CheckResult(
+            name="retrieval_timestamps_present",
+            passed=not missing_retrieval,
+            severity="warning",
+            detail="Source rows should preserve the raw retrieval timestamp.",
+            affected_years=missing_retrieval,
+        )
+    )
+
     expected = set(range(expected_start_year, expected_end_year + 1))
     actual = set(frame.loc[frame["accounting_basis"] == "ESA2010", "year"].astype(int))
     missing_years = sorted(expected.difference(actual))

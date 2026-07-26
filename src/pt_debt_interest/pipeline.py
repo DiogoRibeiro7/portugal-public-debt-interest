@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import pandas as pd
@@ -47,6 +48,45 @@ def _join_row_values(frame: pd.DataFrame, columns: list[str]) -> pd.Series:
     return pd.Series(values, index=frame.index, dtype="string")
 
 
+def _provenance_columns(frame: pd.DataFrame, suffix: str) -> list[str]:
+    return [column for column in frame.columns if column.endswith(suffix)]
+
+
+def _raw_timestamp_from_name(path: Path) -> str:
+    parts = path.stem.split("_")
+    if len(parts) < 3:
+        return path.stem
+    return parts[-1]
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _add_eurostat_row_provenance(frame: pd.DataFrame) -> pd.DataFrame:
+    """Add row-level provenance from per-series raw metadata columns."""
+    output = frame.copy()
+    timestamp_columns = _provenance_columns(output, "_retrieval_timestamp_utc")
+    checksum_columns = _provenance_columns(output, "_source_sha256")
+    raw_file_columns = _provenance_columns(output, "_raw_file")
+    output["retrieval_timestamp_utc"] = (
+        _join_row_values(output.astype("string"), timestamp_columns)
+        if timestamp_columns
+        else pd.NA
+    )
+    output["source_vintage"] = (
+        _join_row_values(output.astype("string"), raw_file_columns)
+        if raw_file_columns
+        else pd.NA
+    )
+    if checksum_columns:
+        output["source_checksum_sha256"] = _join_row_values(
+            output.astype("string"),
+            checksum_columns,
+        )
+    return output
+
+
 def fetch_eurostat(settings: Settings, root: Path = Path(".")) -> Path:
     """Fetch all configured Eurostat series and save the joined source table."""
     raw_dir = root / settings.paths.raw
@@ -58,11 +98,10 @@ def fetch_eurostat(settings: Settings, root: Path = Path(".")) -> Path:
         settings.project.main_start_year,
         settings.project.end_year,
     )
+    frame = _add_eurostat_row_provenance(frame)
     frame["source"] = "Eurostat"
-    frame["source_vintage"] = pd.NA
     frame["accounting_basis"] = "ESA2010"
     frame["observation_status"] = "observed"
-    frame["retrieval_timestamp_utc"] = pd.NA
     status_columns = [column for column in frame.columns if column.endswith("_status")]
     if status_columns:
         frame["source_flags"] = _join_row_values(frame.astype("string"), status_columns)
@@ -90,6 +129,9 @@ def fetch_ameco(settings: Settings, root: Path = Path(".")) -> Path | None:
         settings.project.end_year + 2,
         settings.ameco.forecast_cutoff_year,
     )
+    frame["retrieval_timestamp_utc"] = _raw_timestamp_from_name(archive)
+    frame["source_vintage"] = archive.name
+    frame["source_checksum_sha256"] = _file_sha256(archive)
     destination = interim_dir / "ameco_linked.csv"
     frame.to_csv(destination, index=False)
     return destination
@@ -129,6 +171,7 @@ def fetch_eurostat_panel(settings: Settings, root: Path = Path(".")) -> Path:
                 frame[column] = pd.Series([value] * len(frame), index=frame.index, dtype="boolean")
             else:
                 frame[column] = pd.Series([value] * len(frame), index=frame.index, dtype="string")
+        frame = _add_eurostat_row_provenance(frame)
         frame["source"] = "Eurostat"
         frame["accounting_basis"] = "ESA2010"
         frame["observation_status"] = "observed"
@@ -234,12 +277,12 @@ def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFr
             extension["nominal_gdp_mio_eur"] * extension["debt_pct_gdp_official"] / 100.0
         )
     extension["source"] = "AMECO"
-    extension["source_vintage"] = pd.NA
+    extension["source_vintage"] = extension.get("source_vintage", pd.NA)
     extension["accounting_basis"] = extension.get(
         "accounting_basis_ameco", "linked_ESA2010_ESA95_ESA79"
     )
     extension["observation_status"] = extension.get("observation_status_ameco", "observed")
-    extension["retrieval_timestamp_utc"] = pd.NA
+    extension["retrieval_timestamp_utc"] = extension.get("retrieval_timestamp_utc", pd.NA)
     code_columns = [column for column in extension.columns if column.endswith("_series_code")]
     if code_columns:
         extension["source_flags"] = _join_row_values(extension.astype("string"), code_columns)

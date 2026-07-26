@@ -35,6 +35,7 @@
 | `accounting_basis` | category | ESA2010 or linked historical basis |
 | `observation_status` | category | observed or forecast |
 | `retrieval_timestamp_utc` | timestamp | UTC retrieval timestamp when available |
+| `source_checksum_sha256` | hash | SHA-256 checksum of raw source payloads, joined when a row uses multiple series |
 | `source_flags` | category | Source observation flags or selected source codes |
 | `basis_break` | boolean | Marks the first authoritative ESA 2010 main-series year |
 | `regime` | category | Configured historical period |

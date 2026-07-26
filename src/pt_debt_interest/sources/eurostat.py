@@ -146,6 +146,8 @@ class EurostatClient:
             "raw_file": cache_path.name,
         }
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        checksum = str(manifest["sha256"])
+        raw_file = str(manifest["raw_file"])
 
         frame = jsonstat_to_frame(payload)
         if frame.empty:
@@ -157,7 +159,20 @@ class EurostatClient:
         output["year"] = pd.to_numeric(output["time"], errors="raise").astype(int)
         output[spec.value_name] = pd.to_numeric(output["value"], errors="coerce")
         output[f"{spec.value_name}_status"] = output["status"].astype("string")
-        return output.loc[:, ["year", spec.value_name, f"{spec.value_name}_status"]]
+        output[f"{spec.value_name}_retrieval_timestamp_utc"] = stamp
+        output[f"{spec.value_name}_source_sha256"] = checksum
+        output[f"{spec.value_name}_raw_file"] = raw_file
+        return output.loc[
+            :,
+            [
+                "year",
+                spec.value_name,
+                f"{spec.value_name}_status",
+                f"{spec.value_name}_retrieval_timestamp_utc",
+                f"{spec.value_name}_source_sha256",
+                f"{spec.value_name}_raw_file",
+            ],
+        ]
 
     def fetch_all(
         self,

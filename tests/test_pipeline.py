@@ -6,6 +6,7 @@ import pandas as pd
 from pt_debt_interest.config import EurostatSeriesSpec, load_settings
 from pt_debt_interest.exceptions import SourceError
 from pt_debt_interest.pipeline import (
+    _add_eurostat_row_provenance,
     _canonicalise_annual_table,
     _concat_preserving_columns,
     _fetch_available_panel_series,
@@ -30,6 +31,28 @@ def test_canonical_table_adds_provenance_and_basis_break() -> None:
     assert "retrieval_timestamp_utc" in result.columns
     assert bool(result.loc[result["year"] == 1995, "basis_break"].iloc[0]) is True
     assert result["year"].tolist() == [1994, 1995]
+
+
+def test_add_eurostat_row_provenance_collapses_series_metadata() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2024],
+            "interest_mio_eur_retrieval_timestamp_utc": ["20260726T010000Z"],
+            "debt_mio_eur_retrieval_timestamp_utc": ["20260726T010001Z"],
+            "interest_mio_eur_source_sha256": ["abc"],
+            "debt_mio_eur_source_sha256": ["def"],
+            "interest_mio_eur_raw_file": ["eurostat_interest_20260726T010000Z.json"],
+            "debt_mio_eur_raw_file": ["eurostat_debt_20260726T010001Z.json"],
+        }
+    )
+
+    result = _add_eurostat_row_provenance(frame)
+
+    assert result.loc[0, "retrieval_timestamp_utc"] == (
+        "20260726T010000Z;20260726T010001Z"
+    )
+    assert result.loc[0, "source_checksum_sha256"] == "abc;def"
+    assert "eurostat_interest_20260726T010000Z.json" in result.loc[0, "source_vintage"]
 
 
 def test_clear_ameco_interim_removes_stale_file(tmp_path: Path) -> None:
