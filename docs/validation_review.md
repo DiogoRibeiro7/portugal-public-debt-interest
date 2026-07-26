@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
+- Reproduction procedure: build an AMECO zip containing the same configured series row twice, either within one CSV member or repeated across two CSV members, then call `extract`.
+- Risk: the parser selected the first matching row with `.head(1)` or could merge duplicate output columns from multiple members, making the linked historical extension depend on archive layout instead of an explicit unique selector.
+- Minimal correction: reject selectors that match more than one row in a member or more than one archive member.
+- Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_duplicate_selector_rows` and `tests/test_ameco.py::test_ameco_archive_extract_rejects_duplicate_selector_members`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.pipeline.fetch_eurostat`
 - Reproduction procedure: run `pt-debt fetch-eurostat` and inspect `data/interim/eurostat_main.csv`; raw `.manifest.json` files contain retrieval timestamps and checksums, but `retrieval_timestamp_utc` is empty in the joined interim table.
 - Risk: processed rows cannot be traced back to the exact retrieval timestamp or raw checksum without manually matching filenames in `data/raw/`, weakening reproducibility and making source revisions harder to audit.
 - Minimal correction: propagate per-series raw filename, checksum, and retrieval timestamp from `EurostatClient.fetch_series`, collapse them into row-level provenance fields in the pipeline, and warn when source rows lack retrieval timestamps.
 - Regression test: `tests/test_jsonstat.py::test_eurostat_client_returns_raw_provenance`, `tests/test_pipeline.py::test_add_eurostat_row_provenance_collapses_series_metadata`, and `tests/test_validation.py::test_validation_warns_on_missing_retrieval_timestamp`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.cli.all_command`

@@ -149,6 +149,7 @@ class AmecoArchiveClient:
         _validate_selectors(selectors)
         pieces: list[pd.DataFrame] = []
         found_outputs: set[str] = set()
+        matched_locations: dict[str, str] = {}
         with zipfile.ZipFile(archive_path) as archive:
             for member in archive.namelist():
                 if not member.lower().endswith(".csv"):
@@ -179,7 +180,19 @@ class AmecoArchiveClient:
                     )
                     if not mask.any():
                         continue
-                    selected = frame.loc[mask, [code_column, *year_columns]].head(1)
+                    match_count = int(mask.sum())
+                    if match_count > 1:
+                        raise SourceError(
+                            f"AMECO selector {selector.output_name} matched "
+                            f"{match_count} rows in {member}"
+                        )
+                    if selector.output_name in matched_locations:
+                        raise SourceError(
+                            f"AMECO selector {selector.output_name} matched multiple "
+                            f"archive members: {matched_locations[selector.output_name]}, "
+                            f"{member}"
+                        )
+                    selected = frame.loc[mask, [code_column, *year_columns]]
                     long = selected.melt(
                         id_vars=[code_column],
                         var_name="year",
@@ -192,6 +205,7 @@ class AmecoArchiveClient:
                     long[f"{selector.output_name}_series_code"] = selected[code_column].iloc[0]
                     long[f"{selector.output_name}_source_member"] = member
                     found_outputs.add(selector.output_name)
+                    matched_locations[selector.output_name] = member
                     pieces.append(
                         long.loc[
                             :,

@@ -1,6 +1,7 @@
 import zipfile
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from pt_debt_interest.config import AmecoSelector, HttpSection
@@ -59,4 +60,45 @@ def test_ameco_archive_extract_rejects_missing_selector(tmp_path: Path) -> None:
     }
 
     with pytest.raises(SourceError, match="none of the configured"):
+        client.extract(archive_path, "PRT", selectors, 1960, 2026, 2025)
+
+
+def test_ameco_archive_extract_rejects_duplicate_selector_rows(tmp_path: Path) -> None:
+    source = pd.read_csv("tests/fixtures/ameco/UYIG.csv")
+    duplicated = pd.concat([source, source.iloc[[0]]], ignore_index=True)
+    duplicate_csv = tmp_path / "duplicate_rows.csv"
+    duplicated.to_csv(duplicate_csv, index=False)
+    archive_path = tmp_path / "ameco.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.write(duplicate_csv, arcname="duplicate_rows.csv")
+
+    client = AmecoArchiveClient("https://example.invalid", HttpSection(), tmp_path)
+    selectors = {
+        "interest": AmecoSelector(
+            variable_code="UYIG",
+            unit_code=319,
+            output_name="interest_pct_gdp_ameco",
+        )
+    }
+
+    with pytest.raises(SourceError, match="matched 2 rows"):
+        client.extract(archive_path, "PRT", selectors, 1960, 2026, 2025)
+
+
+def test_ameco_archive_extract_rejects_duplicate_selector_members(tmp_path: Path) -> None:
+    archive_path = tmp_path / "ameco.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.write("tests/fixtures/ameco/UYIG.csv", arcname="UYIG_a.csv")
+        archive.write("tests/fixtures/ameco/UYIG.csv", arcname="UYIG_b.csv")
+
+    client = AmecoArchiveClient("https://example.invalid", HttpSection(), tmp_path)
+    selectors = {
+        "interest": AmecoSelector(
+            variable_code="UYIG",
+            unit_code=319,
+            output_name="interest_pct_gdp_ameco",
+        )
+    }
+
+    with pytest.raises(SourceError, match="matched multiple archive members"):
         client.extract(archive_path, "PRT", selectors, 1960, 2026, 2025)
