@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.reporting.generate_report`
+- Reproduction procedure: call `generate_report` with observed rows where `implicit_interest_rate_pct` is missing, or with that column absent.
+- Risk: the generated report could render headline values such as `nan%` or fail with an uninformative column error, making missing mandatory report inputs look like analytical results.
+- Minimal correction: require the report input to include all headline columns and at least one observed row with complete headline metrics before rendering.
+- Regression test: `tests/test_outputs.py::test_generate_report_rejects_missing_required_columns` and `tests/test_outputs.py::test_generate_report_rejects_incomplete_headline_rows`.
+
+## Previous confirmed finding
+
 - Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
 - Reproduction procedure: call `calculate_metrics` with two rows for the same `year` and valid interest, GDP, and debt columns.
@@ -9,7 +18,7 @@
 - Minimal correction: reject duplicate annual years at the start of metric calculation.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_duplicate_years`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
@@ -18,7 +27,7 @@
 - Minimal correction: validate category counts against declared dimension sizes and reject sparse `value` or `status` indexes that are non-integer or outside the declared cube.
 - Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_dimension_size_mismatch`, `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_out_of_range_sparse_index`, and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_non_integer_sparse_index`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.storage.save_processed`
@@ -27,7 +36,7 @@
 - Minimal correction: validate that processed annual outputs include a `year` column and contain no duplicate years before creating output directories or writing any backend.
 - Regression test: `tests/test_storage.py::test_save_processed_rejects_duplicate_years_before_writing` and `tests/test_storage.py::test_save_processed_requires_year_column`.
 
-## Prior confirmed finding
+## Earlier config finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.config.AnalysisSection`
@@ -36,7 +45,7 @@
 - Minimal correction: validate that configured refinancing shares sum to no more than one and that regime boundaries have non-reversed, non-overlapping year ranges.
 - Regression test: `tests/test_config.py::test_analysis_config_rejects_excess_refinancing_shares`, `tests/test_config.py::test_analysis_config_rejects_overlapping_regimes`, and `tests/test_config.py::test_analysis_config_rejects_reversed_regime`.
 
-## Earlier config finding
+## Earlier source finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`

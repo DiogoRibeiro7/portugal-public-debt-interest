@@ -9,6 +9,15 @@ from jinja2 import Template
 
 from .scenarios import static_rate_shock_table
 
+REQUIRED_REPORT_COLUMNS = {
+    "year",
+    "observation_status",
+    "interest_mio_eur",
+    "interest_pct_gdp",
+    "debt_pct_gdp",
+    "implicit_interest_rate_pct",
+}
+
 REPORT_TEMPLATE = Template(
     """# Portugal public-debt interest burden
 
@@ -106,6 +115,24 @@ def _joined_values(frame: pd.DataFrame, column: str) -> str:
     return ", ".join(values) if values else "not available"
 
 
+def _observed_headline_rows(frame: pd.DataFrame) -> pd.DataFrame:
+    missing = REQUIRED_REPORT_COLUMNS.difference(frame.columns)
+    if missing:
+        raise ValueError(f"report input is missing required columns: {sorted(missing)}")
+    observed = frame.loc[frame["observation_status"] == "observed"].copy()
+    complete = observed.dropna(
+        subset=[
+            "interest_mio_eur",
+            "interest_pct_gdp",
+            "debt_pct_gdp",
+            "implicit_interest_rate_pct",
+        ]
+    )
+    if complete.empty:
+        raise ValueError("report input has no observed rows with complete headline metrics")
+    return complete
+
+
 def _panel_summary(panel_frame: pd.DataFrame | None) -> dict[str, int | None]:
     if panel_frame is None or panel_frame.empty:
         return {
@@ -158,7 +185,7 @@ def generate_report(
     figure_paths: list[Path] | None = None,
 ) -> Path:
     """Generate a concise evidence-led Markdown report."""
-    observed = frame.loc[frame["observation_status"] == "observed"].copy()
+    observed = _observed_headline_rows(frame)
     latest = observed.sort_values("year").iloc[-1]
     peak_interest = observed.sort_values("interest_pct_gdp", ascending=False).iloc[0]
     shock_table = static_rate_shock_table(float(latest["debt_pct_gdp"]), shocks_bps)

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from pt_debt_interest.plotting import generate_all_plots
 from pt_debt_interest.reporting import generate_report
@@ -80,3 +81,18 @@ def test_generate_report_writes_generated_values(tmp_path: Path) -> None:
     assert "Portugal ranked" in content
     assert "Static full-pass-through sensitivities" in content
     assert "01_interest_pct_gdp.png" in content
+
+
+def test_generate_report_rejects_missing_required_columns(tmp_path: Path) -> None:
+    frame = _fixture_frame().drop(columns=["implicit_interest_rate_pct"])
+
+    with pytest.raises(ValueError, match="missing required columns"):
+        generate_report(frame, tmp_path / "summary.md", 1995, [100])
+
+
+def test_generate_report_rejects_incomplete_headline_rows(tmp_path: Path) -> None:
+    frame = _fixture_frame()
+    frame["implicit_interest_rate_pct"] = pd.NA
+
+    with pytest.raises(ValueError, match="complete headline metrics"):
+        generate_report(frame, tmp_path / "summary.md", 1995, [100])
