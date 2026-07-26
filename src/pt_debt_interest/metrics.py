@@ -154,4 +154,9 @@ def calculate_metrics(
     output["source"] = output.get("source", "Eurostat")
     output["accounting_basis"] = output.get("accounting_basis", "ESA2010")
     output["observation_status"] = output.get("observation_status", "observed")
-    return output.replace([np.inf, -np.inf], np.nan)
+    numeric_columns = output.select_dtypes(include=[np.number]).columns
+    output.loc[:, numeric_columns] = output.loc[:, numeric_columns].mask(
+        np.isinf(output.loc[:, numeric_columns]),
+        np.nan,
+    )
+    return output
