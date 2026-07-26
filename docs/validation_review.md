@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: high
+- File and symbol: `src/pt_debt_interest.storage.save_processed`
+- Reproduction procedure: call `save_processed` with a frame containing duplicate `year` values while the configured backend includes CSV output.
+- Risk: `build_dataset` persists outputs before the CLI validation stage, so duplicate annual keys could be written to `data/processed/portugal_debt_interest.csv` before validation reports the dataset invalid. SQLite would later fail on the unique index, but CSV output could already be stale or corrupted.
+- Minimal correction: validate that processed annual outputs include a `year` column and contain no duplicate years before creating output directories or writing any backend.
+- Regression test: `tests/test_storage.py::test_save_processed_rejects_duplicate_years_before_writing` and `tests/test_storage.py::test_save_processed_requires_year_column`.
+
+## Previous confirmed finding
+
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.config.AnalysisSection`
 - Reproduction procedure: instantiate `AnalysisSection(default_refinancing_shares=[0.6, 0.5])`, or instantiate it with overlapping regime windows such as 2000-2005 and 2005-2010.
@@ -9,7 +18,7 @@
 - Minimal correction: validate that configured refinancing shares sum to no more than one and that regime boundaries have non-reversed, non-overlapping year ranges.
 - Regression test: `tests/test_config.py::test_analysis_config_rejects_excess_refinancing_shares`, `tests/test_config.py::test_analysis_config_rejects_overlapping_regimes`, and `tests/test_config.py::test_analysis_config_rejects_reversed_regime`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
@@ -18,7 +27,7 @@
 - Minimal correction: reject selectors that match more than one row in a member or more than one archive member.
 - Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_duplicate_selector_rows` and `tests/test_ameco.py::test_ameco_archive_extract_rejects_duplicate_selector_members`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.pipeline.fetch_eurostat`
@@ -27,7 +36,7 @@
 - Minimal correction: propagate per-series raw filename, checksum, and retrieval timestamp from `EurostatClient.fetch_series`, collapse them into row-level provenance fields in the pipeline, and warn when source rows lack retrieval timestamps.
 - Regression test: `tests/test_jsonstat.py::test_eurostat_client_returns_raw_provenance`, `tests/test_pipeline.py::test_add_eurostat_row_provenance_collapses_series_metadata`, and `tests/test_validation.py::test_validation_warns_on_missing_retrieval_timestamp`.
 
-## Initial confirmed finding
+## First confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.cli.all_command`

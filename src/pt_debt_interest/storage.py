@@ -8,6 +8,17 @@ from pathlib import Path
 import pandas as pd
 
 from .config import Settings
+from .exceptions import ValidationError
+
+
+def _validate_annual_keys(frame: pd.DataFrame) -> None:
+    if "year" not in frame.columns:
+        raise ValidationError("processed dataset must include a year column")
+    duplicate_years = (
+        frame.loc[frame["year"].duplicated(keep=False), "year"].dropna().astype(int).tolist()
+    )
+    if duplicate_years:
+        raise ValidationError(f"processed dataset contains duplicate years: {duplicate_years}")
 
 
 def save_processed(
@@ -16,6 +27,7 @@ def save_processed(
     root: Path = Path("."),
 ) -> dict[str, Path]:
     """Save the analytical table using the configured backend."""
+    _validate_annual_keys(frame)
     processed_dir = root / settings.paths.processed
     processed_dir.mkdir(parents=True, exist_ok=True)
     outputs: dict[str, Path] = {}
