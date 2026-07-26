@@ -17,6 +17,30 @@ def test_jsonstat_to_frame_sparse_values() -> None:
     assert frame.loc[2, "status"] == "p"
 
 
+def test_jsonstat_to_frame_rejects_dimension_size_mismatch() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["size"][-1] = 4
+
+    with pytest.raises(SourceError, match="declares size 4"):
+        jsonstat_to_frame(payload)
+
+
+def test_jsonstat_to_frame_rejects_out_of_range_sparse_index() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["value"]["99"] = 1.0
+
+    with pytest.raises(SourceError, match="index 99 exceeds declared size"):
+        jsonstat_to_frame(payload)
+
+
+def test_jsonstat_to_frame_rejects_non_integer_sparse_index() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["status"] = {"bad": "p"}
+
+    with pytest.raises(SourceError, match="non-integer index"):
+        jsonstat_to_frame(payload)
+
+
 def test_eurostat_client_rejects_unexpected_dimension(tmp_path: Path) -> None:
     payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
     payload["dimension"]["geo"]["category"]["index"] = {"PT": 0, "ES": 1}

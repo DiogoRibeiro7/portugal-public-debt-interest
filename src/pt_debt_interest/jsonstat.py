@@ -22,6 +22,25 @@ def _ordered_categories(category_index: object) -> list[str]:
     raise SourceError("unsupported JSON-stat category index")
 
 
+def _indexed_values(container: object, total_size: int, label: str) -> dict[int, object]:
+    if isinstance(container, list):
+        if len(container) > total_size:
+            raise SourceError(f"JSON-stat {label} length exceeds declared size")
+        return {index: value for index, value in enumerate(container)}
+    if isinstance(container, dict):
+        values: dict[int, object] = {}
+        for raw_index, value in container.items():
+            try:
+                index = int(raw_index)
+            except (TypeError, ValueError) as exc:
+                raise SourceError(f"JSON-stat {label} contains a non-integer index") from exc
+            if index < 0 or index >= total_size:
+                raise SourceError(f"JSON-stat {label} index {index} exceeds declared size")
+            values[index] = value
+        return values
+    raise SourceError(f"unsupported JSON-stat {label} container")
+
+
 def jsonstat_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
     """Convert a Eurostat JSON-stat response into a tidy DataFrame.
 
@@ -40,30 +59,24 @@ def jsonstat_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
         raise SourceError("JSON-stat id and size lengths differ")
 
     categories: list[list[str]] = []
-    for dimension in dimensions:
+    for dimension, size in zip(dimensions, sizes, strict=True):
         try:
             index = dimension_meta[dimension]["category"]["index"]
         except (KeyError, TypeError) as exc:
             raise SourceError(f"missing category index for {dimension}") from exc
-        categories.append(_ordered_categories(index))
+        ordered = _ordered_categories(index)
+        if len(ordered) != int(size):
+            raise SourceError(
+                f"JSON-stat dimension {dimension} declares size {size} "
+                f"but has {len(ordered)} categories"
+            )
+        categories.append(ordered)
 
     total_size = int(np.prod(sizes, dtype=np.int64))
     values_obj = payload.get("value", {})
     statuses_obj = payload.get("status", {})
-
-    if isinstance(values_obj, list):
-        values = {index: value for index, value in enumerate(values_obj)}
-    elif isinstance(values_obj, dict):
-        values = {int(index): value for index, value in values_obj.items()}
-    else:
-        raise SourceError("unsupported JSON-stat value container")
-
-    if isinstance(statuses_obj, list):
-        statuses = {index: value for index, value in enumerate(statuses_obj)}
-    elif isinstance(statuses_obj, dict):
-        statuses = {int(index): value for index, value in statuses_obj.items()}
-    else:
-        statuses = {}
+    values = _indexed_values(values_obj, total_size, "value")
+    statuses = _indexed_values(statuses_obj, total_size, "status")
 
     rows: list[dict[str, object]] = []
     for flat_index in range(total_size):
