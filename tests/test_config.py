@@ -1,12 +1,26 @@
 import pytest
 from pydantic import ValidationError
 
-from pt_debt_interest.config import AnalysisSection, ProjectSection, Settings, load_settings
+from pt_debt_interest.config import (
+    AnalysisSection,
+    HttpSection,
+    ProjectSection,
+    Settings,
+    load_settings,
+)
 
 
 def test_analysis_config_rejects_excess_refinancing_shares() -> None:
     with pytest.raises(ValidationError, match="outstanding stock"):
         AnalysisSection(default_refinancing_shares=[0.6, 0.5])
+
+
+def test_analysis_config_rejects_negative_tolerances() -> None:
+    with pytest.raises(ValidationError, match="tolerances"):
+        AnalysisSection(ratio_tolerance_pp=-0.1)
+
+    with pytest.raises(ValidationError, match="tolerances"):
+        AnalysisSection(identity_tolerance_pp=-0.1)
 
 
 def test_analysis_config_rejects_overlapping_regimes() -> None:
@@ -61,6 +75,17 @@ def test_project_config_rejects_main_start_after_end() -> None:
             extended_start_year=1960,
             end_year=2025,
         )
+
+
+def test_http_config_rejects_invalid_retry_settings() -> None:
+    with pytest.raises(ValidationError, match="timeout_seconds"):
+        HttpSection(timeout_seconds=0)
+
+    with pytest.raises(ValidationError, match="max_retries"):
+        HttpSection(max_retries=0)
+
+    with pytest.raises(ValidationError, match="backoff_seconds"):
+        HttpSection(backoff_seconds=-1)
 
 
 def test_settings_rejects_eurostat_main_geo_mismatch() -> None:

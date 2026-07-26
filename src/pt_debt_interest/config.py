@@ -69,6 +69,27 @@ class HttpSection(BaseModel):
     max_retries: int = 3
     backoff_seconds: float = 1.0
 
+    @field_validator("timeout_seconds")
+    @classmethod
+    def validate_timeout(cls, value: float) -> float:
+        if value <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        return value
+
+    @field_validator("max_retries")
+    @classmethod
+    def validate_max_retries(cls, value: int) -> int:
+        if value < 1:
+            raise ValueError("max_retries must be at least one")
+        return value
+
+    @field_validator("backoff_seconds")
+    @classmethod
+    def validate_backoff(cls, value: float) -> float:
+        if value < 0:
+            raise ValueError("backoff_seconds must not be negative")
+        return value
+
 
 class EurostatSeriesSpec(BaseModel):
     """One Eurostat dataset query."""
@@ -120,6 +141,13 @@ class AnalysisSection(BaseModel):
     default_refinancing_shares: list[float] = Field(default_factory=list)
     observed_only_by_default: bool = True
     regime_boundaries: list[RegimeBoundary] = Field(default_factory=list)
+
+    @field_validator("ratio_tolerance_pp", "identity_tolerance_pp")
+    @classmethod
+    def validate_tolerances(cls, value: float) -> float:
+        if value < 0:
+            raise ValueError("validation tolerances must not be negative")
+        return value
 
     @field_validator("default_refinancing_shares")
     @classmethod
