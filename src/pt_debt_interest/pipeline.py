@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from .config import Settings
+from .config import EurostatSeriesSpec, Settings
+from .exceptions import SourceError
 from .metrics import calculate_metrics
 from .panel import geography_metadata, series_specs_for_geo, validate_country_year_panel
 from .sources.ameco import AmecoArchiveClient
@@ -109,23 +110,74 @@ def fetch_eurostat_panel(settings: Settings, root: Path = Path(".")) -> Path:
     client = EurostatClient(settings.eurostat.base_url, settings.http, raw_dir)
     pieces: list[pd.DataFrame] = []
     for geo in settings.project.comparison_geographies:
-        frame = client.fetch_all(
+        frame = _fetch_available_panel_series(
+            client,
             series_specs_for_geo(settings.eurostat.series, geo),
             settings.project.main_start_year,
             settings.project.end_year,
         )
         metadata = geography_metadata(geo)
         for column, value in metadata.items():
-            frame[column] = pd.Series([value] * len(frame), index=frame.index)
+            if isinstance(value, bool):
+                frame[column] = pd.Series([value] * len(frame), index=frame.index, dtype="boolean")
+            else:
+                frame[column] = pd.Series([value] * len(frame), index=frame.index, dtype="string")
         frame["source"] = "Eurostat"
         frame["accounting_basis"] = "ESA2010"
         frame["observation_status"] = "observed"
         pieces.append(frame)
-    panel = pd.concat(pieces, ignore_index=True, sort=False)
+    panel = _concat_preserving_columns(pieces)
     validate_country_year_panel(panel)
     destination = interim_dir / "eurostat_panel.csv"
     panel.to_csv(destination, index=False)
     return destination
+
+
+def _concat_preserving_columns(pieces: list[pd.DataFrame]) -> pd.DataFrame:
+    """Concatenate frames without all-null-column dtype warnings."""
+    expected_columns = list(dict.fromkeys(column for piece in pieces for column in piece.columns))
+    prepared: list[pd.DataFrame] = []
+    for piece in pieces:
+        all_null_columns = [
+            column for column in piece.columns if bool(piece[column].isna().all())
+        ]
+        prepared.append(piece.drop(columns=all_null_columns))
+    combined = pd.concat(prepared, ignore_index=True, sort=False)
+    for column in expected_columns:
+        if column not in combined.columns:
+            combined[column] = pd.NA
+    return combined.loc[:, expected_columns]
+
+
+def _fetch_available_panel_series(
+    client: EurostatClient,
+    series: dict[str, EurostatSeriesSpec],
+    start_year: int,
+    end_year: int,
+) -> pd.DataFrame:
+    """Fetch comparator series, preserving missing optional series as null columns."""
+    merged: pd.DataFrame | None = None
+    missing: list[tuple[str, str]] = []
+    for name, spec in series.items():
+        try:
+            current = client.fetch_series(name, spec, start_year, end_year)
+        except SourceError as exc:
+            missing.append((name, str(exc)))
+            continue
+        merged = current if merged is None else merged.merge(current, on="year", how="outer")
+    if merged is None:
+        detail = "; ".join(f"{name}: {error}" for name, error in missing)
+        raise SourceError(f"no comparator series could be fetched: {detail}")
+    for name, error in missing:
+        value_name = str(series[name].value_name)
+        merged[value_name] = pd.Series(pd.NA, index=merged.index, dtype="Float64")
+        merged[f"{value_name}_status"] = pd.Series(pd.NA, index=merged.index, dtype="string")
+        merged[f"{value_name}_missing_reason"] = pd.Series(
+            [error] * len(merged),
+            index=merged.index,
+            dtype="string",
+        )
+    return merged.sort_values("year").reset_index(drop=True)
 
 
 def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFrame:
