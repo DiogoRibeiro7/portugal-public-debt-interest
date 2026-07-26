@@ -39,6 +39,15 @@ def _validate_annual_input(frame: pd.DataFrame) -> None:
         raise ValueError(f"annual metrics require unique years: {duplicate_years}")
 
 
+def _validate_positive_denominators(frame: pd.DataFrame) -> None:
+    """Reject non-positive values used as metric denominators."""
+    for column in ["nominal_gdp_mio_eur", "debt_mio_eur"]:
+        values = pd.to_numeric(frame[column], errors="coerce")
+        affected_years = frame.loc[values.notna() & values.le(0), "year"].astype(int).tolist()
+        if affected_years:
+            raise ValueError(f"{column} must be positive for years: {affected_years}")
+
+
 def _same_accounting_basis_as_previous(output: pd.DataFrame) -> pd.Series:
     """Return rows whose lagged calculations stay within one accounting basis."""
     if "accounting_basis" not in output.columns:
@@ -72,6 +81,7 @@ def calculate_metrics(
 
     _validate_percentage_scale(frame)
     _validate_annual_input(frame)
+    _validate_positive_denominators(frame)
 
     output = frame.sort_values("year").copy()
     output["interest_pct_gdp_calculated"] = (

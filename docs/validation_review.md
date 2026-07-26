@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
+- Reproduction procedure: call `calculate_metrics` with `nominal_gdp_mio_eur` equal to zero or `debt_mio_eur` less than or equal to zero.
+- Risk: divisions by invalid denominators can produce infinite or undefined fiscal ratios that are masked to missing values later, obscuring a source-data integrity error.
+- Minimal correction: reject non-positive GDP and debt denominator values before calculating ratios and lagged interest rates.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_non_positive_gdp` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_positive_debt`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`
 - Reproduction procedure: call `validate_dataset` with a row whose `year` is null while the required `year` column exists.
 - Risk: validation can crash during integer conversion instead of returning a structured failed check, making malformed processed datasets harder to diagnose through the CLI.
 - Minimal correction: validate that core key values are non-null before duplicate-year, coverage, and identity checks.
 - Regression test: `tests/test_validation.py::test_validation_reports_missing_core_values_without_crashing` and `tests/test_validation.py::test_validation_reports_missing_accounting_basis_values`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.panel.validate_country_year_panel`
