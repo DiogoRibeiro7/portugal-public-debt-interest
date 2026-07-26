@@ -27,6 +27,28 @@ def test_validation_passes_accounting_identity() -> None:
     assert result["passed"] is True
 
 
+def test_validation_reports_missing_core_columns() -> None:
+    frame = pd.DataFrame({"source": ["Eurostat"]})
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "core_columns_present")
+
+    assert result["passed"] is False
+    assert check["passed"] is False
+    assert check["severity"] == "error"
+    assert check["detail"] == "Missing core columns: ['year', 'accounting_basis']"
+
+
+def test_validation_reports_missing_accounting_basis_without_crashing() -> None:
+    frame = pd.DataFrame({"year": [1995], "source": ["Eurostat"]})
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "core_columns_present")
+
+    assert result["passed"] is False
+    assert check["detail"] == "Missing core columns: ['accounting_basis']"
+
+
 def test_validation_fails_observed_forecast_collision() -> None:
     frame = pd.DataFrame(
         {

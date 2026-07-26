@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.validation.validate_dataset`
+- Reproduction procedure: call `validate_dataset` with a frame missing `year` or `accounting_basis`.
+- Risk: validation could crash with a raw `KeyError` before writing a structured result, making corrupted processed files harder to diagnose through the CLI.
+- Minimal correction: add an explicit core-column validation check and return a failed validation payload before running checks that depend on those columns.
+- Regression test: `tests/test_validation.py::test_validation_reports_missing_core_columns` and `tests/test_validation.py::test_validation_reports_missing_accounting_basis_without_crashing`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting`
 - Reproduction procedure: run output-generation tests in an environment where Matplotlib defaults to the Tk backend but Tk is unavailable or partially configured.
 - Risk: chart generation can fail for environmental GUI reasons even though the project only writes PNG/SVG files, making reporting outputs less reproducible in CI or headless automation.
 - Minimal correction: select Matplotlib's noninteractive `Agg` backend before importing `pyplot`.
 - Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` exercises file-based figure generation under the test runner.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting.plot_european_comparison` and `src/pt_debt_interest.reporting._panel_summary`
@@ -18,7 +27,7 @@
 - Minimal correction: select the latest comparator year where Portugal has a valid observed non-aggregate interest-burden value, then compare all available non-aggregate rows in that year.
 - Regression test: `tests/test_outputs.py::test_generate_all_plots_uses_latest_panel_year_with_portugal` and `tests/test_outputs.py::test_generate_report_uses_latest_panel_year_with_portugal`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting.refinancing_shock_paths`
@@ -27,7 +36,7 @@
 - Minimal correction: build refinancing scenarios only from observed rows with complete baseline interest and debt metrics, and skip the optional scenario output if no such row exists.
 - Regression test: `tests/test_outputs.py::test_refinancing_shock_paths_uses_latest_complete_observed_row` and `tests/test_outputs.py::test_refinancing_shock_paths_skips_incomplete_baseline`.
 
-## Prior confirmed finding
+## Earlier output finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.reporting.generate_report`

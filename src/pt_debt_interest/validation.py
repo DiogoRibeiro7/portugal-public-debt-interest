@@ -16,6 +16,7 @@ PROVENANCE_COLUMNS = [
     "source_flags",
     "basis_break",
 ]
+CORE_COLUMNS = ["year", "accounting_basis"]
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,23 @@ def validate_dataset(
 ) -> dict[str, Any]:
     """Run mandatory and diagnostic validations."""
     checks: list[CheckResult] = []
+
+    missing_core = [column for column in CORE_COLUMNS if column not in frame.columns]
+    checks.append(
+        CheckResult(
+            name="core_columns_present",
+            passed=not missing_core,
+            severity="error",
+            detail=f"Missing core columns: {missing_core}",
+            affected_years=[],
+        )
+    )
+    if missing_core:
+        payload = [asdict(check) for check in checks]
+        return {
+            "passed": False,
+            "checks": payload,
+        }
 
     duplicated = frame.loc[frame["year"].duplicated(), "year"].astype(int).tolist()
     checks.append(
