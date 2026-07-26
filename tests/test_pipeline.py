@@ -2,6 +2,7 @@ import warnings
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from pt_debt_interest.config import EurostatSeriesSpec, load_settings
 from pt_debt_interest.exceptions import SourceError
@@ -99,6 +100,36 @@ def test_fetch_available_panel_series_preserves_missing_series() -> None:
     assert result.loc[0, "interest_pct_gdp"] == 1.5
     assert pd.isna(result.loc[0, "ten_year_yield_pct"])
     assert "returned geo=[]" in result.loc[0, "ten_year_yield_pct_missing_reason"]
+
+
+def test_fetch_available_panel_series_raises_for_required_missing_series() -> None:
+    class FakeClient:
+        def fetch_series(
+            self,
+            name: str,
+            spec: EurostatSeriesSpec,
+            start_year: int,
+            end_year: int,
+        ) -> pd.DataFrame:
+            if name == "interest":
+                raise SourceError("Eurostat gov_10a_main returned no values")
+            return pd.DataFrame({"year": [2024], spec.value_name: [1.5]})
+
+    series = {
+        "interest": EurostatSeriesSpec(
+            dataset="gov_10a_main",
+            filters={"geo": "EA20"},
+            value_name="interest_pct_gdp",
+        ),
+        "yield": EurostatSeriesSpec(
+            dataset="irt_lt_mcby_a",
+            filters={"geo": "EA20"},
+            value_name="ten_year_yield_pct",
+        ),
+    }
+
+    with pytest.raises(SourceError, match="mandatory comparator series interest failed"):
+        _fetch_available_panel_series(FakeClient(), series, 2024, 2024)
 
 
 def test_concat_preserving_columns_avoids_all_null_warning() -> None:

@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: high
+- File and symbol: `src/pt_debt_interest.pipeline._fetch_available_panel_series`
+- Reproduction procedure: make a mandatory comparator input, such as the interest-to-GDP series, raise `SourceError` while another comparator series succeeds.
+- Risk: source acquisition can downgrade a mandatory comparator failure to an all-null missing column, hiding corrupted or unavailable core panel inputs until later stages.
+- Minimal correction: preserve missing columns only for explicitly optional comparator series, currently `ten_year_yield_pct`, and raise immediately for mandatory comparator series failures.
+- Regression test: `tests/test_pipeline.py::test_fetch_available_panel_series_raises_for_required_missing_series`.
+
+## Previous confirmed finding
+
 - Severity: low
 - File and symbol: `src/pt_debt_interest.panel.add_panel_ranks`
 - Reproduction procedure: call `build_panel_metrics` with aggregate rows and inspect the `interest_burden_rank` or `implicit_rate_rank` dtype.
@@ -9,7 +18,7 @@
 - Minimal correction: initialise rank columns as nullable `Int64` columns before assigning per-year ranks.
 - Regression test: `tests/test_panel.py::test_build_panel_metrics_adds_country_ranks`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`

@@ -32,6 +32,8 @@ CANONICAL_PROVENANCE_COLUMNS = [
     "basis_break",
 ]
 
+OPTIONAL_PANEL_VALUE_COLUMNS = {"ten_year_yield_pct"}
+
 
 def _join_row_values(frame: pd.DataFrame, columns: list[str]) -> pd.Series:
     """Join unique non-null row values from selected columns."""
@@ -240,6 +242,8 @@ def _fetch_available_panel_series(
         try:
             current = client.fetch_series(name, spec, start_year, end_year)
         except SourceError as exc:
+            if spec.value_name not in OPTIONAL_PANEL_VALUE_COLUMNS:
+                raise SourceError(f"mandatory comparator series {name} failed: {exc}") from exc
             missing.append((name, str(exc)))
             continue
         merged = current if merged is None else merged.merge(current, on="year", how="outer")
