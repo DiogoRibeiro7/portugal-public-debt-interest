@@ -42,6 +42,13 @@ def test_validate_country_year_panel_rejects_duplicates() -> None:
         validate_country_year_panel(frame)
 
 
+def test_validate_country_year_panel_rejects_missing_keys() -> None:
+    frame = pd.DataFrame({"geo": ["PT", None], "year": [2020, 2021]})
+
+    with pytest.raises(ValidationError, match="missing country-year keys"):
+        validate_country_year_panel(frame)
+
+
 def test_panel_missingness_reports_missing_columns() -> None:
     frame = pd.DataFrame({"geo": ["PT", "PT"], "year": [2020, 2021], "value": [1.0, None]})
 

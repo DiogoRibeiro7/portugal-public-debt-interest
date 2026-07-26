@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.panel.validate_country_year_panel`
+- Reproduction procedure: pass a comparator panel row with a missing `geo` or `year` key into `validate_country_year_panel`.
+- Risk: rows with incomplete country-year keys can pass validation, then be dropped from grouped metric calculations or produce ambiguous missingness diagnostics.
+- Minimal correction: reject null country-year keys before duplicate-key validation and report the affected key records.
+- Regression test: `tests/test_panel.py::test_validate_country_year_panel_rejects_missing_keys`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.pipeline._fetch_available_panel_series`
 - Reproduction procedure: make a mandatory comparator input, such as the interest-to-GDP series, raise `SourceError` while another comparator series succeeds.
 - Risk: source acquisition can downgrade a mandatory comparator failure to an all-null missing column, hiding corrupted or unavailable core panel inputs until later stages.
 - Minimal correction: preserve missing columns only for explicitly optional comparator series, currently `ten_year_yield_pct`, and raise immediately for mandatory comparator series failures.
 - Regression test: `tests/test_pipeline.py::test_fetch_available_panel_series_raises_for_required_missing_series`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: low
 - File and symbol: `src/pt_debt_interest.panel.add_panel_ranks`

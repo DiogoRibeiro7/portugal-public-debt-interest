@@ -62,13 +62,17 @@ def series_specs_for_geo(
 
 def validate_country_year_panel(frame: pd.DataFrame) -> None:
     """Reject duplicate country-year rows in a comparator panel."""
-    required = {"geo", "year"}
-    missing = required.difference(frame.columns)
+    key_columns = ["geo", "year"]
+    missing = set(key_columns).difference(frame.columns)
     if missing:
         raise ValidationError(f"panel is missing required columns: {sorted(missing)}")
-    duplicated = frame.duplicated(subset=["geo", "year"])
+    null_keys = frame[key_columns].isna().any(axis=1)
+    if null_keys.any():
+        keys = frame.loc[null_keys, key_columns].to_dict(orient="records")
+        raise ValidationError(f"panel contains missing country-year keys: {keys}")
+    duplicated = frame.duplicated(subset=key_columns, keep=False)
     if duplicated.any():
-        keys = frame.loc[duplicated, ["geo", "year"]].to_dict(orient="records")
+        keys = frame.loc[duplicated, key_columns].to_dict(orient="records")
         raise ValidationError(f"duplicate country-year keys in panel: {keys}")
 
 
