@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.config.ProjectSection`
+- Reproduction procedure: instantiate project settings with `extended_start_year > main_start_year`, or with `main_start_year > end_year`.
+- Risk: source acquisition and linked-series assembly can run with empty, reversed, or misleading time windows even though each individual year value has the right type.
+- Minimal correction: validate the project year ordering as `extended_start_year <= main_start_year <= end_year`.
+- Regression test: `tests/test_config.py::test_project_config_rejects_extended_start_after_main_start` and `tests/test_config.py::test_project_config_rejects_main_start_after_end`.
+
+## Previous confirmed finding
+
 - Severity: high
 - File and symbol: `src/pt_debt_interest.config.Settings`
 - Reproduction procedure: load settings where `project.eurostat_geo` is `PT` but one configured Eurostat series has `filters.geo = ES`; separately, set `project.comparison_geographies` to include the same geography twice.
@@ -9,7 +18,7 @@
 - Minimal correction: validate that Eurostat series geography filters match `project.eurostat_geo` and that comparator geography codes are unique.
 - Regression test: `tests/test_config.py::test_settings_rejects_eurostat_main_geo_mismatch` and `tests/test_config.py::test_project_config_rejects_duplicate_comparison_geographies`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.sources.eurostat.EurostatClient.fetch_series`
@@ -18,7 +27,7 @@
 - Minimal correction: reject duplicate converted `year` values immediately after parsing one Eurostat series.
 - Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_duplicate_time_labels`.
 
-## Earlier confirmed finding
+## Prior confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`
@@ -27,7 +36,7 @@
 - Minimal correction: add an explicit core-column validation check and return a failed validation payload before running checks that depend on those columns.
 - Regression test: `tests/test_validation.py::test_validation_reports_missing_core_columns` and `tests/test_validation.py::test_validation_reports_missing_accounting_basis_without_crashing`.
 
-## Prior confirmed finding
+## Earlier validation finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.plotting`

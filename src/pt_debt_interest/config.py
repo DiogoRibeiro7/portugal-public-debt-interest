@@ -35,6 +35,14 @@ class ProjectSection(BaseModel):
             raise ValueError(f"comparison geographies must be unique: {duplicates}")
         return values
 
+    @model_validator(mode="after")
+    def validate_year_order(self) -> ProjectSection:
+        if self.extended_start_year > self.main_start_year:
+            raise ValueError("extended_start_year must be no later than main_start_year")
+        if self.main_start_year > self.end_year:
+            raise ValueError("main_start_year must be no later than end_year")
+        return self
+
 
 class PathsSection(BaseModel):
     """Project filesystem paths."""

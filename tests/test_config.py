@@ -39,6 +39,30 @@ def test_project_config_rejects_duplicate_comparison_geographies() -> None:
         )
 
 
+def test_project_config_rejects_extended_start_after_main_start() -> None:
+    with pytest.raises(ValidationError, match="extended_start_year"):
+        ProjectSection(
+            country_name="Portugal",
+            eurostat_geo="PT",
+            ameco_geo="PRT",
+            main_start_year=1995,
+            extended_start_year=2000,
+            end_year=2025,
+        )
+
+
+def test_project_config_rejects_main_start_after_end() -> None:
+    with pytest.raises(ValidationError, match="main_start_year"):
+        ProjectSection(
+            country_name="Portugal",
+            eurostat_geo="PT",
+            ameco_geo="PRT",
+            main_start_year=2026,
+            extended_start_year=1960,
+            end_year=2025,
+        )
+
+
 def test_settings_rejects_eurostat_main_geo_mismatch() -> None:
     payload = load_settings("config/default.yaml").model_dump()
     payload["eurostat"]["series"]["interest_mio_eur"]["filters"]["geo"] = "ES"
