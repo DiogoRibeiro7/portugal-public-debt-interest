@@ -75,6 +75,21 @@ def _panel_with_malformed_portugal_year() -> pd.DataFrame:
     )
 
 
+def _panel_with_fractional_portugal_year() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "geo": ["PT", "ES"],
+            "geo_name": ["Portugal", "Spain"],
+            "year": [2023.5, 2023.5],
+            "interest_pct_gdp": [2.1, 2.4],
+            "source": ["Eurostat"] * 2,
+            "accounting_basis": ["ESA2010"] * 2,
+            "observation_status": ["observed"] * 2,
+            "is_aggregate": [False] * 2,
+        }
+    )
+
+
 def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     paths = generate_all_plots(
         _fixture_frame(),
@@ -108,6 +123,17 @@ def test_generate_all_plots_skips_malformed_panel_year(tmp_path: Path) -> None:
         _fixture_frame(),
         tmp_path,
         panel_frame=_panel_with_malformed_portugal_year(),
+    )
+    names = {path.name for path in paths}
+
+    assert "08_european_comparison.png" not in names
+
+
+def test_generate_all_plots_skips_fractional_panel_year(tmp_path: Path) -> None:
+    paths = generate_all_plots(
+        _fixture_frame(),
+        tmp_path,
+        panel_frame=_panel_with_fractional_portugal_year(),
     )
     names = {path.name for path in paths}
 
@@ -175,6 +201,19 @@ def test_generate_report_skips_malformed_panel_year(tmp_path: Path) -> None:
         1995,
         [100],
         panel_frame=_panel_with_malformed_portugal_year(),
+    )
+    content = destination.read_text(encoding="utf-8")
+
+    assert "Comparator-panel metrics were not available" in content
+
+
+def test_generate_report_skips_fractional_panel_year(tmp_path: Path) -> None:
+    destination = generate_report(
+        _fixture_frame(),
+        tmp_path / "summary.md",
+        1995,
+        [100],
+        panel_frame=_panel_with_fractional_portugal_year(),
     )
     content = destination.read_text(encoding="utf-8")
 

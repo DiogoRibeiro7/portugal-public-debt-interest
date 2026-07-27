@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import numpy as np
 import pandas as pd
 
 from ..config import EurostatSeriesSpec, HttpSection
@@ -158,7 +159,17 @@ class EurostatClient:
             raise SourceError(f"Eurostat series {name} has no time dimension")
 
         output = frame.loc[:, ["time", "value", "status"]].copy()
-        output["year"] = pd.to_numeric(output["time"], errors="raise").astype(int)
+        try:
+            numeric_years = pd.to_numeric(output["time"], errors="raise")
+        except (TypeError, ValueError) as exc:
+            raise SourceError(f"Eurostat series {name} returned non-numeric years") from exc
+        invalid_years = (~np.isfinite(numeric_years)) | numeric_years.mod(1).ne(0)
+        if invalid_years.any():
+            values = output.loc[invalid_years, "time"].astype(str).tolist()
+            raise SourceError(
+                f"Eurostat series {name} returned non-annual time labels: {values}"
+            )
+        output["year"] = numeric_years.astype(int)
         duplicated_years = output.loc[
             output["year"].duplicated(keep=False),
             "year",

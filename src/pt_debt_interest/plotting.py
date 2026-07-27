@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import cast
 
 import matplotlib
+import numpy as np
 import pandas as pd
 
 matplotlib.use("Agg")
@@ -203,6 +204,9 @@ def plot_european_comparison(
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
+    panel = panel.loc[
+        np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)
+    ]
     panel = panel.dropna(subset=["interest_pct_gdp"])
     panel = panel.dropna(subset=["year_numeric"])
     if panel.empty:

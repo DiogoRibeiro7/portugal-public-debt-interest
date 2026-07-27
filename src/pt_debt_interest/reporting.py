@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from jinja2 import Template
 
@@ -153,6 +154,9 @@ def _panel_summary(panel_frame: pd.DataFrame | None) -> dict[str, int | None]:
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
+    panel = panel.loc[
+        np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)
+    ]
     panel = panel.dropna(subset=["interest_pct_gdp"])
     panel = panel.dropna(subset=["year_numeric"])
     if panel.empty or "PT" not in set(panel["geo"].astype(str)):

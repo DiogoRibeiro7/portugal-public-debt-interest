@@ -3,13 +3,31 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.sources.eurostat.EurostatClient.fetch_series`
+- Reproduction procedure: return a JSON-stat payload with a fractional time label such as `2021.5`.
+- Risk: source parsing can truncate malformed time labels to integer years before duplicate detection and provenance persistence.
+- Minimal correction: require Eurostat time labels to be finite whole-year values before converting them to integer years.
+- Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_fractional_time_labels`.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.reporting._panel_summary` and `src/pt_debt_interest.plotting.plot_european_comparison`
+- Reproduction procedure: generate optional comparator outputs with Portugal panel rows whose `year` value is fractional or non-finite.
+- Risk: comparator output can silently truncate fractional years in chart/report labels or crash on non-finite year conversion.
+- Minimal correction: keep only finite whole-number comparator years before selecting Portugal's latest panel year.
+- Regression test: `tests/test_outputs.py::test_generate_report_skips_fractional_panel_year` and `tests/test_outputs.py::test_generate_all_plots_skips_fractional_panel_year`.
+
+## Earlier confirmed finding
+
+- Severity: medium
 - File and symbol: annual-key validation in `src/pt_debt_interest.metrics`, `src/pt_debt_interest.pipeline`, `src/pt_debt_interest.storage`, `src/pt_debt_interest.validation`, and `src/pt_debt_interest.panel`
 - Reproduction procedure: pass fractional years, non-finite years, or equivalent duplicate years such as `2020` and `"2020"` through analytical, persistence, or comparator-panel validation paths.
 - Risk: fractional annual keys can be silently truncated to integers or equivalent annual keys can bypass duplicate checks, creating ambiguous year-level outputs.
 - Minimal correction: validate annual keys as finite numeric whole numbers before integer conversion, and run duplicate detection on normalized year keys where applicable.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_fractional_years`, `tests/test_pipeline.py::test_canonical_table_rejects_fractional_year_values`, `tests/test_storage.py::test_save_processed_rejects_fractional_years_before_writing`, `tests/test_validation.py::test_validation_reports_fractional_year_values`, `tests/test_validation.py::test_validation_reports_missing_core_values_with_malformed_year`, and `tests/test_panel.py::test_validate_country_year_panel_rejects_equivalent_duplicate_years`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.storage._validate_annual_keys`
