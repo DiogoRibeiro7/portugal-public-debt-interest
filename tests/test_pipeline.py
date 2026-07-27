@@ -8,6 +8,7 @@ from pt_debt_interest.config import EurostatSeriesSpec, load_settings
 from pt_debt_interest.exceptions import SourceError
 from pt_debt_interest.pipeline import (
     _add_eurostat_row_provenance,
+    _build_ameco_pre1995,
     _canonicalise_annual_table,
     _concat_preserving_columns,
     _fetch_available_panel_series,
@@ -67,6 +68,19 @@ def test_clear_ameco_interim_removes_stale_file(tmp_path: Path) -> None:
 
     assert removed == stale
     assert not stale.exists()
+
+
+def test_build_ameco_pre1995_rejects_non_positive_interest_ratio() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1994],
+            "interest_bn_eur_ameco": [5.0],
+            "interest_pct_gdp_ameco": [0.0],
+        }
+    )
+
+    with pytest.raises(SourceError, match="interest_pct_gdp_ameco must be positive"):
+        _build_ameco_pre1995(frame, 1995)
 
 
 def test_fetch_available_panel_series_preserves_missing_series() -> None:

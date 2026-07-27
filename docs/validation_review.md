@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: high
+- File and symbol: `src/pt_debt_interest.pipeline._build_ameco_pre1995`
+- Reproduction procedure: pass linked AMECO extension data where `interest_pct_gdp_ameco` is zero while interest amounts are present.
+- Risk: the linked-series mapper can derive infinite nominal GDP values before later numeric masking, making an invalid AMECO denominator look like missing analytical output.
+- Minimal correction: reject non-positive AMECO interest-to-GDP ratios before deriving nominal GDP from interest amounts.
+- Regression test: `tests/test_pipeline.py::test_build_ameco_pre1995_rejects_non_positive_interest_ratio`.
+
+## Previous confirmed finding
+
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.eurostat._validate_requested_dimensions`
 - Reproduction procedure: return a Eurostat JSON-stat response whose `id` and `size` arrays have different lengths.
@@ -9,7 +18,7 @@
 - Minimal correction: explicitly reject Eurostat `id`/`size` length mismatches before building the dimension-size mapping.
 - Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_id_size_mismatch`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.config.EurostatSection`
