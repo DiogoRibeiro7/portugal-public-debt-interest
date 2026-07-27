@@ -111,3 +111,42 @@ def test_build_panel_metrics_adds_country_ranks() -> None:
     assert pd.isna(ea_2022["interest_burden_rank"])
     assert str(result["interest_burden_rank"].dtype) == "Int64"
     assert str(result["implicit_rate_rank"].dtype) == "Int64"
+
+
+def test_build_panel_metrics_parses_string_aggregate_flags() -> None:
+    frame = pd.DataFrame(
+        {
+            "geo": ["PT", "ES", "EA20"],
+            "year": [2022, 2022, 2022],
+            "interest_mio_eur": [6.0, 5.0, 21.0],
+            "nominal_gdp_mio_eur": [120.0, 125.0, 550.0],
+            "debt_mio_eur": [110.0, 95.0, 410.0],
+            "source": ["Eurostat"] * 3,
+            "accounting_basis": ["ESA2010"] * 3,
+            "observation_status": ["observed"] * 3,
+            "is_aggregate": ["False", "false", "True"],
+        }
+    )
+
+    result = build_panel_metrics(frame, denominator="average_debt")
+
+    pt = result.loc[result["geo"] == "PT"].iloc[0]
+    ea = result.loc[result["geo"] == "EA20"].iloc[0]
+    assert pt["interest_burden_rank"] == 1
+    assert pd.isna(ea["interest_burden_rank"])
+
+
+def test_build_panel_metrics_rejects_invalid_aggregate_flags() -> None:
+    frame = pd.DataFrame(
+        {
+            "geo": ["PT"],
+            "year": [2022],
+            "interest_mio_eur": [6.0],
+            "nominal_gdp_mio_eur": [120.0],
+            "debt_mio_eur": [110.0],
+            "is_aggregate": ["not-a-flag"],
+        }
+    )
+
+    with pytest.raises(ValidationError, match="aggregate flags"):
+        build_panel_metrics(frame, denominator="average_debt")

@@ -45,6 +45,12 @@ def _panel_fixture_frame() -> pd.DataFrame:
     )
 
 
+def _panel_with_string_aggregate_flags() -> pd.DataFrame:
+    frame = _panel_fixture_frame()
+    frame["is_aggregate"] = ["False", "false", "FALSE", "True"]
+    return frame
+
+
 def _panel_with_newer_non_portugal_year() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -105,6 +111,17 @@ def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
     assert "figures_manifest.csv" in names
+
+
+def test_generate_all_plots_parses_string_aggregate_flags(tmp_path: Path) -> None:
+    paths = generate_all_plots(
+        _fixture_frame(),
+        tmp_path,
+        panel_frame=_panel_with_string_aggregate_flags(),
+    )
+    names = {path.name for path in paths}
+
+    assert "08_european_comparison.png" in names
 
 
 def test_generate_all_plots_uses_latest_panel_year_with_portugal(tmp_path: Path) -> None:
@@ -180,6 +197,20 @@ def test_generate_report_writes_generated_values(tmp_path: Path) -> None:
     assert "01_interest_pct_gdp.png" in content
 
 
+def test_generate_report_parses_string_aggregate_flags(tmp_path: Path) -> None:
+    destination = generate_report(
+        _fixture_frame(),
+        tmp_path / "summary.md",
+        1995,
+        [100],
+        panel_frame=_panel_with_string_aggregate_flags(),
+    )
+    content = destination.read_text(encoding="utf-8")
+
+    assert "Portugal ranked" in content
+    assert "**3** non-aggregate comparator countries" in content
+
+
 def test_generate_report_uses_latest_panel_year_with_portugal(tmp_path: Path) -> None:
     destination = generate_report(
         _fixture_frame(),
@@ -232,4 +263,20 @@ def test_generate_report_rejects_incomplete_headline_rows(tmp_path: Path) -> Non
     frame["implicit_interest_rate_pct"] = pd.NA
 
     with pytest.raises(ValueError, match="complete headline metrics"):
+        generate_report(frame, tmp_path / "summary.md", 1995, [100])
+
+
+def test_generate_report_rejects_non_numeric_headline_values(tmp_path: Path) -> None:
+    frame = _fixture_frame()
+    frame.loc[frame["year"] == 2023, "interest_pct_gdp"] = "not-a-number"
+
+    with pytest.raises(ValueError, match="interest_pct_gdp must be numeric"):
+        generate_report(frame, tmp_path / "summary.md", 1995, [100])
+
+
+def test_generate_report_rejects_non_finite_headline_values(tmp_path: Path) -> None:
+    frame = _fixture_frame()
+    frame.loc[frame["year"] == 2023, "debt_pct_gdp"] = float("inf")
+
+    with pytest.raises(ValueError, match="debt_pct_gdp must be numeric"):
         generate_report(frame, tmp_path / "summary.md", 1995, [100])

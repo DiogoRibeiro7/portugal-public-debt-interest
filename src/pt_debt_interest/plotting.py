@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
 
 
@@ -202,7 +203,7 @@ def plot_european_comparison(
     if "observation_status" in panel.columns:
         panel = panel.loc[panel["observation_status"] == "observed"]
     if "is_aggregate" in panel.columns:
-        panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
+        panel = panel.loc[~aggregate_flag_mask(panel["is_aggregate"])]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.loc[
         np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)

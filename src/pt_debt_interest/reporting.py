@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from jinja2 import Template
 
+from .panel import aggregate_flag_mask
 from .scenarios import static_rate_shock_table
 
 REQUIRED_REPORT_COLUMNS = {
@@ -18,6 +19,12 @@ REQUIRED_REPORT_COLUMNS = {
     "debt_pct_gdp",
     "implicit_interest_rate_pct",
 }
+HEADLINE_NUMERIC_COLUMNS = [
+    "interest_mio_eur",
+    "interest_pct_gdp",
+    "debt_pct_gdp",
+    "implicit_interest_rate_pct",
+]
 
 REPORT_TEMPLATE = Template(
     """# Portugal public-debt interest burden
@@ -121,16 +128,28 @@ def _observed_headline_rows(frame: pd.DataFrame) -> pd.DataFrame:
     if missing:
         raise ValueError(f"report input is missing required columns: {sorted(missing)}")
     observed = frame.loc[frame["observation_status"] == "observed"].copy()
-    complete = observed.dropna(
-        subset=[
-            "interest_mio_eur",
-            "interest_pct_gdp",
-            "debt_pct_gdp",
-            "implicit_interest_rate_pct",
-        ]
-    )
+    complete = observed.dropna(subset=HEADLINE_NUMERIC_COLUMNS)
     if complete.empty:
         raise ValueError("report input has no observed rows with complete headline metrics")
+    try:
+        years = pd.to_numeric(complete["year"], errors="raise")
+    except (TypeError, ValueError) as exc:
+        raise ValueError("report input year values must be numeric") from exc
+    if ((~np.isfinite(years)) | years.mod(1).ne(0)).any():
+        raise ValueError("report input year values must be finite whole numbers")
+    complete["year"] = years.astype(int)
+    for column in HEADLINE_NUMERIC_COLUMNS:
+        values = pd.to_numeric(complete[column], errors="coerce")
+        invalid = (complete[column].notna() & values.isna()) | (
+            values.notna() & ~np.isfinite(values)
+        )
+        if invalid.any():
+            affected_years = complete.loc[invalid, "year"].astype(int).tolist()
+            raise ValueError(
+                f"report input {column} must be numeric and finite "
+                f"for years: {affected_years}"
+            )
+        complete[column] = values
     return complete
 
 
@@ -152,7 +171,7 @@ def _panel_summary(panel_frame: pd.DataFrame | None) -> dict[str, int | None]:
     if "observation_status" in panel.columns:
         panel = panel.loc[panel["observation_status"] == "observed"]
     if "is_aggregate" in panel.columns:
-        panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
+        panel = panel.loc[~aggregate_flag_mask(panel["is_aggregate"])]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.loc[
         np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)

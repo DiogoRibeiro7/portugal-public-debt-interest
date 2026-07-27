@@ -3,6 +3,24 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.panel.aggregate_flag_mask`, `src/pt_debt_interest.reporting._panel_summary`, and `src/pt_debt_interest.plotting.plot_european_comparison`
+- Reproduction procedure: load comparator-panel rows from CSV where `is_aggregate` contains strings such as `"False"` and `"True"`.
+- Risk: string `"False"` values are truthy under direct boolean casting, causing non-aggregate countries to be excluded from ranks, plots, and report summaries.
+- Minimal correction: normalize aggregate flags from boolean-like strings and numeric flags before filtering comparator rows.
+- Regression test: `tests/test_panel.py::test_build_panel_metrics_parses_string_aggregate_flags`, `tests/test_outputs.py::test_generate_report_parses_string_aggregate_flags`, and `tests/test_outputs.py::test_generate_all_plots_parses_string_aggregate_flags`.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.reporting._observed_headline_rows`
+- Reproduction procedure: call `generate_report` with non-numeric or infinite headline metrics such as `interest_pct_gdp` or `debt_pct_gdp`.
+- Risk: report generation can fail during template preparation with low-level float conversion errors, or render invalid headline values.
+- Minimal correction: validate observed headline rows as finite numeric values before selecting the latest and peak observations.
+- Regression test: `tests/test_outputs.py::test_generate_report_rejects_non_numeric_headline_values` and `tests/test_outputs.py::test_generate_report_rejects_non_finite_headline_values`.
+
+## Earlier confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.scenarios`
 - Reproduction procedure: call static or refinancing scenario helpers with a non-finite or fractional `shock_bps` value.
 - Risk: malformed shock values can produce invalid scenario arithmetic or ambiguous basis-point labels while bypassing direct-call validation.

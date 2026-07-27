@@ -32,6 +32,8 @@ PANEL_MISSINGNESS_COLUMNS = [
     "implicit_interest_rate_pct",
     "ten_year_yield_pct",
 ]
+_TRUE_FLAG_VALUES = {"1", "true", "t", "yes", "y"}
+_FALSE_FLAG_VALUES = {"0", "false", "f", "no", "n", ""}
 
 
 def geography_metadata(geo: str) -> dict[str, object]:
@@ -59,6 +61,30 @@ def series_specs_for_geo(
             value_name=spec.value_name,
         )
     return copied
+
+
+def aggregate_flag_mask(values: pd.Series) -> pd.Series:
+    """Return normalized aggregate flags from mixed CSV/object values."""
+
+    def convert(value: object) -> bool:
+        if value is None or value is pd.NA or value is pd.NaT:
+            return False
+        if isinstance(value, float) and np.isnan(value):
+            return False
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            numeric = float(value)
+            if np.isfinite(numeric) and numeric in {0.0, 1.0}:
+                return bool(numeric)
+        text = str(value).strip().lower()
+        if text in _TRUE_FLAG_VALUES:
+            return True
+        if text in _FALSE_FLAG_VALUES:
+            return False
+        raise ValidationError(f"aggregate flags must be boolean-like: {value!r}")
+
+    return pd.Series([convert(value) for value in values], index=values.index, dtype=bool)
 
 
 def validate_country_year_panel(frame: pd.DataFrame) -> None:
@@ -135,7 +161,7 @@ def add_panel_ranks(frame: pd.DataFrame) -> pd.DataFrame:
     """Add per-year ranks for country rows, excluding aggregate geographies."""
     output = frame.copy()
     if "is_aggregate" in output.columns:
-        country_mask = ~output["is_aggregate"].fillna(False).astype(bool)
+        country_mask = ~aggregate_flag_mask(output["is_aggregate"])
     else:
         country_mask = pd.Series(True, index=output.index)
     output["interest_burden_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
