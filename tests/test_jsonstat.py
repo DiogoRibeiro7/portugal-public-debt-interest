@@ -41,6 +41,30 @@ def test_jsonstat_to_frame_rejects_non_integer_sparse_index() -> None:
         jsonstat_to_frame(payload)
 
 
+def test_jsonstat_to_frame_rejects_duplicate_category_positions() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["dimension"]["time"]["category"]["index"] = {
+        "2021": 0,
+        "2022": 0,
+        "2023": 2,
+    }
+
+    with pytest.raises(SourceError, match="positions must be unique"):
+        jsonstat_to_frame(payload)
+
+
+def test_jsonstat_to_frame_rejects_out_of_range_category_position() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["dimension"]["time"]["category"]["index"] = {
+        "2021": 0,
+        "2022": 1,
+        "2023": 99,
+    }
+
+    with pytest.raises(SourceError, match="position exceeds declared size"):
+        jsonstat_to_frame(payload)
+
+
 def test_eurostat_client_rejects_unexpected_dimension(tmp_path: Path) -> None:
     payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
     payload["dimension"]["geo"]["category"]["index"] = {"PT": 0, "ES": 1}

@@ -10,14 +10,29 @@ import pandas as pd
 from .exceptions import SourceError
 
 
-def _ordered_categories(category_index: object) -> list[str]:
+def _ordered_categories(category_index: object, declared_size: int) -> list[str]:
     """Return category codes in their declared JSON-stat order."""
     if isinstance(category_index, list):
         return [str(item) for item in category_index]
     if isinstance(category_index, dict):
+        positions: list[int] = []
+        pairs: list[tuple[str, int]] = []
+        for code, raw_position in category_index.items():
+            try:
+                position = int(raw_position)
+            except (TypeError, ValueError) as exc:
+                raise SourceError(
+                    "JSON-stat category index contains a non-integer position"
+                ) from exc
+            if position < 0 or position >= declared_size:
+                raise SourceError("JSON-stat category index position exceeds declared size")
+            positions.append(position)
+            pairs.append((str(code), position))
+        if len(set(positions)) != len(positions):
+            raise SourceError("JSON-stat category index positions must be unique")
         return [
             str(code)
-            for code, _ in sorted(category_index.items(), key=lambda item: int(item[1]))
+            for code, _ in sorted(pairs, key=lambda item: item[1])
         ]
     raise SourceError("unsupported JSON-stat category index")
 
@@ -64,7 +79,7 @@ def jsonstat_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
             index = dimension_meta[dimension]["category"]["index"]
         except (KeyError, TypeError) as exc:
             raise SourceError(f"missing category index for {dimension}") from exc
-        ordered = _ordered_categories(index)
+        ordered = _ordered_categories(index, int(size))
         if len(ordered) != int(size):
             raise SourceError(
                 f"JSON-stat dimension {dimension} declares size {size} "

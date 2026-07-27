@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: high
+- File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
+- Reproduction procedure: parse a JSON-stat response whose dict-style category indexes contain duplicate or out-of-range ordinal positions.
+- Risk: flat observation values can be mapped to the wrong category labels, corrupting annual source rows before downstream duplicate-year checks run.
+- Minimal correction: validate dict category index positions are integer, unique, and within the declared dimension size before ordering categories.
+- Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_duplicate_category_positions` and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_out_of_range_category_position`.
+
+## Previous confirmed finding
+
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
 - Reproduction procedure: use an AMECO archive where a configured selector row is present, but all requested-year cells for that selector are blank.
@@ -9,7 +18,7 @@
 - Minimal correction: after requested-year filtering, reject selector outputs whose values are all missing.
 - Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_selector_with_only_missing_values`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.scenarios`
