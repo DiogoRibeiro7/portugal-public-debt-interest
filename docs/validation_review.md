@@ -3,13 +3,31 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.validation.validate_dataset`
+- Reproduction procedure: call `validate_dataset` with a non-numeric `year` value while the `year` column is present.
+- Risk: validation can crash during later integer conversions instead of returning a structured failed check for malformed annual keys.
+- Minimal correction: validate and normalize numeric annual keys before duplicate, coverage, and accounting-basis checks.
+- Regression test: `tests/test_validation.py::test_validation_reports_non_numeric_year_values_without_crashing`.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.config.AmecoSection`
+- Reproduction procedure: configure two AMECO selectors with the same `output_name`, then load settings before extraction.
+- Risk: duplicate linked-source output columns are only rejected at extraction time, after source work has already started.
+- Minimal correction: reject duplicate AMECO `output_name` entries during configuration validation.
+- Regression test: `tests/test_config.py::test_settings_rejects_duplicate_ameco_output_names`.
+
+## Earlier confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
 - Reproduction procedure: call `calculate_metrics` with non-numeric or infinite values in `nominal_gdp_mio_eur` or `debt_mio_eur`.
 - Risk: malformed denominators can produce calculation errors, infinite values, or misleading fiscal ratios instead of failing clearly at the metric boundary.
 - Minimal correction: require present denominator values to be numeric, finite, and positive before any ratio or lagged-rate calculations.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_gdp` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_finite_debt`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`

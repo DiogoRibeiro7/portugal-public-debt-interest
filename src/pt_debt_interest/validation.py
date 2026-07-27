@@ -79,6 +79,26 @@ def validate_dataset(
             "checks": payload,
         }
 
+    try:
+        numeric_years = pd.to_numeric(frame["year"], errors="raise").astype(int)
+    except (TypeError, ValueError):
+        checks.append(
+            CheckResult(
+                name="year_values_numeric",
+                passed=False,
+                severity="error",
+                detail="Year values must be numeric.",
+                affected_years=[],
+            )
+        )
+        payload = [asdict(check) for check in checks]
+        return {
+            "passed": False,
+            "checks": payload,
+        }
+    frame = frame.copy()
+    frame["year"] = numeric_years
+
     duplicated = frame.loc[frame["year"].duplicated(keep=False), "year"].astype(int).tolist()
     checks.append(
         CheckResult(

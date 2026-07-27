@@ -104,3 +104,13 @@ def test_settings_rejects_duplicate_eurostat_value_names() -> None:
 
     with pytest.raises(ValidationError, match="value_name entries must be unique"):
         Settings.model_validate(payload)
+
+
+def test_settings_rejects_duplicate_ameco_output_names() -> None:
+    payload = load_settings("config/default.yaml").model_dump()
+    payload["ameco"]["selectors"]["interest_bn_eur"][
+        "output_name"
+    ] = "interest_pct_gdp_ameco"
+
+    with pytest.raises(ValidationError, match="output_name entries must be unique"):
+        Settings.model_validate(payload)

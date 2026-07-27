@@ -134,6 +134,18 @@ class AmecoSection(BaseModel):
     forecast_cutoff_year: int
     selectors: dict[str, AmecoSelector]
 
+    @field_validator("selectors")
+    @classmethod
+    def validate_unique_output_names(
+        cls,
+        values: dict[str, AmecoSelector],
+    ) -> dict[str, AmecoSelector]:
+        output_names = [selector.output_name for selector in values.values()]
+        duplicates = sorted({name for name in output_names if output_names.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"AMECO output_name entries must be unique: {duplicates}")
+        return values
+
 
 class RegimeBoundary(BaseModel):
     """Economic-regime annotation."""
