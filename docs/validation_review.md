@@ -12,11 +12,11 @@
 ## Previous confirmed finding
 
 - Severity: medium
-- File and symbol: `src/pt_debt_interest.reporting._panel_summary` and `src/pt_debt_interest.plotting.plot_european_comparison`
-- Reproduction procedure: generate optional comparator outputs with Portugal panel rows whose `year` value is fractional or non-finite.
-- Risk: comparator output can silently truncate fractional years in chart/report labels or crash on non-finite year conversion.
-- Minimal correction: keep only finite whole-number comparator years before selecting Portugal's latest panel year.
-- Regression test: `tests/test_outputs.py::test_generate_report_skips_fractional_panel_year` and `tests/test_outputs.py::test_generate_all_plots_skips_fractional_panel_year`.
+- File and symbol: `src/pt_debt_interest.sources.eurostat.EurostatClient.fetch_series`, `src/pt_debt_interest.reporting._panel_summary`, and `src/pt_debt_interest.plotting.plot_european_comparison`
+- Reproduction procedure: ingest a Eurostat response with fractional time labels, or generate optional comparator outputs with Portugal panel rows whose `year` value is fractional or non-finite.
+- Risk: annual source labels and comparator output years can be silently truncated in chart/report labels or crash on non-finite year conversion.
+- Minimal correction: reject non-annual Eurostat time labels and keep only finite whole-number comparator years before selecting Portugal's latest panel year.
+- Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_fractional_time_labels`, `tests/test_outputs.py::test_generate_report_skips_fractional_panel_year`, and `tests/test_outputs.py::test_generate_all_plots_skips_fractional_panel_year`.
 
 ## Earlier confirmed finding
 
