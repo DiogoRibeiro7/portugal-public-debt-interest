@@ -35,6 +35,30 @@ def test_canonical_table_adds_provenance_and_basis_break() -> None:
     assert result["year"].tolist() == [1994, 1995]
 
 
+def test_canonical_table_rejects_missing_year_values() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1994, None],
+            "source": ["AMECO", "Eurostat"],
+        }
+    )
+
+    with pytest.raises(SourceError, match="year values must not be missing"):
+        _canonicalise_annual_table(frame, 1995)
+
+
+def test_canonical_table_rejects_non_numeric_year_values() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1994, "not-a-year"],
+            "source": ["AMECO", "Eurostat"],
+        }
+    )
+
+    with pytest.raises(SourceError, match="year values must be numeric"):
+        _canonicalise_annual_table(frame, 1995)
+
+
 def test_add_eurostat_row_provenance_collapses_series_metadata() -> None:
     frame = pd.DataFrame(
         {

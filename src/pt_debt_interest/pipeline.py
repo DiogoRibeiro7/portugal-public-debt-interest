@@ -318,10 +318,18 @@ def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFr
 def _canonicalise_annual_table(frame: pd.DataFrame, main_start_year: int) -> pd.DataFrame:
     """Apply canonical annual-table ordering and provenance defaults."""
     canonical = frame.copy()
+    if "year" not in canonical.columns:
+        raise SourceError("annual table must include a year column")
+    if canonical["year"].isna().any():
+        raise SourceError("annual table year values must not be missing")
+    try:
+        canonical["year"] = pd.to_numeric(canonical["year"], errors="raise").astype(int)
+    except (TypeError, ValueError) as exc:
+        raise SourceError("annual table year values must be numeric") from exc
     for column in CANONICAL_PROVENANCE_COLUMNS:
         if column not in canonical.columns:
             canonical[column] = pd.NA
-    canonical["basis_break"] = canonical["year"].astype(int).eq(main_start_year)
+    canonical["basis_break"] = canonical["year"].eq(main_start_year)
     canonical = canonical.sort_values(["year", "source"]).reset_index(drop=True)
     return canonical
 

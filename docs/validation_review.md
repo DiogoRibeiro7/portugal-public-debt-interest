@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.pipeline._canonicalise_annual_table`
+- Reproduction procedure: pass a combined annual table with a missing or non-numeric `year` value into `_canonicalise_annual_table`.
+- Risk: canonicalization can crash with a raw conversion error before source-boundary validation, making malformed interim data harder to diagnose.
+- Minimal correction: require present, non-missing, numeric annual keys before sorting and basis-boundary marking.
+- Regression test: `tests/test_pipeline.py::test_canonical_table_rejects_missing_year_values` and `tests/test_pipeline.py::test_canonical_table_rejects_non_numeric_year_values`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.pipeline._build_ameco_pre1995`
 - Reproduction procedure: pass linked AMECO extension data where `debt_pct_gdp_ameco` is zero while nominal GDP can be derived.
 - Risk: the linked-series mapper can derive zero or negative debt stocks from invalid AMECO debt ratios, pushing a source-data error into later metric validation.
 - Minimal correction: reject non-positive AMECO debt-to-GDP ratios before deriving debt stock.
 - Regression test: `tests/test_pipeline.py::test_build_ameco_pre1995_rejects_non_positive_debt_ratio`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.pipeline._build_ameco_pre1995`
