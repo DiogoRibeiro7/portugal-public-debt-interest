@@ -77,6 +77,26 @@ def test_jsonstat_to_frame_rejects_duplicate_category_positions() -> None:
         jsonstat_to_frame(payload)
 
 
+def test_jsonstat_to_frame_rejects_duplicate_list_category_labels() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["dimension"]["time"]["category"]["index"] = ["2021", "2021", "2022"]
+
+    with pytest.raises(SourceError, match="category labels must be unique"):
+        jsonstat_to_frame(payload)
+
+
+def test_jsonstat_to_frame_rejects_duplicate_dict_category_labels() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["dimension"]["time"]["category"]["index"] = {
+        2021: 0,
+        "2021": 1,
+        "2022": 2,
+    }
+
+    with pytest.raises(SourceError, match="category labels must be unique"):
+        jsonstat_to_frame(payload)
+
+
 def test_jsonstat_to_frame_rejects_out_of_range_category_position() -> None:
     payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
     payload["dimension"]["time"]["category"]["index"] = {
@@ -314,7 +334,7 @@ def test_eurostat_client_rejects_duplicate_time_labels(tmp_path: Path) -> None:
 
     client._request = fake_request
 
-    with pytest.raises(SourceError, match="duplicate years"):
+    with pytest.raises(SourceError, match="category labels must be unique"):
         client.fetch_series("interest", spec, 2021, 2023)
 
 

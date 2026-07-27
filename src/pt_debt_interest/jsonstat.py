@@ -37,7 +37,10 @@ def _dimension_size(value: object, dimension: str) -> int:
 def _ordered_categories(category_index: object, declared_size: int) -> list[str]:
     """Return category codes in their declared JSON-stat order."""
     if isinstance(category_index, list):
-        return [str(item) for item in category_index]
+        ordered = [str(item) for item in category_index]
+        if len(set(ordered)) != len(ordered):
+            raise SourceError("JSON-stat category labels must be unique")
+        return ordered
     if isinstance(category_index, dict):
         positions: list[int] = []
         pairs: list[tuple[str, int]] = []
@@ -49,10 +52,13 @@ def _ordered_categories(category_index: object, declared_size: int) -> list[str]
             pairs.append((str(code), position))
         if len(set(positions)) != len(positions):
             raise SourceError("JSON-stat category index positions must be unique")
-        return [
+        ordered = [
             str(code)
             for code, _ in sorted(pairs, key=lambda item: item[1])
         ]
+        if len(set(ordered)) != len(ordered):
+            raise SourceError("JSON-stat category labels must be unique")
+        return ordered
     raise SourceError("unsupported JSON-stat category index")
 
 

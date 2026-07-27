@@ -3,6 +3,15 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.jsonstat._ordered_categories`
+- Reproduction procedure: parse a JSON-stat payload whose category index contains duplicate labels, for example time labels `["2021", "2021", "2022"]`.
+- Risk: duplicate category labels can produce ambiguous tidy rows even when declared dimension sizes and ordinal positions are valid.
+- Minimal correction: reject duplicate category labels after ordering list-style or dict-style category indexes.
+- Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_duplicate_list_category_labels` and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_duplicate_dict_category_labels`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.eurostat._validate_requested_dimensions`
 - Reproduction procedure: return a Eurostat JSON-stat response whose requested dimension, such as `geo`, has a fractional or non-finite `size` value while its category list still contains the requested value.
 - Risk: malformed response metadata can pass requested-dimension validation, be cached to raw files, and fail only later in generic JSON-stat parsing.
