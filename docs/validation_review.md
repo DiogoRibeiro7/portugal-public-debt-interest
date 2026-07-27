@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`
+- Reproduction procedure: use an AMECO archive where a configured selector row is present, but all requested-year cells for that selector are blank.
+- Risk: source extraction can report success for a configured selector that contributed no numeric observations in the analysis window.
+- Minimal correction: after requested-year filtering, reject selector outputs whose values are all missing.
+- Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_selector_with_only_missing_values`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.scenarios`
 - Reproduction procedure: call scenario helpers with `NaN` debt, refinancing shares, or nominal GDP path values.
 - Risk: non-finite inputs bypass ordinary range checks and produce `NaN` scenario outputs that look like calculated results.
 - Minimal correction: require finite numeric debt, refinancing-share, and nominal-GDP-path values before calculating scenario paths.
 - Regression test: `tests/test_scenarios.py::test_static_rate_shock_table_rejects_non_finite_debt`, `tests/test_scenarios.py::test_refinancing_pass_through_rejects_non_finite_shares`, and `tests/test_scenarios.py::test_refinancing_path_rejects_non_finite_gdp_path`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`

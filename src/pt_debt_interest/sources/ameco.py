@@ -243,6 +243,17 @@ class AmecoArchiveClient:
                 "configured AMECO selectors returned no observations in the requested "
                 f"year range {start_year}-{end_year}"
             )
+        empty_outputs = sorted(
+            selector.output_name
+            for selector in selectors.values()
+            if selector.output_name in merged.columns
+            and not bool(merged[selector.output_name].notna().any())
+        )
+        if empty_outputs:
+            raise SourceError(
+                "configured AMECO selectors returned only missing values in the "
+                f"requested year range {start_year}-{end_year}: {empty_outputs}"
+            )
         merged["observation_status_ameco"] = merged["year"].map(
             lambda year: "observed" if year <= forecast_cutoff_year else "forecast"
         )
