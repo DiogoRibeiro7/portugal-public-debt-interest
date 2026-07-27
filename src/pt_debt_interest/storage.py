@@ -68,11 +68,15 @@ def load_processed(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     processed_dir = root / settings.paths.processed
     csv_path = processed_dir / "portugal_debt_interest.csv"
     if csv_path.exists():
-        return pd.read_csv(csv_path)
+        frame = pd.read_csv(csv_path)
+        _validate_annual_keys(frame)
+        return frame
     sqlite_path = processed_dir / settings.storage.sqlite_filename
     if sqlite_path.exists():
         with sqlite3.connect(sqlite_path) as connection:
-            return pd.read_sql_query(
+            frame = pd.read_sql_query(
                 f'SELECT * FROM "{settings.storage.table_name}" ORDER BY year', connection
             )
+        _validate_annual_keys(frame)
+        return frame
     raise FileNotFoundError("processed dataset not found; run the build stage")

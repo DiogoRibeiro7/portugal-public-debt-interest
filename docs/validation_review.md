@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.storage.load_processed`
+- Reproduction procedure: load an existing processed CSV or SQLite table whose `year` column is missing, malformed, or duplicated.
+- Risk: corrupted persisted analytical datasets can be loaded and passed into reporting or plotting despite violating the annual-key contract enforced during save.
+- Minimal correction: run the same annual-key validation after loading processed CSV or SQLite data.
+- Regression test: `tests/test_storage.py::test_load_processed_rejects_duplicate_csv_years` and `tests/test_storage.py::test_load_processed_rejects_missing_sqlite_years`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.panel.aggregate_flag_mask`, `src/pt_debt_interest.reporting._panel_summary`, and `src/pt_debt_interest.plotting.plot_european_comparison`
 - Reproduction procedure: load comparator-panel rows from CSV where `is_aggregate` contains strings such as `"False"` and `"True"`.
 - Risk: string `"False"` values are truthy under direct boolean casting, causing non-aggregate countries to be excluded from ranks, plots, and report summaries.
 - Minimal correction: normalize aggregate flags from boolean-like strings and numeric flags before filtering comparator rows.
 - Regression test: `tests/test_panel.py::test_build_panel_metrics_parses_string_aggregate_flags`, `tests/test_outputs.py::test_generate_report_parses_string_aggregate_flags`, and `tests/test_outputs.py::test_generate_all_plots_parses_string_aggregate_flags`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.reporting._observed_headline_rows`
