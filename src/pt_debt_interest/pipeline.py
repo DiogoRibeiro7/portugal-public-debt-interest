@@ -287,6 +287,16 @@ def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFr
             extension["interest_mio_eur"] / extension["interest_pct_gdp_official"] * 100.0
         )
     if {"nominal_gdp_mio_eur", "debt_pct_gdp_official"}.issubset(extension.columns):
+        invalid_debt_ratio_years = extension.loc[
+            extension["debt_pct_gdp_official"].notna()
+            & extension["debt_pct_gdp_official"].le(0),
+            "year",
+        ].astype(int).tolist()
+        if invalid_debt_ratio_years:
+            raise SourceError(
+                "AMECO debt_pct_gdp_ameco must be positive for debt derivation: "
+                f"{invalid_debt_ratio_years}"
+            )
         extension["debt_mio_eur"] = (
             extension["nominal_gdp_mio_eur"] * extension["debt_pct_gdp_official"] / 100.0
         )
