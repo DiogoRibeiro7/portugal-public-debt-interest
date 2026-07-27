@@ -94,3 +94,13 @@ def test_settings_rejects_eurostat_main_geo_mismatch() -> None:
 
     with pytest.raises(ValidationError, match=r"project\.eurostat_geo"):
         Settings.model_validate(payload)
+
+
+def test_settings_rejects_duplicate_eurostat_value_names() -> None:
+    payload = load_settings("config/default.yaml").model_dump()
+    payload["eurostat"]["series"]["interest_pct_gdp_official"][
+        "value_name"
+    ] = "interest_mio_eur"
+
+    with pytest.raises(ValidationError, match="value_name entries must be unique"):
+        Settings.model_validate(payload)

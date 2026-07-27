@@ -105,6 +105,18 @@ class EurostatSection(BaseModel):
     base_url: str
     series: dict[str, EurostatSeriesSpec]
 
+    @field_validator("series")
+    @classmethod
+    def validate_unique_value_names(
+        cls,
+        values: dict[str, EurostatSeriesSpec],
+    ) -> dict[str, EurostatSeriesSpec]:
+        value_names = [spec.value_name for spec in values.values()]
+        duplicates = sorted({name for name in value_names if value_names.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"Eurostat value_name entries must be unique: {duplicates}")
+        return values
+
 
 class AmecoSelector(BaseModel):
     """Selector for one AMECO series embedded in the archive."""

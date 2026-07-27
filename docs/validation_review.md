@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.config.EurostatSection`
+- Reproduction procedure: configure two Eurostat series with the same `value_name`, then load settings before fetching.
+- Risk: source joins can produce suffixed or ambiguous output columns, causing required analytical inputs to disappear or point to the wrong source series.
+- Minimal correction: reject duplicate Eurostat `value_name` entries during configuration validation.
+- Regression test: `tests/test_config.py::test_settings_rejects_duplicate_eurostat_value_names`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.storage.save_processed`
 - Reproduction procedure: call `save_processed` with a processed frame containing a null `year` value.
 - Risk: processed outputs can persist rows without annual keys; SQLite unique indexes do not reject null keys, so downstream annual reads can become ambiguous.
 - Minimal correction: reject missing `year` values before writing CSV or SQLite outputs.
 - Regression test: `tests/test_storage.py::test_save_processed_rejects_missing_years_before_writing`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
