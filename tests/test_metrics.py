@@ -167,7 +167,37 @@ def test_calculate_metrics_rejects_invalid_real_growth_factor() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="real_gdp_growth_pct must be greater than -100"):
+    with pytest.raises(ValueError, match="real_gdp_growth_pct must be finite"):
+        calculate_metrics(frame)
+
+
+def test_calculate_metrics_rejects_non_numeric_real_growth() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": [220000.0],
+            "debt_mio_eur": [270000.0],
+            "real_gdp_growth_pct": ["not-a-number"],
+        }
+    )
+
+    with pytest.raises(ValueError, match="real_gdp_growth_pct must be finite"):
+        calculate_metrics(frame)
+
+
+def test_calculate_metrics_rejects_non_finite_real_growth() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": [220000.0],
+            "debt_mio_eur": [270000.0],
+            "real_gdp_growth_pct": [float("inf")],
+        }
+    )
+
+    with pytest.raises(ValueError, match="real_gdp_growth_pct must be finite"):
         calculate_metrics(frame)
 
 

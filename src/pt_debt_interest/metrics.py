@@ -78,10 +78,14 @@ def _validate_growth_factors(frame: pd.DataFrame) -> None:
     if "real_gdp_growth_pct" not in frame.columns:
         return
     values = pd.to_numeric(frame["real_gdp_growth_pct"], errors="coerce")
-    affected_years = frame.loc[values.notna() & values.le(-100), "year"].astype(int).tolist()
+    invalid = (frame["real_gdp_growth_pct"].notna() & values.isna()) | (
+        values.notna() & (~np.isfinite(values) | values.le(-100))
+    )
+    affected_years = frame.loc[invalid, "year"].astype(int).tolist()
     if affected_years:
         raise ValueError(
-            f"real_gdp_growth_pct must be greater than -100 for years: {affected_years}"
+            "real_gdp_growth_pct must be finite and greater than -100 "
+            f"for years: {affected_years}"
         )
 
 

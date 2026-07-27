@@ -3,6 +3,15 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.metrics._validate_growth_factors`
+- Reproduction procedure: call `calculate_metrics` with `real_gdp_growth_pct` set to a non-numeric or infinite value.
+- Risk: malformed optional real-growth inputs can be coerced into missing or invalid derived GDP-deflator values without a clear validation failure.
+- Minimal correction: require present real-growth values to be numeric, finite, and greater than `-100`.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_real_growth` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_finite_real_growth`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.metrics.assign_regime`
 - Reproduction procedure: call `calculate_metrics` directly with `regime_boundaries` containing malformed boundary years, such as `{"start": 2020.5, "end": 2022}`.
 - Risk: regime assignment can truncate malformed boundary years or raise low-level conversion errors outside the configuration-loading path.
