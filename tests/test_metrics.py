@@ -44,6 +44,36 @@ def test_calculate_metrics_rejects_decimal_debt_ratio() -> None:
         calculate_metrics(frame)
 
 
+def test_calculate_metrics_rejects_non_numeric_official_interest_ratio() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": [220000.0],
+            "debt_mio_eur": [270000.0],
+            "interest_pct_gdp_official": ["not-a-number"],
+        }
+    )
+
+    with pytest.raises(ValueError, match="interest_pct_gdp_official must be numeric"):
+        calculate_metrics(frame)
+
+
+def test_calculate_metrics_rejects_non_finite_overall_balance() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": [220000.0],
+            "debt_mio_eur": [270000.0],
+            "overall_balance_pct_gdp": [float("inf")],
+        }
+    )
+
+    with pytest.raises(ValueError, match="overall_balance_pct_gdp must be numeric"):
+        calculate_metrics(frame)
+
+
 def test_calculate_metrics_rejects_duplicate_years() -> None:
     frame = pd.DataFrame(
         {

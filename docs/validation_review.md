@@ -3,6 +3,24 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.scenarios`
+- Reproduction procedure: call static or refinancing scenario helpers with a non-finite or fractional `shock_bps` value.
+- Risk: malformed shock values can produce invalid scenario arithmetic or ambiguous basis-point labels while bypassing direct-call validation.
+- Minimal correction: require shock values to be numeric finite whole numbers before scenario calculations.
+- Regression test: `tests/test_scenarios.py::test_static_rate_shock_table_rejects_non_finite_shock`, `tests/test_scenarios.py::test_static_rate_shock_table_rejects_fractional_shock`, `tests/test_scenarios.py::test_refinancing_pass_through_rejects_non_finite_shock`, and `tests/test_scenarios.py::test_refinancing_path_rejects_fractional_shock`.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
+- Reproduction procedure: call `calculate_metrics` with malformed optional percentage columns such as non-numeric `interest_pct_gdp_official` or infinite `overall_balance_pct_gdp`.
+- Risk: optional percentage values can bypass validation and fail later during fill or arithmetic operations, producing unclear type errors or invalid derived fiscal balances.
+- Minimal correction: require present optional percentage inputs to be numeric and finite before metric calculation.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_official_interest_ratio` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_finite_overall_balance`.
+
+## Earlier confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.metrics._validate_growth_factors`
 - Reproduction procedure: call `calculate_metrics` with `real_gdp_growth_pct` set to a non-numeric or infinite value.
 - Risk: malformed optional real-growth inputs can be coerced into missing or invalid derived GDP-deflator values without a clear validation failure.

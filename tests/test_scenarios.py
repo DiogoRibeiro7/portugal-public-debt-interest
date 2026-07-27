@@ -25,6 +25,16 @@ def test_static_rate_shock_table_rejects_non_finite_debt() -> None:
         static_rate_shock_table(float("nan"), [100])
 
 
+def test_static_rate_shock_table_rejects_non_finite_shock() -> None:
+    with pytest.raises(ValueError, match="shock_bps must be a finite whole number"):
+        static_rate_shock_table(90.0, [float("nan")])
+
+
+def test_static_rate_shock_table_rejects_fractional_shock() -> None:
+    with pytest.raises(ValueError, match="shock_bps must be a finite whole number"):
+        static_rate_shock_table(90.0, [12.5])
+
+
 def test_refinancing_pass_through_supports_negative_shock() -> None:
     result = refinancing_pass_through(2.0, 100.0, -100, [0.25, 0.25])
 
@@ -47,6 +57,11 @@ def test_refinancing_pass_through_rejects_non_positive_debt() -> None:
         refinancing_pass_through(2.0, -100.0, 100, [0.2])
 
 
+def test_refinancing_pass_through_rejects_non_finite_shock() -> None:
+    with pytest.raises(ValueError, match="shock_bps must be a finite whole number"):
+        refinancing_pass_through(2.0, 100.0, float("inf"), [0.2])
+
+
 def test_refinancing_path_requires_matching_gdp_path() -> None:
     with pytest.raises(ValueError, match="same length"):
         refinancing_path_from_gdp(5000.0, 250000.0, 100, [0.2, 0.2], [250000.0])
@@ -60,3 +75,8 @@ def test_refinancing_path_rejects_non_positive_debt_stock() -> None:
 def test_refinancing_path_rejects_non_finite_gdp_path() -> None:
     with pytest.raises(ValueError, match="nominal GDP path must contain positive values"):
         refinancing_path_from_gdp(5000.0, 250000.0, 100, [0.2], [float("nan")])
+
+
+def test_refinancing_path_rejects_fractional_shock() -> None:
+    with pytest.raises(ValueError, match="shock_bps must be a finite whole number"):
+        refinancing_path_from_gdp(5000.0, 250000.0, 12.5, [0.2], [250000.0])

@@ -45,6 +45,24 @@ def _validate_percentage_scale(frame: pd.DataFrame) -> None:
         raise ValueError("debt_pct_gdp_official must be expressed as a percentage, not a ratio")
 
 
+def _validate_optional_percentages(frame: pd.DataFrame) -> None:
+    """Reject malformed optional percentage inputs before derived calculations."""
+    for column in [
+        "interest_pct_gdp_official",
+        "debt_pct_gdp_official",
+        "overall_balance_pct_gdp",
+    ]:
+        if column not in frame.columns:
+            continue
+        values = pd.to_numeric(frame[column], errors="coerce")
+        invalid = (frame[column].notna() & values.isna()) | (
+            values.notna() & ~np.isfinite(values)
+        )
+        affected_years = frame.loc[invalid, "year"].astype(int).tolist()
+        if affected_years:
+            raise ValueError(f"{column} must be numeric and finite for years: {affected_years}")
+
+
 def _validate_annual_input(frame: pd.DataFrame) -> None:
     """Reject inputs that make lagged annual calculations ambiguous."""
     if frame["year"].isna().any():
@@ -120,8 +138,9 @@ def calculate_metrics(
     if denominator not in {"average_debt", "previous_debt"}:
         raise ValueError("unsupported implicit-rate denominator")
 
-    _validate_percentage_scale(frame)
     _validate_annual_input(frame)
+    _validate_optional_percentages(frame)
+    _validate_percentage_scale(frame)
     _validate_positive_denominators(frame)
     _validate_growth_factors(frame)
 

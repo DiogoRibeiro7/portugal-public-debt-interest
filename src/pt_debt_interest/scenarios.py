@@ -21,6 +21,18 @@ def _validate_positive_debt(value: float, label: str) -> None:
         raise ValueError(f"{label} must be positive")
 
 
+def _validate_shock_bps(value: object) -> int:
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        raise ValueError("shock_bps must be numeric")
+    try:
+        numeric = float(value)
+    except ValueError as exc:
+        raise ValueError("shock_bps must be numeric") from exc
+    if not math.isfinite(numeric) or numeric % 1 != 0:
+        raise ValueError("shock_bps must be a finite whole number")
+    return int(numeric)
+
+
 def static_rate_shock_table(
     latest_debt_pct_gdp: float,
     shocks_bps: list[int],
@@ -33,7 +45,8 @@ def static_rate_shock_table(
     """
     _validate_positive_debt(latest_debt_pct_gdp, "latest_debt_pct_gdp")
     rows: list[dict[str, float | int | str]] = []
-    for shock in shocks_bps:
+    for raw_shock in shocks_bps:
+        shock = _validate_shock_bps(raw_shock)
         shock_rate = shock / 10_000.0
         rows.append(
             {
@@ -58,6 +71,7 @@ def refinancing_pass_through(
     """Simulate a gradual pass-through through annual refinancing shares."""
     _validate_positive_debt(debt_pct_gdp, "debt_pct_gdp")
     _validate_refinancing_shares(refinancing_shares)
+    shock_bps = _validate_shock_bps(shock_bps)
     cumulative_share = 0.0
     rows: list[dict[str, float | int | str]] = []
     full_effect = debt_pct_gdp * (shock_bps / 10_000.0)
@@ -90,6 +104,7 @@ def refinancing_path_from_gdp(
 ) -> pd.DataFrame:
     """Simulate refinancing pass-through with an explicit nominal GDP path."""
     _validate_positive_debt(debt_stock_mio_eur, "debt_stock_mio_eur")
+    shock_bps = _validate_shock_bps(shock_bps)
     if len(refinancing_shares) != len(nominal_gdp_path_mio_eur):
         raise ValueError("refinancing shares and GDP path must have the same length")
     if any(not math.isfinite(value) or value <= 0 for value in nominal_gdp_path_mio_eur):
