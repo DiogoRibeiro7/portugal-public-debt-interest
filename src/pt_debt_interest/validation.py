@@ -79,7 +79,7 @@ def validate_dataset(
             "checks": payload,
         }
 
-    duplicated = frame.loc[frame["year"].duplicated(), "year"].astype(int).tolist()
+    duplicated = frame.loc[frame["year"].duplicated(keep=False), "year"].astype(int).tolist()
     checks.append(
         CheckResult(
             name="unique_years",

@@ -80,6 +80,21 @@ def test_validation_reports_missing_accounting_basis_values() -> None:
     assert check["affected_years"] == [1996]
 
 
+def test_validation_reports_all_duplicate_year_rows() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1995, 1995, 1996],
+            "accounting_basis": ["ESA2010", "ESA2010", "ESA2010"],
+        }
+    )
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "unique_years")
+
+    assert result["passed"] is False
+    assert check["affected_years"] == [1995, 1995]
+
+
 def test_validation_fails_observed_forecast_collision() -> None:
     frame = pd.DataFrame(
         {

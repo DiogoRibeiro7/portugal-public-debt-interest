@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.validation.validate_dataset`
+- Reproduction procedure: call `validate_dataset` with two rows for the same `year`.
+- Risk: duplicate-year diagnostics only report later duplicate rows, obscuring the full set of annual records involved in the key collision.
+- Minimal correction: use `duplicated(keep=False)` when collecting affected duplicate years.
+- Regression test: `tests/test_validation.py::test_validation_reports_all_duplicate_year_rows`.
+
+## Previous confirmed finding
+
 - Severity: high
 - File and symbol: `src/pt_debt_interest.pipeline._canonicalise_annual_table`
 - Reproduction procedure: pass a combined annual table with a missing or non-numeric `year` value into `_canonicalise_annual_table`.
@@ -9,7 +18,7 @@
 - Minimal correction: require present, non-missing, numeric annual keys before sorting and basis-boundary marking.
 - Regression test: `tests/test_pipeline.py::test_canonical_table_rejects_missing_year_values` and `tests/test_pipeline.py::test_canonical_table_rejects_non_numeric_year_values`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.pipeline._build_ameco_pre1995`
