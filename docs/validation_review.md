@@ -3,13 +3,31 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.metrics.assign_regime`
+- Reproduction procedure: call `calculate_metrics` directly with `regime_boundaries` containing malformed boundary years, such as `{"start": 2020.5, "end": 2022}`.
+- Risk: regime assignment can truncate malformed boundary years or raise low-level conversion errors outside the configuration-loading path.
+- Minimal correction: validate direct-call regime boundary years as finite whole numbers before assigning labels.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_fractional_regime_boundary_years` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_regime_boundary_years`.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.config.HttpSection`, `src/pt_debt_interest.config.AnalysisSection`, and `src/pt_debt_interest.metrics.assign_regime`
+- Reproduction procedure: construct settings with `NaN` or infinite HTTP timeout/backoff values, validation tolerances, or default refinancing shares; or calculate metrics with non-numeric or fractional regime boundary years.
+- Risk: non-finite configuration values can pass load-time validation, while malformed regime boundaries can fail late or be truncated during annual regime assignment.
+- Minimal correction: require finite numeric configuration values and parse regime boundary years as whole numbers before assigning regimes.
+- Regression test: `tests/test_config.py::test_http_config_rejects_non_finite_retry_settings`, `tests/test_config.py::test_analysis_config_rejects_non_finite_tolerances`, `tests/test_config.py::test_analysis_config_rejects_non_finite_refinancing_shares`, `tests/test_metrics.py::test_calculate_metrics_rejects_fractional_regime_boundary_years`, and `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_regime_boundary_years`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.jsonstat._ordered_categories`
 - Reproduction procedure: parse a JSON-stat payload whose category index contains duplicate labels, for example time labels `["2021", "2021", "2022"]`.
 - Risk: duplicate category labels can produce ambiguous tidy rows even when declared dimension sizes and ordinal positions are valid.
 - Minimal correction: reject duplicate category labels after ordering list-style or dict-style category indexes.
 - Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_duplicate_list_category_labels` and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_duplicate_dict_category_labels`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.eurostat._validate_requested_dimensions`

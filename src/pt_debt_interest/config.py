@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Literal
 
@@ -72,7 +73,7 @@ class HttpSection(BaseModel):
     @field_validator("timeout_seconds")
     @classmethod
     def validate_timeout(cls, value: float) -> float:
-        if value <= 0:
+        if not math.isfinite(value) or value <= 0:
             raise ValueError("timeout_seconds must be positive")
         return value
 
@@ -86,7 +87,7 @@ class HttpSection(BaseModel):
     @field_validator("backoff_seconds")
     @classmethod
     def validate_backoff(cls, value: float) -> float:
-        if value < 0:
+        if not math.isfinite(value) or value < 0:
             raise ValueError("backoff_seconds must not be negative")
         return value
 
@@ -169,13 +170,15 @@ class AnalysisSection(BaseModel):
     @field_validator("ratio_tolerance_pp", "identity_tolerance_pp")
     @classmethod
     def validate_tolerances(cls, value: float) -> float:
-        if value < 0:
+        if not math.isfinite(value) or value < 0:
             raise ValueError("validation tolerances must not be negative")
         return value
 
     @field_validator("default_refinancing_shares")
     @classmethod
     def validate_refinancing_shares(cls, values: list[float]) -> list[float]:
+        if any(not math.isfinite(value) for value in values):
+            raise ValueError("refinancing shares must be finite")
         if any(value < 0 or value > 1 for value in values):
             raise ValueError("refinancing shares must lie between zero and one")
         if sum(values) > 1.0:

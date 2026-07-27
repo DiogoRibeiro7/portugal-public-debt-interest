@@ -15,12 +15,25 @@ def test_analysis_config_rejects_excess_refinancing_shares() -> None:
         AnalysisSection(default_refinancing_shares=[0.6, 0.5])
 
 
+def test_analysis_config_rejects_non_finite_refinancing_shares() -> None:
+    with pytest.raises(ValidationError, match="shares must be finite"):
+        AnalysisSection(default_refinancing_shares=[float("nan")])
+
+
 def test_analysis_config_rejects_negative_tolerances() -> None:
     with pytest.raises(ValidationError, match="tolerances"):
         AnalysisSection(ratio_tolerance_pp=-0.1)
 
     with pytest.raises(ValidationError, match="tolerances"):
         AnalysisSection(identity_tolerance_pp=-0.1)
+
+
+def test_analysis_config_rejects_non_finite_tolerances() -> None:
+    with pytest.raises(ValidationError, match="tolerances"):
+        AnalysisSection(ratio_tolerance_pp=float("inf"))
+
+    with pytest.raises(ValidationError, match="tolerances"):
+        AnalysisSection(identity_tolerance_pp=float("nan"))
 
 
 def test_analysis_config_rejects_overlapping_regimes() -> None:
@@ -86,6 +99,14 @@ def test_http_config_rejects_invalid_retry_settings() -> None:
 
     with pytest.raises(ValidationError, match="backoff_seconds"):
         HttpSection(backoff_seconds=-1)
+
+
+def test_http_config_rejects_non_finite_retry_settings() -> None:
+    with pytest.raises(ValidationError, match="timeout_seconds"):
+        HttpSection(timeout_seconds=float("inf"))
+
+    with pytest.raises(ValidationError, match="backoff_seconds"):
+        HttpSection(backoff_seconds=float("nan"))
 
 
 def test_settings_rejects_eurostat_main_geo_mismatch() -> None:

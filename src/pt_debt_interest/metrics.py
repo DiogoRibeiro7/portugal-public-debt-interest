@@ -16,9 +16,24 @@ REQUIRED_BASE_COLUMNS = {
 def assign_regime(year: int, boundaries: list[dict[str, object]]) -> str | None:
     """Return the configured regime label for a year."""
     for boundary in boundaries:
-        if int(str(boundary["start"])) <= year <= int(str(boundary["end"])):
+        start = _regime_boundary_year(boundary["start"], "start")
+        end = _regime_boundary_year(boundary["end"], "end")
+        if start <= year <= end:
             return str(boundary["label"])
     return None
+
+
+def _regime_boundary_year(value: object, label: str) -> int:
+    """Parse a regime boundary year without truncating malformed values."""
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        raise ValueError(f"regime boundary {label} year must be numeric")
+    try:
+        numeric = float(value)
+    except ValueError as exc:
+        raise ValueError(f"regime boundary {label} year must be numeric") from exc
+    if not np.isfinite(numeric) or numeric % 1 != 0:
+        raise ValueError(f"regime boundary {label} year must be a whole number")
+    return int(numeric)
 
 
 def _validate_percentage_scale(frame: pd.DataFrame) -> None:
