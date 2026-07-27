@@ -3,13 +3,31 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.storage._validate_annual_keys`
+- Reproduction procedure: call `save_processed` with a processed frame whose `year` column contains a non-numeric value.
+- Risk: persistence can raise a low-level conversion error while checking annual keys instead of rejecting malformed output with the project validation exception before any files are written.
+- Minimal correction: coerce persisted annual keys to numeric values before duplicate detection and raise `ValidationError` for malformed years.
+- Regression test: `tests/test_storage.py::test_save_processed_rejects_non_numeric_years_before_writing`.
+
+## Previous confirmed finding
+
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.panel.validate_country_year_panel`
+- Reproduction procedure: pass a comparator panel row whose `geo` key is an empty or whitespace-only string.
+- Risk: blank geography identifiers pass key validation and can then appear as legitimate rows in missingness summaries and rank calculations.
+- Minimal correction: reject blank geography keys before duplicate detection.
+- Regression test: `tests/test_panel.py::test_validate_country_year_panel_rejects_blank_geographies`.
+
+## Earlier confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.reporting._panel_summary` and `src/pt_debt_interest.plotting.plot_european_comparison`
 - Reproduction procedure: generate outputs with comparator-panel rows whose `year` value is non-numeric.
 - Risk: optional European-comparison output can crash report or plot generation instead of being skipped as unavailable panel context.
 - Minimal correction: coerce comparator-panel years to numeric values and drop malformed rows before selecting Portugal's latest comparator year.
 - Regression test: `tests/test_outputs.py::test_generate_report_skips_malformed_panel_year` and `tests/test_outputs.py::test_generate_all_plots_skips_malformed_panel_year`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`

@@ -16,9 +16,11 @@ def _validate_annual_keys(frame: pd.DataFrame) -> None:
         raise ValidationError("processed dataset must include a year column")
     if frame["year"].isna().any():
         raise ValidationError("processed dataset year values must not be missing")
-    duplicate_years = (
-        frame.loc[frame["year"].duplicated(keep=False), "year"].dropna().astype(int).tolist()
-    )
+    try:
+        years = pd.to_numeric(frame["year"], errors="raise").astype(int)
+    except (TypeError, ValueError) as exc:
+        raise ValidationError("processed dataset year values must be numeric") from exc
+    duplicate_years = years.loc[years.duplicated(keep=False)].tolist()
     if duplicate_years:
         raise ValidationError(f"processed dataset contains duplicate years: {duplicate_years}")
 

@@ -70,6 +70,10 @@ def validate_country_year_panel(frame: pd.DataFrame) -> None:
     if null_keys.any():
         keys = frame.loc[null_keys, key_columns].to_dict(orient="records")
         raise ValidationError(f"panel contains missing country-year keys: {keys}")
+    blank_geo = frame["geo"].astype(str).str.strip().eq("")
+    if blank_geo.any():
+        keys = frame.loc[blank_geo, key_columns].to_dict(orient="records")
+        raise ValidationError(f"panel contains blank geography keys: {keys}")
     duplicated = frame.duplicated(subset=key_columns, keep=False)
     if duplicated.any():
         keys = frame.loc[duplicated, key_columns].to_dict(orient="records")
