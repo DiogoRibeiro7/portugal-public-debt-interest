@@ -46,6 +46,18 @@ def _category_values(payload: dict[str, Any], dimension: str) -> set[str]:
     raise SourceError(f"Eurostat dimension {dimension} has unsupported category index")
 
 
+def _dimension_size(value: object, dataset: str, dimension: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        raise SourceError(f"Eurostat {dataset} returned invalid size for {dimension}")
+    try:
+        numeric = float(value)
+    except ValueError as exc:
+        raise SourceError(f"Eurostat {dataset} returned invalid size for {dimension}") from exc
+    if not np.isfinite(numeric) or numeric % 1 != 0 or numeric < 0:
+        raise SourceError(f"Eurostat {dataset} returned invalid size for {dimension}")
+    return int(numeric)
+
+
 def _validate_requested_dimensions(
     payload: dict[str, Any],
     filters: dict[str, str],
@@ -68,7 +80,7 @@ def _validate_requested_dimensions(
             raise SourceError(
                 f"Eurostat {dataset} returned {dimension}={sorted(values)}; expected {expected}"
             )
-        if int(dimension_sizes[dimension]) != 1:
+        if _dimension_size(dimension_sizes[dimension], dataset, dimension) != 1:
             raise SourceError(f"Eurostat {dataset} returned multiple values for {dimension}")
 
 

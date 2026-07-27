@@ -171,6 +171,82 @@ def test_eurostat_client_rejects_id_size_mismatch(tmp_path: Path) -> None:
         client.fetch_series("interest", spec, 2021, 2023)
 
 
+def test_eurostat_client_rejects_fractional_requested_dimension_size(
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["size"][4] = 1.5
+    client = EurostatClient("https://example.invalid", HttpSection(), tmp_path)
+    spec = EurostatSeriesSpec(
+        dataset="gov_10a_main",
+        filters={
+            "freq": "A",
+            "unit": "MIO_EUR",
+            "sector": "S13",
+            "na_item": "D41PAY",
+            "geo": "PT",
+        },
+        value_name="interest_mio_eur",
+    )
+
+    def fake_request(dataset: str, params: list[tuple[str, str]]):
+        return type(
+            "Response",
+            (),
+            {
+                "payload": payload,
+                "content": json.dumps(payload).encode("utf-8"),
+                "url": "https://example.invalid",
+                "status_code": 200,
+            },
+        )()
+
+    client._request = fake_request
+
+    with pytest.raises(SourceError, match="invalid size for geo"):
+        client.fetch_series("interest", spec, 2021, 2023)
+
+    assert not list(tmp_path.glob("eurostat_interest_*.json"))
+
+
+def test_eurostat_client_rejects_non_finite_requested_dimension_size(
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["size"][4] = float("inf")
+    client = EurostatClient("https://example.invalid", HttpSection(), tmp_path)
+    spec = EurostatSeriesSpec(
+        dataset="gov_10a_main",
+        filters={
+            "freq": "A",
+            "unit": "MIO_EUR",
+            "sector": "S13",
+            "na_item": "D41PAY",
+            "geo": "PT",
+        },
+        value_name="interest_mio_eur",
+    )
+
+    def fake_request(dataset: str, params: list[tuple[str, str]]):
+        return type(
+            "Response",
+            (),
+            {
+                "payload": payload,
+                "content": json.dumps(payload).encode("utf-8"),
+                "url": "https://example.invalid",
+                "status_code": 200,
+            },
+        )()
+
+    client._request = fake_request
+
+    with pytest.raises(SourceError, match="invalid size for geo"):
+        client.fetch_series("interest", spec, 2021, 2023)
+
+    assert not list(tmp_path.glob("eurostat_interest_*.json"))
+
+
 def test_eurostat_client_returns_raw_provenance(tmp_path: Path) -> None:
     payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
     client = EurostatClient("https://example.invalid", HttpSection(), tmp_path)

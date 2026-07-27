@@ -3,6 +3,15 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.sources.eurostat._validate_requested_dimensions`
+- Reproduction procedure: return a Eurostat JSON-stat response whose requested dimension, such as `geo`, has a fractional or non-finite `size` value while its category list still contains the requested value.
+- Risk: malformed response metadata can pass requested-dimension validation, be cached to raw files, and fail only later in generic JSON-stat parsing.
+- Minimal correction: validate requested-dimension sizes as non-negative finite whole numbers before accepting the source response.
+- Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_fractional_requested_dimension_size` and `tests/test_jsonstat.py::test_eurostat_client_rejects_non_finite_requested_dimension_size`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
 - Reproduction procedure: parse a JSON-stat payload whose `size` entry is fractional or negative, such as `3.5`.
 - Risk: declared dimension sizes can be truncated or passed into coordinate calculations before validation, making malformed JSON-stat shapes harder to diagnose.
