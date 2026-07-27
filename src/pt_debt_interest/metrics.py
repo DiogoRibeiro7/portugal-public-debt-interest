@@ -32,6 +32,12 @@ def _validate_percentage_scale(frame: pd.DataFrame) -> None:
 
 def _validate_annual_input(frame: pd.DataFrame) -> None:
     """Reject inputs that make lagged annual calculations ambiguous."""
+    if frame["year"].isna().any():
+        raise ValueError("annual metrics require non-missing years")
+    try:
+        pd.to_numeric(frame["year"], errors="raise").astype(int)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("annual metrics require numeric years") from exc
     duplicate_years = (
         frame.loc[frame["year"].duplicated(keep=False), "year"].dropna().astype(int).tolist()
     )
