@@ -96,7 +96,21 @@ def test_calculate_metrics_rejects_non_positive_gdp() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="nominal_gdp_mio_eur must be positive"):
+    with pytest.raises(ValueError, match="nominal_gdp_mio_eur must be finite and positive"):
+        calculate_metrics(frame)
+
+
+def test_calculate_metrics_rejects_non_numeric_gdp() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": ["not-a-number"],
+            "debt_mio_eur": [270000.0],
+        }
+    )
+
+    with pytest.raises(ValueError, match="nominal_gdp_mio_eur must be finite and positive"):
         calculate_metrics(frame)
 
 
@@ -110,7 +124,21 @@ def test_calculate_metrics_rejects_non_positive_debt() -> None:
         }
     )
 
-    with pytest.raises(ValueError, match="debt_mio_eur must be positive"):
+    with pytest.raises(ValueError, match="debt_mio_eur must be finite and positive"):
+        calculate_metrics(frame)
+
+
+def test_calculate_metrics_rejects_non_finite_debt() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021],
+            "interest_mio_eur": [5000.0],
+            "nominal_gdp_mio_eur": [220000.0],
+            "debt_mio_eur": [float("inf")],
+        }
+    )
+
+    with pytest.raises(ValueError, match="debt_mio_eur must be finite and positive"):
         calculate_metrics(frame)
 
 

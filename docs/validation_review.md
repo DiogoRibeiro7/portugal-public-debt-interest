@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: high
+- File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
+- Reproduction procedure: call `calculate_metrics` with non-numeric or infinite values in `nominal_gdp_mio_eur` or `debt_mio_eur`.
+- Risk: malformed denominators can produce calculation errors, infinite values, or misleading fiscal ratios instead of failing clearly at the metric boundary.
+- Minimal correction: require present denominator values to be numeric, finite, and positive before any ratio or lagged-rate calculations.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_gdp` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_finite_debt`.
+
+## Previous confirmed finding
+
+- Severity: high
 - File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
 - Reproduction procedure: parse a JSON-stat response whose dict-style category indexes contain duplicate or out-of-range ordinal positions.
 - Risk: flat observation values can be mapped to the wrong category labels, corrupting annual source rows before downstream duplicate-year checks run.
 - Minimal correction: validate dict category index positions are integer, unique, and within the declared dimension size before ordering categories.
 - Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_duplicate_category_positions` and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_out_of_range_category_position`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient.extract`

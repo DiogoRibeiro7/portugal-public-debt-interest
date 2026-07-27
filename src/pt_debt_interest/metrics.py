@@ -49,9 +49,12 @@ def _validate_positive_denominators(frame: pd.DataFrame) -> None:
     """Reject non-positive values used as metric denominators."""
     for column in ["nominal_gdp_mio_eur", "debt_mio_eur"]:
         values = pd.to_numeric(frame[column], errors="coerce")
-        affected_years = frame.loc[values.notna() & values.le(0), "year"].astype(int).tolist()
+        invalid = (frame[column].notna() & values.isna()) | (
+            values.notna() & (~np.isfinite(values) | values.le(0))
+        )
+        affected_years = frame.loc[invalid, "year"].astype(int).tolist()
         if affected_years:
-            raise ValueError(f"{column} must be positive for years: {affected_years}")
+            raise ValueError(f"{column} must be finite and positive for years: {affected_years}")
 
 
 def _validate_growth_factors(frame: pd.DataFrame) -> None:
