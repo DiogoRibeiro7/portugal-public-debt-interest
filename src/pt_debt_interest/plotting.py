@@ -202,14 +202,16 @@ def plot_european_comparison(
         panel = panel.loc[panel["observation_status"] == "observed"]
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
+    panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.dropna(subset=["interest_pct_gdp"])
+    panel = panel.dropna(subset=["year_numeric"])
     if panel.empty:
         return None
-    portugal_years = panel.loc[panel["geo"].astype(str).eq("PT"), "year"]
+    portugal_years = panel.loc[panel["geo"].astype(str).eq("PT"), "year_numeric"]
     if portugal_years.empty:
         return None
     latest_year = int(portugal_years.max())
-    latest = panel.loc[panel["year"].eq(latest_year)].copy()
+    latest = panel.loc[panel["year_numeric"].eq(latest_year)].copy()
     if latest.empty:
         return None
     latest["label"] = latest.get("geo_name", latest["geo"]).fillna(latest["geo"])

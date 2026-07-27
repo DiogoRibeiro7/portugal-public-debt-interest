@@ -152,16 +152,18 @@ def _panel_summary(panel_frame: pd.DataFrame | None) -> dict[str, int | None]:
         panel = panel.loc[panel["observation_status"] == "observed"]
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~panel["is_aggregate"].fillna(False).astype(bool)]
+    panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.dropna(subset=["interest_pct_gdp"])
+    panel = panel.dropna(subset=["year_numeric"])
     if panel.empty or "PT" not in set(panel["geo"].astype(str)):
         return {
             "panel_latest_year": None,
             "portugal_interest_rank": None,
             "comparator_count": None,
         }
-    portugal_years = panel.loc[panel["geo"].astype(str).eq("PT"), "year"]
+    portugal_years = panel.loc[panel["geo"].astype(str).eq("PT"), "year_numeric"]
     latest_year = int(portugal_years.max())
-    latest = panel.loc[panel["year"].eq(latest_year)].copy()
+    latest = panel.loc[panel["year_numeric"].eq(latest_year)].copy()
     if "PT" not in set(latest["geo"].astype(str)):
         return {
             "panel_latest_year": None,

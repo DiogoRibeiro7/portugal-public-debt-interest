@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.reporting._panel_summary` and `src/pt_debt_interest.plotting.plot_european_comparison`
+- Reproduction procedure: generate outputs with comparator-panel rows whose `year` value is non-numeric.
+- Risk: optional European-comparison output can crash report or plot generation instead of being skipped as unavailable panel context.
+- Minimal correction: coerce comparator-panel years to numeric values and drop malformed rows before selecting Portugal's latest comparator year.
+- Regression test: `tests/test_outputs.py::test_generate_report_skips_malformed_panel_year` and `tests/test_outputs.py::test_generate_all_plots_skips_malformed_panel_year`.
+
+## Previous confirmed finding
+
 - Severity: high
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`
 - Reproduction procedure: call `validate_dataset` with a non-numeric `year` value while the `year` column is present.
@@ -9,7 +18,7 @@
 - Minimal correction: validate and normalize numeric annual keys before duplicate, coverage, and accounting-basis checks.
 - Regression test: `tests/test_validation.py::test_validation_reports_non_numeric_year_values_without_crashing`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.config.AmecoSection`
