@@ -3,11 +3,11 @@
 ## Confirmed finding
 
 - Severity: medium
-- File and symbol: `src/pt_debt_interest.sources.eurostat.EurostatClient.fetch_series`
-- Reproduction procedure: return a JSON-stat payload with a fractional time label such as `2021.5`.
-- Risk: source parsing can truncate malformed time labels to integer years before duplicate detection and provenance persistence.
-- Minimal correction: require Eurostat time labels to be finite whole-year values before converting them to integer years.
-- Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_fractional_time_labels`.
+- File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient._parse_code`
+- Reproduction procedure: parse an AMECO series code with an unexpected extra dotted segment, such as `PRT.1.0.319.5.0.UYIG`, while configured selectors match by positional unit and variable codes.
+- Risk: malformed AMECO codes can shift the parsed unit position and allow the wrong source row to be extracted as a valid linked series.
+- Minimal correction: require the expected six-part AMECO code shape and finite whole-number unit codes before selector matching.
+- Regression test: `tests/test_ameco.py::test_ameco_archive_extract_rejects_non_finite_unit_code`, `tests/test_ameco.py::test_ameco_code_parser_rejects_non_finite_unit_code`, and `tests/test_ameco.py::test_ameco_code_parser_rejects_extra_segments`.
 
 ## Previous confirmed finding
 

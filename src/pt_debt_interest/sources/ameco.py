@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
+import numpy as np
 import pandas as pd
 
 from ..config import AmecoSelector, HttpSection
@@ -126,14 +127,17 @@ class AmecoArchiveClient:
     def _parse_code(code: str) -> tuple[str, int, str] | None:
         """Extract country, unit, and variable from an AMECO series code."""
         parts = str(code).strip().split(".")
-        if len(parts) < 6:
+        if len(parts) != 6:
             return None
         country = parts[0]
         variable = parts[-1]
         try:
-            unit_code = int(float(parts[-3]))
+            numeric_unit = float(parts[-3])
         except ValueError:
             return None
+        if not np.isfinite(numeric_unit) or numeric_unit % 1 != 0:
+            return None
+        unit_code = int(numeric_unit)
         return country, unit_code, variable
 
     def extract(
