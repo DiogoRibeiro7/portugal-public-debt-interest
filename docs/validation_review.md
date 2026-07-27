@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.scenarios`
+- Reproduction procedure: call scenario helpers with `NaN` debt, refinancing shares, or nominal GDP path values.
+- Risk: non-finite inputs bypass ordinary range checks and produce `NaN` scenario outputs that look like calculated results.
+- Minimal correction: require finite numeric debt, refinancing-share, and nominal-GDP-path values before calculating scenario paths.
+- Regression test: `tests/test_scenarios.py::test_static_rate_shock_table_rejects_non_finite_debt`, `tests/test_scenarios.py::test_refinancing_pass_through_rejects_non_finite_shares`, and `tests/test_scenarios.py::test_refinancing_path_rejects_non_finite_gdp_path`.
+
+## Previous confirmed finding
+
 - Severity: high
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
 - Reproduction procedure: call `calculate_metrics` directly with a missing or non-numeric `year` value.
@@ -9,7 +18,7 @@
 - Minimal correction: require non-missing, numeric annual keys before duplicate-year validation and metric calculation.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_missing_years` and `tests/test_metrics.py::test_calculate_metrics_rejects_non_numeric_years`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.validation.validate_dataset`

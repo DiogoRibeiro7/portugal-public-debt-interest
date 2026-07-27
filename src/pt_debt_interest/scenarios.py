@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import math
+
 import pandas as pd
 
 
 def _validate_refinancing_shares(refinancing_shares: list[float]) -> None:
+    if any(not math.isfinite(share) for share in refinancing_shares):
+        raise ValueError("refinancing shares must be finite")
     if any(share < 0 or share > 1 for share in refinancing_shares):
         raise ValueError("refinancing shares must lie between zero and one")
     if sum(refinancing_shares) > 1.0:
@@ -13,7 +17,7 @@ def _validate_refinancing_shares(refinancing_shares: list[float]) -> None:
 
 
 def _validate_positive_debt(value: float, label: str) -> None:
-    if value <= 0:
+    if not math.isfinite(value) or value <= 0:
         raise ValueError(f"{label} must be positive")
 
 
@@ -88,7 +92,7 @@ def refinancing_path_from_gdp(
     _validate_positive_debt(debt_stock_mio_eur, "debt_stock_mio_eur")
     if len(refinancing_shares) != len(nominal_gdp_path_mio_eur):
         raise ValueError("refinancing shares and GDP path must have the same length")
-    if any(value <= 0 for value in nominal_gdp_path_mio_eur):
+    if any(not math.isfinite(value) or value <= 0 for value in nominal_gdp_path_mio_eur):
         raise ValueError("nominal GDP path must contain positive values")
     _validate_refinancing_shares(refinancing_shares)
 
