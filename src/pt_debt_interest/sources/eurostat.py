@@ -54,6 +54,8 @@ def _validate_requested_dimensions(
     sizes = payload.get("size")
     if not isinstance(dimensions, list) or not isinstance(sizes, list):
         raise SourceError(f"Eurostat {dataset} response is missing id or size")
+    if len(dimensions) != len(sizes):
+        raise SourceError(f"Eurostat {dataset} id and size lengths differ")
     dimension_sizes = dict(zip((str(item) for item in dimensions), sizes, strict=True))
     for dimension, expected in filters.items():
         if dimension not in dimension_sizes:

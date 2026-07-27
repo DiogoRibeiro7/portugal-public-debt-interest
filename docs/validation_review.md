@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: medium
+- File and symbol: `src/pt_debt_interest.sources.eurostat._validate_requested_dimensions`
+- Reproduction procedure: return a Eurostat JSON-stat response whose `id` and `size` arrays have different lengths.
+- Risk: source validation can raise a raw `ValueError` before the client reports a structured `SourceError`, making API schema changes harder to diagnose.
+- Minimal correction: explicitly reject Eurostat `id`/`size` length mismatches before building the dimension-size mapping.
+- Regression test: `tests/test_jsonstat.py::test_eurostat_client_rejects_id_size_mismatch`.
+
+## Previous confirmed finding
+
 - Severity: high
 - File and symbol: `src/pt_debt_interest.config.EurostatSection`
 - Reproduction procedure: configure two Eurostat series with the same `value_name`, then load settings before fetching.
@@ -9,7 +18,7 @@
 - Minimal correction: reject duplicate Eurostat `value_name` entries during configuration validation.
 - Regression test: `tests/test_config.py::test_settings_rejects_duplicate_eurostat_value_names`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: high
 - File and symbol: `src/pt_debt_interest.storage.save_processed`
