@@ -14,6 +14,8 @@ from .exceptions import ValidationError
 def _validate_annual_keys(frame: pd.DataFrame) -> None:
     if "year" not in frame.columns:
         raise ValidationError("processed dataset must include a year column")
+    if frame["year"].isna().any():
+        raise ValidationError("processed dataset year values must not be missing")
     duplicate_years = (
         frame.loc[frame["year"].duplicated(keep=False), "year"].dropna().astype(int).tolist()
     )

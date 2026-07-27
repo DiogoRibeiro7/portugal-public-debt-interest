@@ -2,6 +2,15 @@
 
 ## Confirmed finding
 
+- Severity: high
+- File and symbol: `src/pt_debt_interest.storage.save_processed`
+- Reproduction procedure: call `save_processed` with a processed frame containing a null `year` value.
+- Risk: processed outputs can persist rows without annual keys; SQLite unique indexes do not reject null keys, so downstream annual reads can become ambiguous.
+- Minimal correction: reject missing `year` values before writing CSV or SQLite outputs.
+- Regression test: `tests/test_storage.py::test_save_processed_rejects_missing_years_before_writing`.
+
+## Previous confirmed finding
+
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.metrics.calculate_metrics`
 - Reproduction procedure: call `calculate_metrics` with `real_gdp_growth_pct` equal to `-100` while nominal GDP growth is present.
@@ -9,7 +18,7 @@
 - Minimal correction: reject real GDP growth values less than or equal to `-100%` before factor-based GDP-deflator calculations.
 - Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_invalid_real_growth_factor`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.scenarios`
