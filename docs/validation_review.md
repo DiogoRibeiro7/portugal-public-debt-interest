@@ -3,13 +3,22 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: annual-key validation in `src/pt_debt_interest.metrics`, `src/pt_debt_interest.pipeline`, `src/pt_debt_interest.storage`, `src/pt_debt_interest.validation`, and `src/pt_debt_interest.panel`
+- Reproduction procedure: pass fractional years, non-finite years, or equivalent duplicate years such as `2020` and `"2020"` through analytical, persistence, or comparator-panel validation paths.
+- Risk: fractional annual keys can be silently truncated to integers or equivalent annual keys can bypass duplicate checks, creating ambiguous year-level outputs.
+- Minimal correction: validate annual keys as finite numeric whole numbers before integer conversion, and run duplicate detection on normalized year keys where applicable.
+- Regression test: `tests/test_metrics.py::test_calculate_metrics_rejects_fractional_years`, `tests/test_pipeline.py::test_canonical_table_rejects_fractional_year_values`, `tests/test_storage.py::test_save_processed_rejects_fractional_years_before_writing`, `tests/test_validation.py::test_validation_reports_fractional_year_values`, `tests/test_validation.py::test_validation_reports_missing_core_values_with_malformed_year`, and `tests/test_panel.py::test_validate_country_year_panel_rejects_equivalent_duplicate_years`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.storage._validate_annual_keys`
 - Reproduction procedure: call `save_processed` with a processed frame whose `year` column contains a non-numeric value.
 - Risk: persistence can raise a low-level conversion error while checking annual keys instead of rejecting malformed output with the project validation exception before any files are written.
 - Minimal correction: coerce persisted annual keys to numeric values before duplicate detection and raise `ValidationError` for malformed years.
 - Regression test: `tests/test_storage.py::test_save_processed_rejects_non_numeric_years_before_writing`.
 
-## Previous confirmed finding
+## Earlier confirmed finding
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.panel.validate_country_year_panel`

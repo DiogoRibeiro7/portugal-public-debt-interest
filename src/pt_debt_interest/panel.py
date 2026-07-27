@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 
+import numpy as np
 import pandas as pd
 
 from .config import EurostatSeriesSpec
@@ -74,7 +75,18 @@ def validate_country_year_panel(frame: pd.DataFrame) -> None:
     if blank_geo.any():
         keys = frame.loc[blank_geo, key_columns].to_dict(orient="records")
         raise ValidationError(f"panel contains blank geography keys: {keys}")
-    duplicated = frame.duplicated(subset=key_columns, keep=False)
+    try:
+        numeric_years = pd.to_numeric(frame["year"], errors="raise")
+    except (TypeError, ValueError) as exc:
+        raise ValidationError("panel year keys must be numeric") from exc
+    invalid_years = (~np.isfinite(numeric_years)) | numeric_years.mod(1).ne(0)
+    if invalid_years.any():
+        keys = frame.loc[invalid_years, key_columns].to_dict(orient="records")
+        raise ValidationError(f"panel year keys must be whole numbers: {keys}")
+
+    key_frame = frame[key_columns].copy()
+    key_frame["year"] = numeric_years.astype(int)
+    duplicated = key_frame.duplicated(subset=key_columns, keep=False)
     if duplicated.any():
         keys = frame.loc[duplicated, key_columns].to_dict(orient="records")
         raise ValidationError(f"duplicate country-year keys in panel: {keys}")

@@ -96,6 +96,38 @@ def test_validation_reports_non_numeric_year_values_without_crashing() -> None:
     assert check["severity"] == "error"
 
 
+def test_validation_reports_fractional_year_values() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1995, 1996.5],
+            "accounting_basis": ["ESA2010", "ESA2010"],
+        }
+    )
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "year_values_integral")
+
+    assert result["passed"] is False
+    assert check["passed"] is False
+    assert check["severity"] == "error"
+
+
+def test_validation_reports_missing_core_values_with_malformed_year() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": ["not-a-year"],
+            "accounting_basis": [None],
+        }
+    )
+
+    result = validate_dataset(frame, 1995, 1996, 0.15, 0.05)
+    check = next(item for item in result["checks"] if item["name"] == "core_values_present")
+
+    assert result["passed"] is False
+    assert check["passed"] is False
+    assert check["affected_years"] == []
+
+
 def test_validation_reports_all_duplicate_year_rows() -> None:
     frame = pd.DataFrame(
         {

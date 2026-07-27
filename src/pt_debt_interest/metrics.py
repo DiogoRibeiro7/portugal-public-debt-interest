@@ -35,12 +35,13 @@ def _validate_annual_input(frame: pd.DataFrame) -> None:
     if frame["year"].isna().any():
         raise ValueError("annual metrics require non-missing years")
     try:
-        pd.to_numeric(frame["year"], errors="raise").astype(int)
+        numeric_years = pd.to_numeric(frame["year"], errors="raise")
     except (TypeError, ValueError) as exc:
         raise ValueError("annual metrics require numeric years") from exc
-    duplicate_years = (
-        frame.loc[frame["year"].duplicated(keep=False), "year"].dropna().astype(int).tolist()
-    )
+    if ((~np.isfinite(numeric_years)) | numeric_years.mod(1).ne(0)).any():
+        raise ValueError("annual metrics require whole-number years")
+    years = numeric_years.astype(int)
+    duplicate_years = years.loc[years.duplicated(keep=False)].tolist()
     if duplicate_years:
         raise ValueError(f"annual metrics require unique years: {duplicate_years}")
 

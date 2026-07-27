@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from .config import EurostatSeriesSpec, Settings
@@ -323,9 +324,12 @@ def _canonicalise_annual_table(frame: pd.DataFrame, main_start_year: int) -> pd.
     if canonical["year"].isna().any():
         raise SourceError("annual table year values must not be missing")
     try:
-        canonical["year"] = pd.to_numeric(canonical["year"], errors="raise").astype(int)
+        numeric_years = pd.to_numeric(canonical["year"], errors="raise")
     except (TypeError, ValueError) as exc:
         raise SourceError("annual table year values must be numeric") from exc
+    if ((~np.isfinite(numeric_years)) | numeric_years.mod(1).ne(0)).any():
+        raise SourceError("annual table year values must be whole numbers")
+    canonical["year"] = numeric_years.astype(int)
     for column in CANONICAL_PROVENANCE_COLUMNS:
         if column not in canonical.columns:
             canonical[column] = pd.NA

@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from .config import Settings
@@ -17,9 +18,12 @@ def _validate_annual_keys(frame: pd.DataFrame) -> None:
     if frame["year"].isna().any():
         raise ValidationError("processed dataset year values must not be missing")
     try:
-        years = pd.to_numeric(frame["year"], errors="raise").astype(int)
+        numeric_years = pd.to_numeric(frame["year"], errors="raise")
     except (TypeError, ValueError) as exc:
         raise ValidationError("processed dataset year values must be numeric") from exc
+    if ((~np.isfinite(numeric_years)) | numeric_years.mod(1).ne(0)).any():
+        raise ValidationError("processed dataset year values must be whole numbers")
+    years = numeric_years.astype(int)
     duplicate_years = years.loc[years.duplicated(keep=False)].tolist()
     if duplicate_years:
         raise ValidationError(f"processed dataset contains duplicate years: {duplicate_years}")

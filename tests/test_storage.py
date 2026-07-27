@@ -55,3 +55,18 @@ def test_save_processed_rejects_non_numeric_years_before_writing(
     assert not (
         tmp_path / settings.paths.processed / settings.storage.sqlite_filename
     ).exists()
+
+
+def test_save_processed_rejects_fractional_years_before_writing(
+    tmp_path: Path,
+) -> None:
+    settings = load_settings("config/default.yaml")
+    frame = pd.DataFrame({"year": [2024, 2024.5], "value": [1.0, 2.0]})
+
+    with pytest.raises(ValidationError, match="year values must be whole numbers"):
+        save_processed(frame, settings, tmp_path)
+
+    assert not (tmp_path / settings.paths.processed / "portugal_debt_interest.csv").exists()
+    assert not (
+        tmp_path / settings.paths.processed / settings.storage.sqlite_filename
+    ).exists()

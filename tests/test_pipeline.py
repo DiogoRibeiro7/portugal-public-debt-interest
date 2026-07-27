@@ -59,6 +59,18 @@ def test_canonical_table_rejects_non_numeric_year_values() -> None:
         _canonicalise_annual_table(frame, 1995)
 
 
+def test_canonical_table_rejects_fractional_year_values() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1994, 1994.5],
+            "source": ["AMECO", "Eurostat"],
+        }
+    )
+
+    with pytest.raises(SourceError, match="year values must be whole numbers"):
+        _canonicalise_annual_table(frame, 1995)
+
+
 def test_add_eurostat_row_provenance_collapses_series_metadata() -> None:
     frame = pd.DataFrame(
         {

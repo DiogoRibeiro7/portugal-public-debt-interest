@@ -56,6 +56,27 @@ def test_validate_country_year_panel_rejects_blank_geographies() -> None:
         validate_country_year_panel(frame)
 
 
+def test_validate_country_year_panel_rejects_non_numeric_years() -> None:
+    frame = pd.DataFrame({"geo": ["PT", "ES"], "year": [2020, "not-a-year"]})
+
+    with pytest.raises(ValidationError, match="year keys must be numeric"):
+        validate_country_year_panel(frame)
+
+
+def test_validate_country_year_panel_rejects_fractional_years() -> None:
+    frame = pd.DataFrame({"geo": ["PT", "ES"], "year": [2020, 2020.5]})
+
+    with pytest.raises(ValidationError, match="year keys must be whole numbers"):
+        validate_country_year_panel(frame)
+
+
+def test_validate_country_year_panel_rejects_equivalent_duplicate_years() -> None:
+    frame = pd.DataFrame({"geo": ["PT", "PT"], "year": [2020, "2020"]})
+
+    with pytest.raises(ValidationError, match="duplicate country-year"):
+        validate_country_year_panel(frame)
+
+
 def test_panel_missingness_reports_missing_columns() -> None:
     frame = pd.DataFrame({"geo": ["PT", "PT"], "year": [2020, 2021], "value": [1.0, None]})
 

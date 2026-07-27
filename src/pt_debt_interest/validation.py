@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 PROVENANCE_COLUMNS = [
@@ -61,7 +62,9 @@ def validate_dataset(
         frame[CORE_COLUMNS].isna().any(axis=1),
         "year",
     ].dropna()
-    affected_key_years = missing_key_values.astype(int).tolist()
+    affected_key_years = (
+        pd.to_numeric(missing_key_values, errors="coerce").dropna().astype(int).tolist()
+    )
     checks.append(
         CheckResult(
             name="core_values_present",
@@ -80,7 +83,7 @@ def validate_dataset(
         }
 
     try:
-        numeric_years = pd.to_numeric(frame["year"], errors="raise").astype(int)
+        numeric_years = pd.to_numeric(frame["year"], errors="raise")
     except (TypeError, ValueError):
         checks.append(
             CheckResult(
@@ -96,6 +99,22 @@ def validate_dataset(
             "passed": False,
             "checks": payload,
         }
+    if ((~np.isfinite(numeric_years)) | numeric_years.mod(1).ne(0)).any():
+        checks.append(
+            CheckResult(
+                name="year_values_integral",
+                passed=False,
+                severity="error",
+                detail="Year values must be whole numbers.",
+                affected_years=[],
+            )
+        )
+        payload = [asdict(check) for check in checks]
+        return {
+            "passed": False,
+            "checks": payload,
+        }
+    numeric_years = numeric_years.astype(int)
     frame = frame.copy()
     frame["year"] = numeric_years
 
