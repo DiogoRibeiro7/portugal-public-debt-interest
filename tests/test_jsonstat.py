@@ -25,6 +25,22 @@ def test_jsonstat_to_frame_rejects_dimension_size_mismatch() -> None:
         jsonstat_to_frame(payload)
 
 
+def test_jsonstat_to_frame_rejects_fractional_dimension_size() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["size"][-1] = 3.5
+
+    with pytest.raises(SourceError, match="dimension time has invalid size"):
+        jsonstat_to_frame(payload)
+
+
+def test_jsonstat_to_frame_rejects_negative_dimension_size() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["size"][-1] = -1
+
+    with pytest.raises(SourceError, match="dimension time has invalid size"):
+        jsonstat_to_frame(payload)
+
+
 def test_jsonstat_to_frame_rejects_out_of_range_sparse_index() -> None:
     payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
     payload["value"]["99"] = 1.0

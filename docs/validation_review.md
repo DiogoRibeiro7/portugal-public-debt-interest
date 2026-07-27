@@ -3,6 +3,15 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.jsonstat.jsonstat_to_frame`
+- Reproduction procedure: parse a JSON-stat payload whose `size` entry is fractional or negative, such as `3.5`.
+- Risk: declared dimension sizes can be truncated or passed into coordinate calculations before validation, making malformed JSON-stat shapes harder to diagnose.
+- Minimal correction: validate dimension sizes as non-negative finite whole numbers before category ordering and sparse-value coordinate mapping.
+- Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_fractional_dimension_size` and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_negative_dimension_size`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.jsonstat._ordered_categories` and `src/pt_debt_interest.jsonstat._indexed_values`
 - Reproduction procedure: parse a JSON-stat payload whose category positions or sparse observation indexes are numeric fractional values such as `1.5`.
 - Risk: parser index conversion can truncate fractional JSON numbers, mapping observations or categories to the wrong dimension positions.

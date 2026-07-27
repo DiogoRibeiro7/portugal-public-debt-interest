@@ -23,6 +23,17 @@ def _integer_index(value: object, label: str) -> int:
     return int(numeric)
 
 
+def _dimension_size(value: object, dimension: str) -> int:
+    """Parse a JSON-stat dimension size without truncating invalid values."""
+    try:
+        size = _integer_index(value, "dimension size")
+    except SourceError as exc:
+        raise SourceError(f"JSON-stat dimension {dimension} has invalid size") from exc
+    if size < 0:
+        raise SourceError(f"JSON-stat dimension {dimension} has invalid size")
+    return size
+
+
 def _ordered_categories(category_index: object, declared_size: int) -> list[str]:
     """Return category codes in their declared JSON-stat order."""
     if isinstance(category_index, list):
@@ -79,20 +90,23 @@ def jsonstat_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
         raise SourceError("JSON-stat id and size lengths differ")
 
     categories: list[list[str]] = []
+    parsed_sizes: list[int] = []
     for dimension, size in zip(dimensions, sizes, strict=True):
+        declared_size = _dimension_size(size, str(dimension))
         try:
             index = dimension_meta[dimension]["category"]["index"]
         except (KeyError, TypeError) as exc:
             raise SourceError(f"missing category index for {dimension}") from exc
-        ordered = _ordered_categories(index, int(size))
-        if len(ordered) != int(size):
+        ordered = _ordered_categories(index, declared_size)
+        if len(ordered) != declared_size:
             raise SourceError(
-                f"JSON-stat dimension {dimension} declares size {size} "
+                f"JSON-stat dimension {dimension} declares size {declared_size} "
                 f"but has {len(ordered)} categories"
             )
         categories.append(ordered)
+        parsed_sizes.append(declared_size)
 
-    total_size = int(np.prod(sizes, dtype=np.int64))
+    total_size = int(np.prod(parsed_sizes, dtype=np.int64))
     values_obj = payload.get("value", {})
     statuses_obj = payload.get("status", {})
     values = _indexed_values(values_obj, total_size, "value")
@@ -102,7 +116,7 @@ def jsonstat_to_frame(payload: dict[str, Any]) -> pd.DataFrame:
     for flat_index in range(total_size):
         if flat_index not in values and flat_index not in statuses:
             continue
-        coordinates = np.unravel_index(flat_index, tuple(int(size) for size in sizes))
+        coordinates = np.unravel_index(flat_index, tuple(parsed_sizes))
         row: dict[str, object] = {
             dimension: categories[position][coordinate]
             for position, (dimension, coordinate) in enumerate(
