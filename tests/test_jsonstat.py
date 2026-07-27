@@ -41,6 +41,14 @@ def test_jsonstat_to_frame_rejects_non_integer_sparse_index() -> None:
         jsonstat_to_frame(payload)
 
 
+def test_jsonstat_to_frame_rejects_fractional_sparse_index() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["status"] = {1.5: "p"}
+
+    with pytest.raises(SourceError, match="non-integer index"):
+        jsonstat_to_frame(payload)
+
+
 def test_jsonstat_to_frame_rejects_duplicate_category_positions() -> None:
     payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
     payload["dimension"]["time"]["category"]["index"] = {
@@ -62,6 +70,18 @@ def test_jsonstat_to_frame_rejects_out_of_range_category_position() -> None:
     }
 
     with pytest.raises(SourceError, match="position exceeds declared size"):
+        jsonstat_to_frame(payload)
+
+
+def test_jsonstat_to_frame_rejects_fractional_category_position() -> None:
+    payload = json.loads(Path("tests/fixtures/eurostat_interest.json").read_text())
+    payload["dimension"]["time"]["category"]["index"] = {
+        "2021": 0,
+        "2022": 1.5,
+        "2023": 2,
+    }
+
+    with pytest.raises(SourceError, match="non-integer index"):
         jsonstat_to_frame(payload)
 
 

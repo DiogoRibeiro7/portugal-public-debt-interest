@@ -10,6 +10,19 @@ import pandas as pd
 from .exceptions import SourceError
 
 
+def _integer_index(value: object, label: str) -> int:
+    """Parse a JSON-stat index value without truncating non-integer numbers."""
+    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+        raise SourceError(f"JSON-stat {label} contains a non-integer index")
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError) as exc:
+        raise SourceError(f"JSON-stat {label} contains a non-integer index") from exc
+    if not np.isfinite(numeric) or numeric % 1 != 0:
+        raise SourceError(f"JSON-stat {label} contains a non-integer index")
+    return int(numeric)
+
+
 def _ordered_categories(category_index: object, declared_size: int) -> list[str]:
     """Return category codes in their declared JSON-stat order."""
     if isinstance(category_index, list):
@@ -18,12 +31,7 @@ def _ordered_categories(category_index: object, declared_size: int) -> list[str]
         positions: list[int] = []
         pairs: list[tuple[str, int]] = []
         for code, raw_position in category_index.items():
-            try:
-                position = int(raw_position)
-            except (TypeError, ValueError) as exc:
-                raise SourceError(
-                    "JSON-stat category index contains a non-integer position"
-                ) from exc
+            position = _integer_index(raw_position, "category index")
             if position < 0 or position >= declared_size:
                 raise SourceError("JSON-stat category index position exceeds declared size")
             positions.append(position)
@@ -45,10 +53,7 @@ def _indexed_values(container: object, total_size: int, label: str) -> dict[int,
     if isinstance(container, dict):
         values: dict[int, object] = {}
         for raw_index, value in container.items():
-            try:
-                index = int(raw_index)
-            except (TypeError, ValueError) as exc:
-                raise SourceError(f"JSON-stat {label} contains a non-integer index") from exc
+            index = _integer_index(raw_index, label)
             if index < 0 or index >= total_size:
                 raise SourceError(f"JSON-stat {label} index {index} exceeds declared size")
             values[index] = value

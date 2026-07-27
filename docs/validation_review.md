@@ -3,6 +3,15 @@
 ## Confirmed finding
 
 - Severity: medium
+- File and symbol: `src/pt_debt_interest.jsonstat._ordered_categories` and `src/pt_debt_interest.jsonstat._indexed_values`
+- Reproduction procedure: parse a JSON-stat payload whose category positions or sparse observation indexes are numeric fractional values such as `1.5`.
+- Risk: parser index conversion can truncate fractional JSON numbers, mapping observations or categories to the wrong dimension positions.
+- Minimal correction: validate JSON-stat indexes as finite whole numbers before converting them to integers.
+- Regression test: `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_fractional_category_position` and `tests/test_jsonstat.py::test_jsonstat_to_frame_rejects_fractional_sparse_index`.
+
+## Previous confirmed finding
+
+- Severity: medium
 - File and symbol: `src/pt_debt_interest.sources.ameco.AmecoArchiveClient._parse_code`
 - Reproduction procedure: parse an AMECO series code with an unexpected extra dotted segment, such as `PRT.1.0.319.5.0.UYIG`, while configured selectors match by positional unit and variable codes.
 - Risk: malformed AMECO codes can shift the parsed unit position and allow the wrong source row to be extracted as a valid linked series.
