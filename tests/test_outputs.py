@@ -117,6 +117,7 @@ def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
     assert "10_interest_burden_decomposition.png" in names
+    assert "refinancing_scenarios.csv" in names
     assert "figures_manifest.csv" in names
 
 

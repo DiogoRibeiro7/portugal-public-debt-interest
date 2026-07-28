@@ -362,6 +362,20 @@ def plot_refinancing_shock_paths(
     return _save(fig, output_dir / "09_refinancing_shock_paths")
 
 
+def write_refinancing_scenarios(
+    scenario_frame: pd.DataFrame,
+    output_dir: Path,
+) -> Path | None:
+    """Write the scenario table used by the refinancing figure."""
+    if scenario_frame.empty:
+        return None
+    reports_dir = output_dir.parent
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    destination = reports_dir / "refinancing_scenarios.csv"
+    scenario_frame.to_csv(destination, index=False)
+    return destination
+
+
 def _write_manifest(paths: list[Path], frame: pd.DataFrame, output_dir: Path) -> Path:
     manifest = pd.DataFrame(
         {
@@ -400,5 +414,8 @@ def generate_all_plots(
         plot_interest_burden_decomposition(frame, output_dir),
     ]
     paths = [path for group in candidates if group is not None for path in group]
+    scenario_path = write_refinancing_scenarios(scenario_frame, output_dir)
+    if scenario_path is not None:
+        paths.append(scenario_path)
     paths.append(_write_manifest(paths, frame, output_dir))
     return paths

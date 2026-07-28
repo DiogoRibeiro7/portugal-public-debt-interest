@@ -90,6 +90,8 @@ The static full-pass-through effect is:
 
 This is a long-run arithmetic sensitivity, not an immediate annual forecast. A refinancing model applies the shock only to the configured share of debt repriced in each future year.
 
+The dynamic scenario table reports the annual refinancing share, cumulative repriced share, remaining unrepriced share, full-pass-through burden, realised incremental burden at each horizon, and the remaining gap to full pass-through. A zero-basis-point shock must produce zero incremental burden, and a refinancing schedule that sums to one must reconcile to the static full-pass-through result at the final horizon.
+
 ## Comparison design
 
 Cross-country comparisons use the same Eurostat datasets, sector, transaction, and units. Country-specific cash-accounting sources cannot be mixed into the harmonised panel without a separate reconciliation layer.

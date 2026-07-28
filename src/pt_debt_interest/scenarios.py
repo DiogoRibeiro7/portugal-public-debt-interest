@@ -78,6 +78,7 @@ def refinancing_pass_through(
     for horizon, share in enumerate(refinancing_shares, start=1):
         cumulative_share += share
         additional = full_effect * cumulative_share
+        remaining_share = 1.0 - cumulative_share
         rows.append(
             {
                 "scenario_kind": "dynamic_refinancing",
@@ -85,9 +86,13 @@ def refinancing_pass_through(
                 "baseline_debt_pct_gdp": debt_pct_gdp,
                 "shock_bps": shock_bps,
                 "horizon_year": horizon,
-                "refinancing_share": share,
-                "refinanced_share_cumulative": cumulative_share,
+                "annual_refinancing_share": share,
+                "repriced_share_cumulative": cumulative_share,
+                "remaining_unrepriced_share": remaining_share,
+                "additional_interest_pct_gdp_full_pass_through": full_effect,
                 "additional_interest_pct_gdp": additional,
+                "gap_to_full_pass_through_pct_gdp": full_effect - additional,
+                "pass_through_completion_pct": cumulative_share * 100.0,
                 "interest_pct_gdp_scenario": initial_interest_pct_gdp + additional,
                 "interpretation": "deterministic arithmetic simulation",
             }
@@ -127,8 +132,9 @@ def refinancing_path_from_gdp(
                 "scenario_kind": "dynamic_refinancing",
                 "horizon_year": horizon,
                 "shock_bps": shock_bps,
-                "refinancing_share": share,
-                "refinanced_share_cumulative": cumulative_share,
+                "annual_refinancing_share": share,
+                "repriced_share_cumulative": cumulative_share,
+                "remaining_unrepriced_share": 1.0 - cumulative_share,
                 "nominal_gdp_mio_eur": gdp_mio_eur,
                 "additional_interest_mio_eur": additional_interest_mio_eur,
                 "cumulative_additional_interest_mio_eur": (

@@ -40,6 +40,24 @@ def test_refinancing_pass_through_supports_negative_shock() -> None:
 
     assert result.loc[0, "additional_interest_pct_gdp"] == pytest.approx(-0.25)
     assert result.loc[1, "interest_pct_gdp_scenario"] == pytest.approx(1.5)
+    assert result.loc[1, "remaining_unrepriced_share"] == pytest.approx(0.5)
+
+
+def test_refinancing_pass_through_zero_shock_has_zero_increment() -> None:
+    result = refinancing_pass_through(2.0, 100.0, 0, [0.25, 0.25])
+
+    assert result["additional_interest_pct_gdp"].tolist() == [0.0, 0.0]
+    assert result["gap_to_full_pass_through_pct_gdp"].tolist() == [0.0, 0.0]
+
+
+def test_refinancing_pass_through_reconciles_full_pass_through() -> None:
+    result = refinancing_pass_through(2.0, 100.0, 100, [0.4, 0.6])
+
+    assert result.loc[1, "additional_interest_pct_gdp"] == pytest.approx(
+        result.loc[1, "additional_interest_pct_gdp_full_pass_through"]
+    )
+    assert result.loc[1, "gap_to_full_pass_through_pct_gdp"] == pytest.approx(0.0)
+    assert result.loc[1, "pass_through_completion_pct"] == pytest.approx(100.0)
 
 
 def test_refinancing_pass_through_rejects_invalid_shares() -> None:
