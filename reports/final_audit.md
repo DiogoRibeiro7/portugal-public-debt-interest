@@ -23,6 +23,7 @@ Commands completed successfully:
 - Non-aggregate 2025 comparator countries: 20.
 - Portugal 2025 interest-burden rank: 6.
 - Validation result: passed.
+- Figure generation emits PNG, SVG, and vector PDF outputs; the LaTeX report embeds the PDF figures.
 
 ## Methodological Corrections Verified
 
@@ -41,7 +42,7 @@ Commands completed successfully:
 ## Remaining Warnings
 
 - The validation report retains a warning for debt-ratio reconciliation in 1997 and 1998. This is a warning, not a failed check.
-- The LaTeX build reports minor overfull/underfull box warnings. The PDF builds successfully.
+- The LaTeX build reports minor overfull/underfull box warnings. The PDF builds successfully with vector figure inputs.
 - The current AMECO archive did not yield complete pre-1995 analytical rows under the configured selectors; the generated main table therefore begins in 1995.
 
 ## Exclusion Check

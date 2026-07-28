@@ -38,10 +38,12 @@ def _save(fig: Figure, path: Path) -> list[Path]:
     fig.tight_layout()
     png_path = path.with_suffix(".png")
     svg_path = path.with_suffix(".svg")
+    pdf_path = path.with_suffix(".pdf")
     fig.savefig(png_path, dpi=180, bbox_inches="tight")
     fig.savefig(svg_path, bbox_inches="tight")
+    fig.savefig(pdf_path, bbox_inches="tight")
     plt.close(fig)
-    return [png_path, svg_path]
+    return [png_path, svg_path, pdf_path]
 
 
 def _annotate_source(ax: Axes, frame: pd.DataFrame) -> None:

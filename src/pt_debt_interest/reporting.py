@@ -247,7 +247,11 @@ def generate_report(
         "government_revenue_mio_eur",
     )
     figure_names = (
-        ", ".join(path.name for path in figure_paths if path.suffix.lower() in {".png", ".svg"})
+        ", ".join(
+            path.name
+            for path in figure_paths
+            if path.suffix.lower() in {".png", ".svg", ".pdf"}
+        )
         if figure_paths
         else ""
     )

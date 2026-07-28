@@ -27,7 +27,7 @@
 - Validation report: `reports/validation.json`.
 - Source coverage: `reports/source_coverage.csv`.
 - Reproducibility metadata: `reports/reproducibility.json`.
-- Figures: `reports/figures/`.
+- Figures: `reports/figures/` as PNG, SVG, and PDF files.
 
 ## Final State
 

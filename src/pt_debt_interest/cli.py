@@ -44,7 +44,9 @@ def _existing_figure_paths(settings: Settings) -> list[Path]:
     if not settings.paths.figures.exists():
         return []
     return sorted(
-        path for path in settings.paths.figures.iterdir() if path.suffix.lower() in {".png", ".svg"}
+        path
+        for path in settings.paths.figures.iterdir()
+        if path.suffix.lower() in {".png", ".svg", ".pdf"}
     )
 
 
