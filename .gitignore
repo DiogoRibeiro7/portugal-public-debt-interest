@@ -19,3 +19,12 @@ reports/figures/*
 reports/summary.md
 reports/validation.json
 reports/eurostat_panel_missingness.csv
+
+# LaTeX build artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
