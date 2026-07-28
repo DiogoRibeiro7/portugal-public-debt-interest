@@ -1,0 +1,32 @@
+# Revision Summary
+
+## Completed Work
+
+- Added a methodological revision plan and committed it.
+- Replaced the ambiguous implicit-rate treatment with explicit rate definitions.
+- Corrected debt-dynamics accounting to use interest divided by previous-year debt.
+- Added exact interest-burden decomposition outputs, tests, figure generation, and documentation.
+- Enforced completeness rules for any linked historical extension.
+- Expanded the comparator panel to the euro-area country universe plus aggregate context.
+- Rebuilt the refinancing scenario outputs to expose assumptions and reconciliation fields.
+- Expanded source provenance and added source-coverage diagnostics.
+- Removed the correlation table from the paper and replaced it with accounting-based interpretation.
+- Flattened the main paper structure into standard article sections.
+- Updated the paper's euro-area comparison table and added the exact decomposition figure.
+- Added reproducibility metadata and strengthened CI with `pip check`.
+
+## Current Outputs
+
+- Final PDF: `paper/portugal_public_debt_interest_report.pdf`.
+- LaTeX source: `paper/portugal_public_debt_interest_report.tex`.
+- Annual table: `data/processed/portugal_debt_interest.csv`.
+- SQLite database: `data/processed/portugal_debt_interest.sqlite`.
+- Comparator panel: `data/processed/eurostat_panel_metrics.csv`.
+- Validation report: `reports/validation.json`.
+- Source coverage: `reports/source_coverage.csv`.
+- Reproducibility metadata: `reports/reproducibility.json`.
+- Figures: `reports/figures/`.
+
+## Final State
+
+The repository passes tests, linting, typing, full pipeline generation, and LaTeX compilation. The main empirical sample is now clearly the harmonised Eurostat ESA 2010 period, 1995-2025, with no incomplete pre-1995 rows represented as observations.

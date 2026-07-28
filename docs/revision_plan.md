@@ -37,7 +37,7 @@ Validation baseline:
 - Warning retained: `debt_ratio_reconciliation` fails for 1997 and 1998.
 - Current PDF hash after rebuild: `0EADDB2920536BD31DA2DC8709EFC3F36685274CA3F66910D1DE952DD09F03D8`.
 
-Important reproduction caveat: the prompt requested reproduction from a clean environment. The available session was the existing working environment, so the audit recorded the install step needed to make tests import the package. A future final audit should use a fresh virtual environment or container.
+Important reproduction caveat: the revision request required reproduction from a clean environment. The available session was the existing working environment, so the audit recorded the install step needed to make tests import the package. A future final audit should use a fresh virtual environment or container.
 
 ## Repository map
 
@@ -121,18 +121,18 @@ data/processed/eurostat_panel_metrics.csv
 
 ## Methodological defects
 
-1. **Ambiguous implicit-rate column.** `metrics.calculate_metrics` calculates both previous-debt and average-debt rates but writes the selected configured value into a generic `implicit_interest_rate_pct` column. With the default `analysis.implicit_rate_denominator: average_debt`, debt-dynamics outputs use the average-debt rate even though the discrete identity requires interest divided by previous-period debt.
+1. **Ambiguous implicit-rate column.** The earlier implementation calculated both previous-debt and average-debt rates but also wrote the selected configured value into a generic rate column. With the default average-debt denominator, debt-dynamics outputs used the average-debt rate even though the discrete identity requires interest divided by previous-period debt.
 
 Current formulas:
 
 ```text
 implicit_interest_rate_previous_debt_pct = I_t / D_{t-1} * 100
 implicit_interest_rate_average_debt_pct = I_t / ((D_{t-1} + D_t) / 2) * 100
-implicit_interest_rate_pct = selected configured rate
-interest_growth_differential_pct = implicit_interest_rate_pct - nominal_gdp_growth_pct
-debt_stabilising_primary_balance_pct_gdp =
-  ((implicit_interest_rate_pct - g_t) / (1 + g_t)) * d_{t-1}
-stock_flow_adjustment_pct_gdp =
+generic_effective_rate = selected configured rate
+interest_growth_differential = generic_effective_rate - nominal_gdp_growth
+former_stabilising_primary_balance =
+  ((generic_effective_rate - g_t) / (1 + g_t)) * d_{t-1}
+former_stock_flow_adjustment =
   observed_debt_change - automatic_debt_dynamics + primary_balance_pct_gdp
 ```
 
@@ -182,7 +182,7 @@ reconstructed_debt_ratio_change =
   - Add display-boundary percentage columns:
     - `effective_interest_rate_debt_dynamics_pct`
     - `implicit_interest_rate_average_debt_pct`
-  - Remove generic `implicit_interest_rate_pct` from new outputs.
+  - Remove the generic implicit-rate output from new outputs.
   - Preserve first-year missing values where lagged debt is unavailable.
 - `docs/interest_rate_definitions.md`
   - Document use cases and prohibited uses.
@@ -324,9 +324,9 @@ Add or update tests covering:
 
 ## Data migration plan
 
-Existing processed files must be regenerated. The current processed CSV and SQLite schema contain the generic `implicit_interest_rate_pct` column and debt-dynamics columns based on the configured denominator. The revision should:
+Existing processed files must be regenerated. The old processed CSV and SQLite schema contain a generic rate column and debt-dynamics columns based on the configured denominator. The revision should:
 
-- remove or deprecate `implicit_interest_rate_pct`;
+- remove or deprecate the generic rate column;
 - add explicit decimal and percentage display columns for both rate concepts;
 - add debt-dynamics contribution and reconciliation columns;
 - add interest-burden decomposition outputs;
@@ -338,14 +338,14 @@ Migration should be implemented as a full regeneration from raw/interim inputs, 
 
 ## Expected breaking changes
 
-- Column removal or deprecation: `implicit_interest_rate_pct`.
+- Column removal or deprecation: the generic implicit-rate column.
 - New rate columns:
   - `effective_interest_rate_debt_dynamics_decimal`
   - `effective_interest_rate_debt_dynamics_pct`
   - `implicit_interest_rate_average_debt_decimal`
   - `implicit_interest_rate_average_debt_pct`
 - Debt-dynamics column changes:
-  - old `debt_stabilising_primary_balance_pct_gdp` and `stock_flow_adjustment_pct_gdp` replaced or renamed with explicit contribution/reconciliation columns.
+  - old stabilising-primary-balance and stock-flow-adjustment columns replaced or renamed with explicit contribution/reconciliation columns.
 - Comparator panel expands from configured hand-picked geographies to eligible euro-area countries.
 - SQLite schema gains additional tables and columns.
 - Figure filenames may change or expand.

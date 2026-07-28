@@ -103,10 +103,10 @@ ameco:
       variable_code: UBLG
       unit_code: 319
       output_name: overall_balance_pct_gdp_ameco
-    implicit_interest_rate_pct:
+    ameco_average_debt_rate_pct:
       variable_code: AYIGD
       unit_code: 0
-      output_name: implicit_interest_rate_pct_ameco
+      output_name: ameco_average_debt_rate_pct
 
 analysis:
   ratio_tolerance_pp: 0.15

@@ -346,7 +346,7 @@
 
 - Severity: low
 - File and symbol: `src/pt_debt_interest.panel.add_panel_ranks`
-- Reproduction procedure: call `build_panel_metrics` with aggregate rows and inspect the `interest_burden_rank` or `implicit_rate_rank` dtype.
+- Reproduction procedure: call `build_panel_metrics` with aggregate rows and inspect the `interest_burden_rank` or `average_debt_rate_rank` dtype.
 - Risk: rank outputs can be stored as generic object columns, making downstream CSV/SQLite consumers and tests less predictable even though the semantic type is nullable integer rank.
 - Minimal correction: initialise rank columns as nullable `Int64` columns before assigning per-year ranks.
 - Regression test: `tests/test_panel.py::test_build_panel_metrics_adds_country_ranks`.
@@ -436,7 +436,7 @@
 
 - Severity: medium
 - File and symbol: `src/pt_debt_interest.reporting.generate_report`
-- Reproduction procedure: call `generate_report` with observed rows where `implicit_interest_rate_pct` is missing, or with that column absent.
+- Reproduction procedure: call `generate_report` with observed rows where `implicit_interest_rate_average_debt_pct` is missing, or with that column absent.
 - Risk: the generated report could render headline values such as `nan%` or fail with an uninformative column error, making missing mandatory report inputs look like analytical results.
 - Minimal correction: require the report input to include all headline columns and at least one observed row with complete headline metrics before rendering.
 - Regression test: `tests/test_outputs.py::test_generate_report_rejects_missing_required_columns` and `tests/test_outputs.py::test_generate_report_rejects_incomplete_headline_rows`.

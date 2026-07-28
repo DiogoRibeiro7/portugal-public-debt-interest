@@ -14,7 +14,7 @@ This project builds a transparent annual dataset for Portugal's public-debt inte
 - How has the burden changed relative to nominal GDP?
 - Was the decline driven by lower effective rates, a lower debt ratio, nominal growth, or inflation?
 - How quickly do market-rate changes pass through to the effective cost of the debt stock?
-- How does Portugal compare with Spain, Italy, Greece, Ireland, the euro area, and selected low-risk benchmarks?
+- How does Portugal compare with the euro-area country universe under harmonised Eurostat definitions?
 
 ## Main outputs
 
