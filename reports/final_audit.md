@@ -29,6 +29,7 @@ Commands completed successfully:
 - Main analytical paper tables are generated as tracked LaTeX fragments from processed outputs.
 - Recurring paper headline values are generated as LaTeX macros from processed outputs.
 - Citation metadata is available in `CITATION.cff`.
+- Dependency-resolution policy and regeneration commands are documented in `docs/reproducibility.md`.
 
 ## Methodological Corrections Verified
 

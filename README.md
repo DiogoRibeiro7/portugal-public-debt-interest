@@ -107,3 +107,6 @@ docs/        Methodology, source registry, and data dictionary
 4. Forecasts never silently replace observations.
 5. Pre-1995 linked data never silently overwrite the ESA 2010 series.
 6. Each build records reproducibility metadata and source coverage diagnostics.
+
+Dependency-resolution and live-data regeneration details are documented in
+`docs/reproducibility.md`.

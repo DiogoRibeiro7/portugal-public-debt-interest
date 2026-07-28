@@ -19,6 +19,7 @@
 - Replaced manually typed analytical paper tables with generated LaTeX fragments.
 - Replaced recurring manually typed headline values with generated LaTeX macros.
 - Added citation metadata for software reuse.
+- Documented the supported dependency resolver and live regeneration workflow.
 
 ## Current Outputs
 
@@ -34,6 +35,7 @@
 - LaTeX table fragments: `reports/tables/`.
 - Headline macro fragment: `reports/tables/paper_headlines.tex`.
 - Citation metadata: `CITATION.cff`.
+- Reproducibility guide: `docs/reproducibility.md`.
 
 ## Final State
 

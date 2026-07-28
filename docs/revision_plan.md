@@ -276,12 +276,12 @@ reconstructed_debt_ratio_change =
 
 ### Stage 12: reproducibility metadata
 
-Status note: citation metadata and README citation guidance are now present.
-The remaining reproducibility items are lock/resolver documentation and any
-CI expansion that requires cached analytical fixtures or LaTeX availability.
+Status note: citation metadata, README citation guidance, and resolver
+documentation are now present. The remaining reproducibility item is any CI
+expansion that requires cached analytical fixtures or LaTeX availability.
 
-- Add/commit lock file or clearly document the supported resolver.
-- Add replication metadata generation:
+- Completed: clearly document the supported resolver in `docs/reproducibility.md`.
+- Completed: add replication metadata generation:
   - project version;
   - Git commit;
   - dirty-tree status;
@@ -290,9 +290,9 @@ CI expansion that requires cached analytical fixtures or LaTeX availability.
   - lock/config/data/report checksums;
   - report build timestamp;
   - PDF checksum.
-- Add `CITATION.cff`.
-- Add changelog entry.
-- Update README.
+- Completed: add `CITATION.cff`.
+- Completed: add changelog entry.
+- Completed: update README.
 - Extend CI to build cached analytical outputs and compile LaTeX where available.
 
 ### Stage 13: final audit
