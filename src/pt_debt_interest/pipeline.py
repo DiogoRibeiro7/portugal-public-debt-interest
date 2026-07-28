@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import platform
+import subprocess
+from datetime import UTC, datetime
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 import numpy as np
@@ -76,6 +81,27 @@ def _raw_timestamp_from_name(path: Path) -> str:
 
 def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _package_version() -> str:
+    try:
+        return version("portugal-public-debt-interest")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def _git_value(root: Path, *args: str) -> str | None:
+    result = subprocess.run(
+        ["git", *args],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    value = result.stdout.strip()
+    return value or None
 
 
 def _add_eurostat_row_provenance(frame: pd.DataFrame) -> pd.DataFrame:
@@ -404,6 +430,32 @@ def write_source_coverage_report(
     return destination
 
 
+def write_reproducibility_metadata(
+    settings: Settings,
+    root: Path = Path("."),
+) -> Path:
+    """Write environment and configuration metadata for reproducible builds."""
+    reports_dir = root / settings.paths.reports
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    config_path = root / "config/default.yaml"
+    git_status = _git_value(root, "status", "--short", "--untracked-files=no")
+    payload = {
+        "generated_at_utc": datetime.now(UTC).isoformat(),
+        "package_version": _package_version(),
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "git_commit": _git_value(root, "rev-parse", "HEAD"),
+        "git_dirty_tracked_files": bool(git_status),
+        "config_path": str(config_path),
+        "config_sha256": _file_sha256(config_path) if config_path.exists() else None,
+        "storage_backend": settings.storage.backend,
+        "project": settings.project.model_dump(),
+    }
+    destination = reports_dir / "reproducibility.json"
+    destination.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
+    return destination
+
+
 def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     """Build the final annual table from available interim source files."""
     interim_dir = root / settings.paths.interim
@@ -436,4 +488,5 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     save_processed(analytical, settings, root)
     save_interest_decomposition(decomposition, settings, root)
     write_source_coverage_report(analytical, settings, root)
+    write_reproducibility_metadata(settings, root)
     return analytical

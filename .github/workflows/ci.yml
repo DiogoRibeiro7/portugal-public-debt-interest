@@ -22,3 +22,4 @@ jobs:
       - run: ruff check .
       - run: mypy src
       - run: pytest --cov=pt_debt_interest --cov-report=term-missing
+      - run: python -m pip check

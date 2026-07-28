@@ -5,6 +5,7 @@ import pandas as pd
 from pt_debt_interest.config import load_settings
 from pt_debt_interest.pipeline import (
     _add_eurostat_row_provenance,
+    write_reproducibility_metadata,
     write_source_coverage_report,
 )
 
@@ -49,3 +50,16 @@ def test_write_source_coverage_report_summarises_complete_rows(tmp_path: Path) -
 
     assert result.loc[0, "row_count"] == 2
     assert result.loc[0, "complete_core_rows"] == 1
+
+
+def test_write_reproducibility_metadata_records_config_hash(tmp_path: Path) -> None:
+    settings = load_settings("config/default.yaml")
+    config_dir = tmp_path / "config"
+    config_dir.mkdir()
+    (config_dir / "default.yaml").write_text("project: test\n", encoding="utf-8")
+
+    destination = write_reproducibility_metadata(settings, tmp_path)
+    content = destination.read_text(encoding="utf-8")
+
+    assert "config_sha256" in content
+    assert "python_version" in content

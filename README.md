@@ -24,6 +24,8 @@ This project builds a transparent annual dataset for Portugal's public-debt inte
 - `reports/figures/`: publication-ready charts.
 - `reports/summary.md`: automatically generated analytical summary.
 - `reports/validation.json`: data-quality and identity checks.
+- `reports/reproducibility.json`: build metadata, config hash, Python version,
+  package version, and git revision.
 
 ## Methodological boundary
 
@@ -97,3 +99,4 @@ docs/        Methodology, source registry, and data dictionary
 3. Official and calculated GDP ratios are both retained and reconciled.
 4. Forecasts never silently replace observations.
 5. Pre-1995 linked data never silently overwrite the ESA 2010 series.
+6. Each build records reproducibility metadata and source coverage diagnostics.
