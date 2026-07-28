@@ -22,6 +22,7 @@ This project builds a transparent annual dataset for Portugal's public-debt inte
 - `data/processed/portugal_debt_interest.sqlite`: optional SQL copy.
 - `data/processed/eurostat_panel_metrics.csv`: optional comparator-panel metrics.
 - `reports/figures/`: publication-ready charts as PNG, SVG, and PDF files.
+- `reports/tables/`: generated LaTeX table fragments used by the paper.
 - `reports/summary.md`: automatically generated analytical summary.
 - `reports/validation.json`: data-quality and identity checks.
 - `reports/reproducibility.json`: build metadata, config hash, Python version,
@@ -64,6 +65,7 @@ pt-debt build
 pt-debt validate
 pt-debt plot
 pt-debt report
+pt-debt tables
 ```
 
 When `data/processed/eurostat_panel_metrics.csv` exists, `pt-debt plot` and

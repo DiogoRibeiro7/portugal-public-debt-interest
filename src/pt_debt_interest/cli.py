@@ -9,6 +9,7 @@ import pandas as pd
 import typer
 
 from .config import Settings, load_settings
+from .latex_tables import generate_latex_tables
 from .pipeline import (
     build_dataset,
     build_eurostat_panel,
@@ -150,6 +151,22 @@ def report_command(config: Path = DEFAULT_CONFIG) -> None:
     typer.echo(destination)
 
 
+@app.command("tables")
+def tables_command(config: Path = DEFAULT_CONFIG) -> None:
+    """Generate LaTeX tables from processed analytical data."""
+    settings = _settings(config)
+    frame = load_processed(settings)
+    paths = generate_latex_tables(
+        frame,
+        settings.paths.reports / "tables",
+        settings.project.main_start_year,
+        settings.analysis.static_rate_shocks_bps,
+        panel_frame=_load_optional_panel_metrics(settings),
+    )
+    for path in paths:
+        typer.echo(path)
+
+
 @app.command("all")
 def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> None:
     """Run acquisition, build, validation, charts, and report."""
@@ -188,6 +205,13 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
         settings.analysis.static_rate_shocks_bps,
         panel_frame=_load_optional_panel_metrics(settings),
         figure_paths=figure_paths,
+    )
+    generate_latex_tables(
+        frame,
+        settings.paths.reports / "tables",
+        settings.project.main_start_year,
+        settings.analysis.static_rate_shocks_bps,
+        panel_frame=_load_optional_panel_metrics(settings),
     )
     if not result["passed"]:
         raise typer.Exit(code=1)

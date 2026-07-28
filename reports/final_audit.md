@@ -10,6 +10,7 @@ Commands completed successfully:
 - `ruff check .`: passed.
 - `mypy src`: passed.
 - `pt-debt all --config config/default.yaml`: completed.
+- `pt-debt tables --config config/default.yaml`: completed.
 - `latexmk -pdf -interaction=nonstopmode -halt-on-error portugal_public_debt_interest_report.tex`: completed.
 
 ## Data Checks
@@ -25,6 +26,7 @@ Commands completed successfully:
 - Validation result: passed.
 - Figure generation emits PNG, SVG, and vector PDF outputs; the LaTeX report embeds the PDF figures.
 - Debt/rate, expenditure, and revenue charts use stacked panels rather than mixed axes.
+- Main analytical paper tables are generated as tracked LaTeX fragments from processed outputs.
 
 ## Methodological Corrections Verified
 
@@ -38,6 +40,7 @@ Commands completed successfully:
 - Refinancing scenarios now expose full-pass-through, cumulative repricing, remaining unrepriced share, and pass-through gap columns.
 - Source provenance includes source database, source table or series, vintage, retrieval timestamp, and checksum fields where available.
 - Reproducibility metadata records package version, Python version, platform, git revision, config hash, and project settings.
+- The paper imports generated tables for summary statistics, regime averages, recent dynamics, European comparisons, static sensitivities, and the annual appendix table.
 - The main paper no longer uses the previous level-correlation table as evidence.
 
 ## Remaining Warnings

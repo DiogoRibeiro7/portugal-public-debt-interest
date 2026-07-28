@@ -16,6 +16,7 @@
 - Flattened the main paper structure into standard article sections.
 - Updated the paper's euro-area comparison table and added the exact decomposition figure.
 - Added reproducibility metadata and strengthened CI with `pip check`.
+- Replaced manually typed analytical paper tables with generated LaTeX fragments.
 
 ## Current Outputs
 
@@ -28,6 +29,7 @@
 - Source coverage: `reports/source_coverage.csv`.
 - Reproducibility metadata: `reports/reproducibility.json`.
 - Figures: `reports/figures/` as PNG, SVG, and PDF files.
+- LaTeX table fragments: `reports/tables/`.
 
 ## Final State
 
