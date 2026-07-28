@@ -133,6 +133,23 @@ def test_build_ameco_pre1995_rejects_non_positive_debt_ratio() -> None:
         _build_ameco_pre1995(frame, 1995)
 
 
+def test_build_ameco_pre1995_drops_incomplete_context_rows() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [1993, 1994],
+            "interest_bn_eur_ameco": [None, 5.0],
+            "interest_pct_gdp_ameco": [4.0, 5.0],
+            "debt_pct_gdp_ameco": [60.0, 70.0],
+            "overall_balance_pct_gdp_ameco": [-4.0, -3.0],
+        }
+    )
+
+    result = _build_ameco_pre1995(frame, 1995)
+
+    assert result["year"].tolist() == [1994]
+    assert result.loc[result["year"].eq(1994), "source"].iloc[0] == "AMECO"
+
+
 def test_fetch_available_panel_series_preserves_missing_series() -> None:
     class FakeClient:
         def fetch_series(
@@ -255,6 +272,7 @@ def test_build_dataset_writes_interest_decomposition(tmp_path: Path) -> None:
     result = build_dataset(settings, tmp_path)
 
     assert "rate_effect_pp" in result.columns
+    assert result["is_harmonised_main_sample"].tolist() == [True, True]
     assert (
         tmp_path
         / settings.paths.processed

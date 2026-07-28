@@ -56,4 +56,6 @@
 | `source_checksum_sha256` | hash | SHA-256 checksum of raw source payloads, joined when a row uses multiple series |
 | `source_flags` | category | Source observation flags or selected source codes |
 | `basis_break` | boolean | Marks the first authoritative ESA 2010 main-series year |
+| `is_harmonised_main_sample` | boolean | Marks rows in the authoritative ESA 2010 analysis sample |
+| `is_historical_extension` | boolean | Marks linked pre-main-sample observations retained only for historical context |
 | `regime` | category | Configured historical period |

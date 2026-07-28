@@ -52,7 +52,12 @@ interest divided by previous-year debt.
 ## Historical evolution
 
 - Main harmonised series: **{{ main_start }}-{{ latest_year }}**.
-- Extended linked series begins in **{{ first_year }}** when AMECO data are available.
+{% if historical_extension_start is not none -%}
+- Extended linked series begins in **{{ historical_extension_start }}** when AMECO
+  data are available.
+{% else -%}
+- No complete pre-{{ main_start }} linked observations are included in this generated dataset.
+{% endif %}
 - Highest observed interest burden in the generated dataset:
   **{{ peak_interest_ratio | round(2) }}% of GDP in {{ peak_interest_year }}**.
 
@@ -230,7 +235,11 @@ def generate_report(
     )
     rendered = REPORT_TEMPLATE.render(
         main_start=main_start_year,
-        first_year=int(frame["year"].min()),
+        historical_extension_start=(
+            int(frame.loc[frame["year"] < main_start_year, "year"].min())
+            if (frame["year"] < main_start_year).any()
+            else None
+        ),
         latest_year=int(latest["year"]),
         latest_status=str(latest["observation_status"]),
         latest_interest_bn=float(latest["interest_mio_eur"]) / 1_000.0,

@@ -32,9 +32,18 @@ CANONICAL_PROVENANCE_COLUMNS = [
     "retrieval_timestamp_utc",
     "source_flags",
     "basis_break",
+    "is_harmonised_main_sample",
+    "is_historical_extension",
 ]
 
 OPTIONAL_PANEL_VALUE_COLUMNS = {"ten_year_yield_pct"}
+AMECO_CORE_ANALYTICAL_COLUMNS = [
+    "interest_mio_eur",
+    "interest_pct_gdp_official",
+    "nominal_gdp_mio_eur",
+    "debt_mio_eur",
+    "debt_pct_gdp_official",
+]
 
 
 def _join_row_values(frame: pd.DataFrame, columns: list[str]) -> pd.Series:
@@ -302,6 +311,11 @@ def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFr
         extension["debt_mio_eur"] = (
             extension["nominal_gdp_mio_eur"] * extension["debt_pct_gdp_official"] / 100.0
         )
+    if not set(AMECO_CORE_ANALYTICAL_COLUMNS).issubset(extension.columns):
+        return extension.iloc[0:0].copy()
+    extension = extension.dropna(subset=AMECO_CORE_ANALYTICAL_COLUMNS, how="any")
+    if extension.empty:
+        return extension
     extension["source"] = "AMECO"
     extension["source_vintage"] = extension.get("source_vintage", pd.NA)
     extension["accounting_basis"] = extension.get(
@@ -335,6 +349,11 @@ def _canonicalise_annual_table(frame: pd.DataFrame, main_start_year: int) -> pd.
         if column not in canonical.columns:
             canonical[column] = pd.NA
     canonical["basis_break"] = canonical["year"].eq(main_start_year)
+    canonical["is_harmonised_main_sample"] = (
+        canonical["year"].ge(main_start_year)
+        & canonical["accounting_basis"].astype(str).eq("ESA2010")
+    )
+    canonical["is_historical_extension"] = canonical["year"].lt(main_start_year)
     canonical = canonical.sort_values(["year", "source"]).reset_index(drop=True)
     return canonical
 
