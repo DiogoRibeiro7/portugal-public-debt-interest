@@ -128,7 +128,7 @@ def _observed_headline_rows(frame: pd.DataFrame) -> pd.DataFrame:
     if missing:
         raise ValueError(f"report input is missing required columns: {sorted(missing)}")
     observed = frame.loc[frame["observation_status"] == "observed"].copy()
-    complete = observed.dropna(subset=HEADLINE_NUMERIC_COLUMNS)
+    complete = observed.dropna(subset=HEADLINE_NUMERIC_COLUMNS).copy()
     if complete.empty:
         raise ValueError("report input has no observed rows with complete headline metrics")
     try:
