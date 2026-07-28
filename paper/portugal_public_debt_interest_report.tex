@@ -214,71 +214,49 @@ reduce the near-term debt-ratio pressure from the existing stock.
 \subsection{Unit of Observation and Institutional Sector}
 
 The unit of observation is the calendar year. The institutional sector is
-general government, Eurostat sector \texttt{S13}. This sector choice is
-important because central-government cash measures can differ from
-general-government accrual-based national accounts. The paper therefore does
-not mix central-government budget execution with ESA general-government
-interest payable.
+general government as defined in the European national-accounts framework.
+This sector choice is important because central-government cash measures can
+differ from general-government accrual-based national accounts. The paper
+therefore does not mix central-government budget execution with ESA
+general-government interest payable.
 
-The main empirical sample is 1995--2025, the period in which the repository's
-authoritative Portugal series is built from Eurostat ESA 2010 concepts. The
-repository also preserves a linked AMECO extension for 1960--1994. The
+The main empirical sample is 1995--2025, the period in which the authoritative
+Portugal series is built from Eurostat ESA 2010 concepts. A linked AMECO
+extension is preserved for 1960--1994. The
 extension is useful for historical context, but it is not used to make claims
 about accounting-consistent changes across the 1995 boundary. The first ESA
 2010 main-series year is marked as a basis break.
 
-\subsection{Eurostat Source Tables}
+\subsection{Eurostat Evidence}
 
-The analysis uses the following Eurostat datasets \cite{eurostatgov}:
-\begin{itemize}
-  \item \texttt{gov\_10a\_main}: government revenue, expenditure, and main
-        aggregates; used for general-government interest payable
-        \texttt{D41PAY}, overall balance \texttt{B9}, million-euro values, and
-        percentage-of-GDP ratios.
-  \item \texttt{gov\_10dd\_edpt1}: government deficit, debt, and associated
-        data; used for Maastricht consolidated gross debt \texttt{GD}.
-  \item \texttt{nama\_10\_gdp}: GDP and main components; used for current-price
-        nominal GDP \texttt{B1GQ} and real GDP growth.
-  \item \texttt{irt\_lt\_mcby\_a}: long-term government bond yield, used as
-        the market-yield comparison series.
-\end{itemize}
+The core evidence is drawn from Eurostat government-finance statistics,
+government-debt statistics, national accounts, and the harmonised long-term
+government bond yield series \cite{eurostatgov}. These sources provide the
+four empirical objects required by the paper: interest payable, gross public
+debt, nominal and real GDP, and a market-yield benchmark. The analysis uses
+million-euro values when the level of the interest bill is the object of
+interest and percentage-of-GDP measures when the fiscal burden is the object of
+interest.
 
-The comparator panel uses the same concepts, sector filters, units, and
-geographies configured in the repository. Aggregate geographies, such as the
-euro area, are retained as context where available but excluded from country
-ranks.
+The European comparison is constructed under the same conceptual definitions:
+general government, annual frequency, harmonised national-accounts concepts,
+and comparable units. Aggregate geographies, such as the euro area, are
+retained as contextual information where available but excluded from country
+ranks. This design prevents the country comparison from being driven by
+inconsistent accounting definitions.
 
 \subsection{AMECO Historical Extension}
 
-AMECO is used for a linked pre-1995 extension \cite{ameco}. The repository records AMECO
-series codes, source members, observation status, and accounting-basis labels.
-The extension is labelled \texttt{linked\_ESA2010\_ESA95\_ESA79}. It cannot
-overwrite Eurostat rows. Forecast rows are retained where available but are
-excluded from historical descriptive statements unless explicitly stated.
+AMECO is used for a linked pre-1995 extension \cite{ameco}. The extension is
+kept separate from the Eurostat main sample and is explicitly labelled as a
+linked historical series across accounting regimes. It cannot overwrite
+Eurostat observations. Forecast observations are excluded from historical
+descriptive statements unless explicitly stated.
 
 This conservative treatment is appropriate because a long time series can
 create a false appearance of precision when accounting regimes change. The
 paper therefore uses the extension as context and the Eurostat ESA 2010 sample
 as the primary evidence base.
-
-\subsection{Generated Analytical Artifacts}
-
-The reproducible pipeline writes:
-\begin{itemize}
-  \item \texttt{data/processed/portugal\_debt\_interest.csv};
-  \item \texttt{data/processed/portugal\_debt\_interest.sqlite};
-  \item \texttt{data/processed/eurostat\_panel\_metrics.csv};
-  \item \texttt{reports/validation.json};
-  \item \texttt{reports/summary.md};
-  \item publication-oriented PNG and SVG figures in \texttt{reports/figures/}.
-\end{itemize}
-
-The repository deliberately excludes generated data and figure outputs from
-ordinary version control, except where an output is intentionally published as
-part of this paper. Raw source downloads include manifest metadata with
-retrieval timestamps, request information, HTTP status, payload size, and
-checksums. The processed rows also preserve joined source-vintage and checksum
-fields, making source revisions auditable.
 
 \section{Measurement}
 
@@ -291,10 +269,9 @@ The principal burden measure is:
   \label{eq:burden}
 \end{equation}
 where \(I_t\) is general-government interest payable and \(Y_t\) is nominal
-GDP. The processed dataset retains two versions of the ratio: the official
-Eurostat percentage-of-GDP measure and a calculated ratio from the million-euro
-interest and nominal GDP values. The preferred column uses the official ratio
-where present and a calculated fallback otherwise.
+GDP. The preferred empirical measure is Eurostat's official percentage-of-GDP
+ratio. A reconstructed ratio from the underlying million-euro values is used
+only as a reconciliation check and fallback.
 
 \subsection{Implicit Interest Rate}
 
@@ -305,9 +282,9 @@ The implicit interest rate is:
   \label{eq:implicit-rate}
 \end{equation}
 The denominator is the average of prior-year and current-year debt. This
-choice reduces mechanical distortion when year-end debt moves sharply. The
-pipeline also calculates a previous-year debt version, but this paper uses the
-configured average-debt measure unless otherwise stated.
+choice reduces mechanical distortion when year-end debt moves sharply. It also
+matches the paper's emphasis on the average cost of the outstanding stock
+rather than the marginal cost of new borrowing.
 
 \subsection{Primary Balance}
 
@@ -347,56 +324,27 @@ percentage points of GDP. This is a static sensitivity. It should not be
 interpreted as an immediate forecast because only a fraction of the debt stock
 is refinanced in a typical year.
 
-\section{Validation, Data Quality, and Reproducibility}
+\section{Validation and Data Quality}
 
 \subsection{Validation Results}
 
-The latest repository validation reports that all error-severity checks pass.
-One warning remains: the official and calculated debt ratios differ by more
-than the configured 0.15 percentage-point tolerance in 1997 and 1998. The
-warning is analytically plausible because early years around accounting-basis
-transitions and official ratio conventions can create small reconciliation
-differences. It is retained in the paper because a high-quality empirical
-project should report data warnings rather than hide them.
+The empirical series passed the project's data-validation checks. One warning
+remains: the official and reconstructed debt ratios differ by more than the
+configured tolerance in 1997 and 1998. The warning is analytically plausible
+because early years around accounting-basis transitions and official ratio
+conventions can create small reconciliation differences. It is retained in the
+paper because a high-quality empirical study should report data warnings
+rather than hide them.
 
 \subsection{Quality Controls}
 
-The repository contains checks at several boundaries:
-\begin{itemize}
-  \item source parsing checks for JSON-stat dimensional consistency, duplicate
-        annual labels, malformed sparse indexes, and requested-dimension
-        validity;
-  \item configuration checks for invalid year ranges, duplicated comparator
-        geographies, inconsistent source geographies, invalid tolerances, and
-        malformed refinancing shares;
-  \item analytical checks for duplicate annual keys, non-positive denominators,
-        non-finite growth values, and invalid scenario inputs;
-  \item persistence checks for malformed, missing, or duplicate years before
-        saving and after loading processed outputs;
-  \item output checks that reject incomplete headline rows and malformed
-        comparator years before generating reports or plots.
-\end{itemize}
-
-These controls matter because the empirical claims in this paper depend on
-annual-key integrity, denominator validity, and harmonised country-year
-comparisons. The validation architecture is therefore part of the research
-design, not a purely technical implementation detail.
-
-\subsection{Replication Procedure}
-
-The full local workflow is:
-\begin{verbatim}
-python -m pt_debt_interest.cli all --config config/default.yaml
-pytest
-ruff check .
-mypy src
-\end{verbatim}
-
-The latest verification before this paper reported 133 passing tests, a passing
-Ruff check, and a passing Mypy run. Continuous integration on GitHub was not a
-substantive code failure in the last observed run; the job was blocked by an
-external account billing or spending-limit condition before executing the test
-suite.
+The analysis depends on three forms of data integrity. First, every observation
+must represent one and only one calendar year. Second, denominators such as GDP
+and debt must be positive, finite, and economically interpretable. Third,
+cross-country comparisons must use the same institutional sector, transaction
+concept, and unit. The validation layer checks these conditions before the
+figures and tables in the paper are produced. Technical replication details
+are reported in the appendices rather than in the main argument.
 
 \section{Descriptive Evidence for Portugal}
 
@@ -874,10 +822,10 @@ risk premia. It also does not model contingent liabilities, ageing costs, or
 debt-maturity composition in full detail. Instead, it provides the measurement
 and accounting basis required before those questions can be studied rigorously.
 
-\subsection{Academic Contribution of the Repository}
+\subsection{Academic Contribution of the Study}
 
-The contribution of this repository is primarily empirical and reproducible.
-It does not propose a new macroeconomic theory. It provides a clean,
+The contribution of this study is primarily empirical and reproducible. It
+does not propose a new macroeconomic theory. It provides a clean,
 auditable, annually indexed dataset that separates national-accounts interest
 flows, debt stocks, growth, balances, market yields, and comparator-country
 metrics. It also embeds validation checks that reduce the probability of
@@ -1032,7 +980,23 @@ Eurostat source tables are \texttt{gov\_10a\_main},
 The latest validation result passed all error-severity checks and retained one
 warning for debt-ratio reconciliation in 1997 and 1998.
 
-\section{Appendix D: Reproducibility Commands}
+\section{Appendix D: Replication Materials}
+
+The replication workflow produces the following analytical outputs:
+\begin{itemize}
+  \item \texttt{data/processed/portugal\_debt\_interest.csv};
+  \item \texttt{data/processed/portugal\_debt\_interest.sqlite};
+  \item \texttt{data/processed/eurostat\_panel\_metrics.csv};
+  \item \texttt{reports/validation.json};
+  \item \texttt{reports/summary.md};
+  \item publication-oriented figures in \texttt{reports/figures/}.
+\end{itemize}
+
+Raw source downloads include retrieval timestamps, request metadata, payload
+sizes, and checksums. Processed rows preserve source-vintage and checksum
+metadata so revisions can be audited.
+
+\section{Appendix E: Reproducibility Commands}
 
 \begin{verbatim}
 python -m pt_debt_interest.cli all --config config/default.yaml
