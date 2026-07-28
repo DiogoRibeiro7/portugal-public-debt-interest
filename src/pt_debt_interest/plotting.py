@@ -86,9 +86,9 @@ def plot_debt_and_rate(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
     ax_left.plot(frame["year"], frame["debt_pct_gdp"], label="Debt-to-GDP")
     ax_right.plot(
         frame["year"],
-        frame["implicit_interest_rate_pct"],
+        frame["implicit_interest_rate_average_debt_pct"],
         linestyle="--",
-        label="Implicit interest rate",
+        label="Average-debt implicit rate",
     )
     ax_left.set_title("Debt stock and effective interest cost")
     ax_left.set_xlabel("Year")
@@ -127,8 +127,8 @@ def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path]
     ax.plot(frame["year"], frame["ten_year_yield_pct"], label="10-year convergence yield")
     ax.plot(
         frame["year"],
-        frame["implicit_interest_rate_pct"],
-        label="Implicit interest rate",
+        frame["implicit_interest_rate_average_debt_pct"],
+        label="Average-debt implicit rate",
     )
     ax.set_title("Market yield versus effective cost of the debt stock")
     ax.set_xlabel("Year")
@@ -161,9 +161,10 @@ def plot_growth_decomposition(frame: pd.DataFrame, output_dir: Path) -> list[Pat
 def plot_debt_dynamics(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
     """Plot debt-dynamics contribution terms when available."""
     required = {
-        "debt_stabilising_primary_balance_pct_gdp",
-        "primary_balance_pct_gdp",
-        "stock_flow_adjustment_pct_gdp",
+        "interest_growth_contribution_pp",
+        "primary_balance_contribution_pp",
+        "stock_flow_adjustment_pp",
+        "observed_debt_ratio_change_pp",
     }
     if not required.issubset(frame.columns):
         return None
@@ -171,14 +172,24 @@ def plot_debt_dynamics(frame: pd.DataFrame, output_dir: Path) -> list[Path] | No
     ax.axhline(0.0, linewidth=1)
     ax.plot(
         frame["year"],
-        frame["debt_stabilising_primary_balance_pct_gdp"],
+        frame["interest_growth_contribution_pp"],
         label="Interest-growth term",
     )
-    ax.plot(frame["year"], frame["primary_balance_pct_gdp"], label="Primary balance")
     ax.plot(
         frame["year"],
-        frame["stock_flow_adjustment_pct_gdp"],
+        frame["primary_balance_contribution_pp"],
+        label="Primary balance contribution",
+    )
+    ax.plot(
+        frame["year"],
+        frame["stock_flow_adjustment_pp"],
         label="Stock-flow residual",
+    )
+    ax.plot(
+        frame["year"],
+        frame["observed_debt_ratio_change_pp"],
+        linestyle="--",
+        label="Observed debt-ratio change",
     )
     ax.set_title("Debt-dynamics contribution terms")
     ax.set_xlabel("Year")

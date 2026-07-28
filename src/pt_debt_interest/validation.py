@@ -227,6 +227,25 @@ def validate_dataset(
             )
         )
 
+    if "debt_dynamics_reconciliation_error_pp" in frame.columns:
+        reconciliation_error = frame["debt_dynamics_reconciliation_error_pp"].abs()
+        affected = frame.loc[
+            reconciliation_error > identity_tolerance_pp,
+            "year",
+        ].astype(int).tolist()
+        checks.append(
+            CheckResult(
+                name="debt_dynamics_reconciliation",
+                passed=not affected,
+                severity="error",
+                detail=(
+                    "Debt-dynamics contributions must reconstruct observed "
+                    f"debt-ratio changes within {identity_tolerance_pp} pp."
+                ),
+                affected_years=affected,
+            )
+        )
+
     observed_forecast_overlap: list[int] = []
     if {"year", "observation_status", "source"}.issubset(frame.columns):
         for year, group in frame.groupby("year"):

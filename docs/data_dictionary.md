@@ -19,14 +19,20 @@
 | `debt_pct_gdp_official` | % GDP | Official Eurostat debt ratio |
 | `debt_pct_gdp_calculated` | % GDP | Debt in euros divided by current-price GDP |
 | `debt_pct_gdp` | % GDP | Preferred debt ratio |
-| `implicit_interest_rate_previous_debt_pct` | % | Interest divided by previous-year debt |
-| `implicit_interest_rate_average_debt_pct` | % | Interest divided by average of previous and current debt |
-| `implicit_interest_rate_pct` | % | Interest divided by configured debt denominator |
+| `effective_interest_rate_debt_dynamics_decimal` | ratio | Interest divided by previous-year debt; internal debt-dynamics rate |
+| `effective_interest_rate_debt_dynamics_pct` | % | Display version of the debt-dynamics effective interest rate |
+| `implicit_interest_rate_average_debt_decimal` | ratio | Interest divided by average of previous and current debt; internal average-cost rate |
+| `implicit_interest_rate_average_debt_pct` | % | Display version of the average-stock implicit interest rate |
 | `interest_burden_rank` | rank | Per-year rank among non-aggregate comparator countries by interest burden |
-| `implicit_rate_rank` | rank | Per-year rank among non-aggregate comparator countries by implicit rate |
+| `average_debt_rate_rank` | rank | Per-year rank among non-aggregate comparator countries by average-debt implicit rate |
 | `interest_growth_differential_pct` | percentage points | Implicit interest rate minus nominal GDP growth |
-| `debt_stabilising_primary_balance_pct_gdp` | % GDP | Primary balance needed to stabilise debt absent stock-flow effects |
-| `stock_flow_adjustment_pct_gdp` | % GDP | Residual in the discrete debt-dynamics equation |
+| `debt_stabilising_primary_balance_before_sfa_pct_gdp` | % GDP | Primary balance needed to stabilise debt absent stock-flow effects |
+| `observed_debt_ratio_change_pp` | percentage points | Observed annual change in the debt-to-GDP ratio |
+| `interest_growth_contribution_pp` | percentage points | Debt-ratio contribution from the effective interest rate and nominal GDP growth |
+| `primary_balance_contribution_pp` | percentage points | Debt-ratio contribution of the primary balance, equal to the negative of the primary balance |
+| `stock_flow_adjustment_pp` | percentage points | Residual in the discrete debt-dynamics equation |
+| `reconstructed_debt_ratio_change_pp` | percentage points | Sum of debt-dynamics contribution terms |
+| `debt_dynamics_reconciliation_error_pp` | percentage points | Observed minus reconstructed debt-ratio change |
 | `overall_balance_pct_gdp` | % GDP | Net lending (+) or borrowing (-), `B9` |
 | `primary_balance_pct_gdp` | % GDP | Overall balance plus interest expenditure |
 | `ten_year_yield_pct` | % | EMU convergence-criterion long-term yield |

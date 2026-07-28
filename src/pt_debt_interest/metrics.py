@@ -127,8 +127,8 @@ def calculate_metrics(
     frame:
         Annual source data indexed by a `year` column.
     denominator:
-        `average_debt` uses the mean of debt at t-1 and t. `previous_debt`
-        uses only the debt stock at t-1.
+        Deprecated compatibility argument. Both supported interest-rate
+        concepts are always calculated explicitly.
     regime_boundaries:
         Optional list of dictionaries with `start`, `end`, and `label`.
     """
@@ -157,20 +157,20 @@ def calculate_metrics(
 
     previous_debt = output["debt_mio_eur"].shift(1)
     average_debt = (previous_debt + output["debt_mio_eur"]) / 2.0
-    output["implicit_interest_rate_previous_debt_pct"] = (
-        output["interest_mio_eur"] / previous_debt * 100.0
+    output["effective_interest_rate_debt_dynamics_decimal"] = (
+        output["interest_mio_eur"] / previous_debt
+    )
+    output["implicit_interest_rate_average_debt_decimal"] = (
+        output["interest_mio_eur"] / average_debt
+    )
+    output.loc[~same_basis, "effective_interest_rate_debt_dynamics_decimal"] = np.nan
+    output.loc[~same_basis, "implicit_interest_rate_average_debt_decimal"] = np.nan
+    output["effective_interest_rate_debt_dynamics_pct"] = (
+        output["effective_interest_rate_debt_dynamics_decimal"] * 100.0
     )
     output["implicit_interest_rate_average_debt_pct"] = (
-        output["interest_mio_eur"] / average_debt * 100.0
+        output["implicit_interest_rate_average_debt_decimal"] * 100.0
     )
-    output.loc[~same_basis, "implicit_interest_rate_previous_debt_pct"] = np.nan
-    output.loc[~same_basis, "implicit_interest_rate_average_debt_pct"] = np.nan
-    selected_rate = (
-        "implicit_interest_rate_average_debt_pct"
-        if denominator == "average_debt"
-        else "implicit_interest_rate_previous_debt_pct"
-    )
-    output["implicit_interest_rate_pct"] = output[selected_rate]
 
     if "real_gdp_growth_pct" in output.columns:
         nominal_factor = 1.0 + output["nominal_gdp_growth_pct"] / 100.0
@@ -198,28 +198,44 @@ def calculate_metrics(
 
     debt_ratio_lag = output["debt_pct_gdp"].shift(1) / 100.0
     debt_ratio = output["debt_pct_gdp"] / 100.0
-    rate = output["implicit_interest_rate_pct"] / 100.0
+    rate = output["effective_interest_rate_debt_dynamics_decimal"]
     growth = output["nominal_gdp_growth_pct"] / 100.0
+    growth_denominator = 1.0 + growth
     output["interest_growth_differential_pct"] = (rate - growth) * 100.0
-    output["debt_stabilising_primary_balance_pct_gdp"] = (
-        ((rate - growth) / (1.0 + growth)) * debt_ratio_lag * 100.0
+    output["debt_stabilising_primary_balance_before_sfa_pct_gdp"] = (
+        ((rate - growth) / growth_denominator) * debt_ratio_lag * 100.0
+    )
+    output["observed_debt_ratio_change_pp"] = (debt_ratio - debt_ratio_lag) * 100.0
+    output["interest_growth_contribution_pp"] = (
+        ((rate - growth) / growth_denominator) * debt_ratio_lag * 100.0
     )
     if "primary_balance_pct_gdp" in output.columns:
-        debt_change_pct_gdp = (debt_ratio - debt_ratio_lag) * 100.0
-        automatic_debt_dynamics = (
-            ((rate - growth) / (1.0 + growth)) * debt_ratio_lag * 100.0
+        output["primary_balance_contribution_pp"] = -output["primary_balance_pct_gdp"]
+        output["stock_flow_adjustment_pp"] = (
+            output["observed_debt_ratio_change_pp"]
+            - output["interest_growth_contribution_pp"]
+            - output["primary_balance_contribution_pp"]
         )
-        output["stock_flow_adjustment_pct_gdp"] = (
-            debt_change_pct_gdp
-            - automatic_debt_dynamics
-            + output["primary_balance_pct_gdp"]
+        output["reconstructed_debt_ratio_change_pp"] = (
+            output["interest_growth_contribution_pp"]
+            + output["primary_balance_contribution_pp"]
+            + output["stock_flow_adjustment_pp"]
+        )
+        output["debt_dynamics_reconciliation_error_pp"] = (
+            output["observed_debt_ratio_change_pp"]
+            - output["reconstructed_debt_ratio_change_pp"]
         )
     output.loc[
         ~same_basis,
         [
             "interest_growth_differential_pct",
-            "debt_stabilising_primary_balance_pct_gdp",
-            "stock_flow_adjustment_pct_gdp",
+            "debt_stabilising_primary_balance_before_sfa_pct_gdp",
+            "observed_debt_ratio_change_pp",
+            "interest_growth_contribution_pp",
+            "primary_balance_contribution_pp",
+            "stock_flow_adjustment_pp",
+            "reconstructed_debt_ratio_change_pp",
+            "debt_dynamics_reconciliation_error_pp",
         ],
     ] = np.nan
 

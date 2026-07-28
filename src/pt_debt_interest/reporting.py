@@ -17,13 +17,13 @@ REQUIRED_REPORT_COLUMNS = {
     "interest_mio_eur",
     "interest_pct_gdp",
     "debt_pct_gdp",
-    "implicit_interest_rate_pct",
+    "implicit_interest_rate_average_debt_pct",
 }
 HEADLINE_NUMERIC_COLUMNS = [
     "interest_mio_eur",
     "interest_pct_gdp",
     "debt_pct_gdp",
-    "implicit_interest_rate_pct",
+    "implicit_interest_rate_average_debt_pct",
 ]
 
 REPORT_TEMPLATE = Template(
@@ -35,7 +35,7 @@ REPORT_TEMPLATE = Template(
 - Interest expenditure: **EUR {{ latest_interest_bn | round(2) }} billion**, or
   **{{ latest_interest_ratio | round(2) }}% of GDP**.
 - Gross debt: **{{ latest_debt_ratio | round(2) }}% of GDP**.
-- Implicit interest rate: **{{ latest_implicit_rate | round(2) }}%**.
+- Average-debt implicit interest rate: **{{ latest_implicit_rate | round(2) }}%**.
 {% if latest_primary_balance is not none -%}
 - Primary balance: **{{ latest_primary_balance | round(2) }}% of GDP**.
 - Overall balance: **{{ latest_overall_balance | round(2) }}% of GDP**.
@@ -45,8 +45,9 @@ REPORT_TEMPLATE = Template(
 
 Interest expenditure is Eurostat ESA 2010 general-government interest payable
 (`D41PAY`). The main burden measure is interest divided by nominal GDP. The
-implicit interest rate uses the configured debt denominator and is not the same
-object as the ten-year sovereign yield.
+average-debt implicit interest rate is an average-stock measure and is not the
+same object as the ten-year sovereign yield. Debt-dynamics calculations use
+interest divided by previous-year debt.
 
 ## Historical evolution
 
@@ -229,7 +230,7 @@ def generate_report(
         latest_interest_bn=float(latest["interest_mio_eur"]) / 1_000.0,
         latest_interest_ratio=float(latest["interest_pct_gdp"]),
         latest_debt_ratio=float(latest["debt_pct_gdp"]),
-        latest_implicit_rate=float(latest["implicit_interest_rate_pct"]),
+        latest_implicit_rate=float(latest["implicit_interest_rate_average_debt_pct"]),
         latest_primary_balance=_optional_float(latest, "primary_balance_pct_gdp"),
         latest_overall_balance=_optional_float(latest, "overall_balance_pct_gdp"),
         latest_nominal_growth=_optional_float(latest, "nominal_gdp_growth_pct"),

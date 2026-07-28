@@ -14,15 +14,17 @@ def _fixture_frame() -> pd.DataFrame:
             "interest_mio_eur": [5000.0, 4800.0, 5500.0],
             "interest_pct_gdp": [2.2, 2.0, 2.1],
             "debt_pct_gdp": [125.0, 115.0, 105.0],
-            "implicit_interest_rate_pct": [2.0, 1.8, 2.1],
+            "implicit_interest_rate_average_debt_pct": [2.0, 1.8, 2.1],
             "overall_balance_pct_gdp": [-2.0, -0.3, 1.0],
             "primary_balance_pct_gdp": [0.2, 1.7, 3.1],
             "ten_year_yield_pct": [0.3, 1.7, 3.0],
             "nominal_gdp_growth_pct": [None, 11.0, 8.0],
             "real_gdp_growth_pct": [5.6, 6.8, 2.5],
             "gdp_deflator_growth_pct": [None, 3.9, 5.4],
-            "debt_stabilising_primary_balance_pct_gdp": [None, -9.0, -6.0],
-            "stock_flow_adjustment_pct_gdp": [None, -1.0, 0.5],
+            "interest_growth_contribution_pp": [None, -9.0, -6.0],
+            "primary_balance_contribution_pp": [None, -1.7, -3.1],
+            "stock_flow_adjustment_pp": [None, -1.0, 0.5],
+            "observed_debt_ratio_change_pp": [None, -10.0, -10.0],
             "source": ["Eurostat", "Eurostat", "Eurostat"],
             "accounting_basis": ["ESA2010", "ESA2010", "ESA2010"],
             "observation_status": ["observed", "observed", "observed"],
@@ -252,7 +254,7 @@ def test_generate_report_skips_fractional_panel_year(tmp_path: Path) -> None:
 
 
 def test_generate_report_rejects_missing_required_columns(tmp_path: Path) -> None:
-    frame = _fixture_frame().drop(columns=["implicit_interest_rate_pct"])
+    frame = _fixture_frame().drop(columns=["implicit_interest_rate_average_debt_pct"])
 
     with pytest.raises(ValueError, match="missing required columns"):
         generate_report(frame, tmp_path / "summary.md", 1995, [100])
@@ -260,7 +262,7 @@ def test_generate_report_rejects_missing_required_columns(tmp_path: Path) -> Non
 
 def test_generate_report_rejects_incomplete_headline_rows(tmp_path: Path) -> None:
     frame = _fixture_frame()
-    frame["implicit_interest_rate_pct"] = pd.NA
+    frame["implicit_interest_rate_average_debt_pct"] = pd.NA
 
     with pytest.raises(ValueError, match="complete headline metrics"):
         generate_report(frame, tmp_path / "summary.md", 1995, [100])

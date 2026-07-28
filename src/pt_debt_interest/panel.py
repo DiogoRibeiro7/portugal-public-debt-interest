@@ -29,7 +29,7 @@ PANEL_MISSINGNESS_COLUMNS = [
     "debt_mio_eur",
     "debt_pct_gdp",
     "nominal_gdp_mio_eur",
-    "implicit_interest_rate_pct",
+    "implicit_interest_rate_average_debt_pct",
     "ten_year_yield_pct",
 ]
 _TRUE_FLAG_VALUES = {"1", "true", "t", "yes", "y"}
@@ -165,10 +165,10 @@ def add_panel_ranks(frame: pd.DataFrame) -> pd.DataFrame:
     else:
         country_mask = pd.Series(True, index=output.index)
     output["interest_burden_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
-    output["implicit_rate_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
+    output["average_debt_rate_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
     rank_columns = {
         "interest_burden_rank": "interest_pct_gdp",
-        "implicit_rate_rank": "implicit_interest_rate_pct",
+        "average_debt_rate_rank": "implicit_interest_rate_average_debt_pct",
     }
     for rank_column, value_column in rank_columns.items():
         if value_column not in output.columns:
