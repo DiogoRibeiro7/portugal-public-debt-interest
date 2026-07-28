@@ -10,6 +10,8 @@ import pandas as pd
 
 PROVENANCE_COLUMNS = [
     "source",
+    "source_database",
+    "source_table_or_series",
     "source_vintage",
     "accounting_basis",
     "observation_status",

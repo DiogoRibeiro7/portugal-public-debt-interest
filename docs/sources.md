@@ -55,4 +55,6 @@ AMECO includes observations and European Commission forecasts. It can link ESA 2
 
 Each live source download is preserved in `data/raw/` with a UTC timestamp in the filename. A neighbouring `.manifest.json` file records the request URL, retrieval time, HTTP status, payload size, checksum, and source-specific selection metadata where available. These manifests are intended to make parser inputs auditable without editing raw files.
 
-Eurostat interim rows retain per-series raw filenames, retrieval timestamps, and SHA-256 checksums. The processed annual table also carries row-level joined `source_vintage`, `retrieval_timestamp_utc`, and `source_checksum_sha256` fields so source revisions can be audited from the analytical output.
+Eurostat interim rows retain per-series raw filenames, retrieval timestamps, and SHA-256 checksums. The processed annual table also carries row-level joined `source_database`, `source_table_or_series`, `source_vintage`, `retrieval_timestamp_utc`, and `source_checksum_sha256` fields so source revisions can be audited from the analytical output.
+
+The build stage also writes `reports/source_coverage.csv`, which summarises the available year span, row count, and complete-core-observation count by source, database, accounting basis, observation status, and sample flag.

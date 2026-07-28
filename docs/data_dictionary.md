@@ -49,6 +49,8 @@
 | `primary_balance_pct_gdp` | % GDP | Overall balance plus interest expenditure |
 | `ten_year_yield_pct` | % | EMU convergence-criterion long-term yield |
 | `source` | category | Eurostat or AMECO |
+| `source_database` | category | Source database or institutional data system |
+| `source_table_or_series` | category | Joined source table, series, raw file, or archive identifiers used by the row |
 | `source_vintage` | category | Source release or vintage identifier when available |
 | `accounting_basis` | category | ESA2010 or linked historical basis |
 | `observation_status` | category | observed or forecast |

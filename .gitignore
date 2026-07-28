@@ -20,6 +20,7 @@ reports/summary.md
 reports/validation.json
 reports/eurostat_panel_missingness.csv
 reports/refinancing_scenarios.csv
+reports/source_coverage.csv
 
 # LaTeX build artifacts
 *.aux

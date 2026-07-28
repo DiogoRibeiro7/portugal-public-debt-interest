@@ -26,6 +26,8 @@ from .storage import save_interest_decomposition, save_processed
 
 CANONICAL_PROVENANCE_COLUMNS = [
     "source",
+    "source_database",
+    "source_table_or_series",
     "source_vintage",
     "accounting_basis",
     "observation_status",
@@ -97,6 +99,12 @@ def _add_eurostat_row_provenance(frame: pd.DataFrame) -> pd.DataFrame:
             output.astype("string"),
             checksum_columns,
         )
+    if raw_file_columns:
+        output["source_table_or_series"] = _join_row_values(
+            output.astype("string"),
+            raw_file_columns,
+        )
+    output["source_database"] = "Eurostat"
     return output
 
 
@@ -145,6 +153,8 @@ def fetch_ameco(settings: Settings, root: Path = Path(".")) -> Path | None:
     frame["retrieval_timestamp_utc"] = _raw_timestamp_from_name(archive)
     frame["source_vintage"] = archive.name
     frame["source_checksum_sha256"] = _file_sha256(archive)
+    frame["source_database"] = "AMECO"
+    frame["source_table_or_series"] = archive.name
     destination = interim_dir / "ameco_linked.csv"
     frame.to_csv(destination, index=False)
     return destination
@@ -317,6 +327,8 @@ def _build_ameco_pre1995(ameco: pd.DataFrame, main_start_year: int) -> pd.DataFr
     if extension.empty:
         return extension
     extension["source"] = "AMECO"
+    extension["source_database"] = extension.get("source_database", "AMECO")
+    extension["source_table_or_series"] = extension.get("source_table_or_series", pd.NA)
     extension["source_vintage"] = extension.get("source_vintage", pd.NA)
     extension["accounting_basis"] = extension.get(
         "accounting_basis_ameco", "linked_ESA2010_ESA95_ESA79"
@@ -358,6 +370,40 @@ def _canonicalise_annual_table(frame: pd.DataFrame, main_start_year: int) -> pd.
     return canonical
 
 
+def write_source_coverage_report(
+    frame: pd.DataFrame,
+    settings: Settings,
+    root: Path = Path("."),
+) -> Path:
+    """Write source coverage diagnostics for the annual analytical table."""
+    reports_dir = root / settings.paths.reports
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    core_columns = ["interest_mio_eur", "nominal_gdp_mio_eur", "debt_mio_eur"]
+    grouping_columns = [
+        "source",
+        "source_database",
+        "accounting_basis",
+        "observation_status",
+        "is_harmonised_main_sample",
+        "is_historical_extension",
+    ]
+    available_grouping = [column for column in grouping_columns if column in frame.columns]
+    records: list[dict[str, object]] = []
+    for keys, group in frame.groupby(available_grouping, dropna=False):
+        record = dict(zip(available_grouping, keys, strict=True))
+        record["start_year"] = int(group["year"].min())
+        record["end_year"] = int(group["year"].max())
+        record["row_count"] = len(group)
+        record["complete_core_rows"] = int(group.dropna(subset=core_columns).shape[0])
+        records.append(record)
+    destination = reports_dir / "source_coverage.csv"
+    pd.DataFrame(records).sort_values(["start_year", "source"]).to_csv(
+        destination,
+        index=False,
+    )
+    return destination
+
+
 def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     """Build the final annual table from available interim source files."""
     interim_dir = root / settings.paths.interim
@@ -389,4 +435,5 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     analytical = analytical.merge(decomposition, on="year", how="left")
     save_processed(analytical, settings, root)
     save_interest_decomposition(decomposition, settings, root)
+    write_source_coverage_report(analytical, settings, root)
     return analytical

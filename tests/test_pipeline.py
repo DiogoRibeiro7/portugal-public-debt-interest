@@ -90,6 +90,7 @@ def test_add_eurostat_row_provenance_collapses_series_metadata() -> None:
         "20260726T010000Z;20260726T010001Z"
     )
     assert result.loc[0, "source_checksum_sha256"] == "abc;def"
+    assert result.loc[0, "source_database"] == "Eurostat"
     assert "eurostat_interest_20260726T010000Z.json" in result.loc[0, "source_vintage"]
 
 
@@ -273,6 +274,11 @@ def test_build_dataset_writes_interest_decomposition(tmp_path: Path) -> None:
 
     assert "rate_effect_pp" in result.columns
     assert result["is_harmonised_main_sample"].tolist() == [True, True]
+    assert (
+        tmp_path
+        / settings.paths.reports
+        / "source_coverage.csv"
+    ).exists()
     assert (
         tmp_path
         / settings.paths.processed
