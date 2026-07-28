@@ -35,6 +35,7 @@
 \newcommand{\eur}{\mathrm{EUR}}
 \newcommand{\gdp}{\mathrm{GDP}}
 \newcommand{\pt}{\mathrm{PT}}
+\input{../reports/tables/paper_headlines.tex}
 
 \title{\textbf{Portugal's Public-Debt Interest Burden: An Empirical Assessment of Measurement, Debt Dynamics, and Euro-Area Comparison}}
 \author{Diogo Ribeiro}
@@ -45,7 +46,7 @@
 
 \begin{abstract}
 This paper provides a reproducible empirical assessment of Portugal's
-general government interest burden from 1995 to 2025, the harmonised Eurostat
+general government interest burden from \MainStartYear{} to \LatestYear{}, the harmonised Eurostat
 ESA 2010 period used for the main empirical sample. The dependent variable is
 interest payable by the general government
 sector as a percentage of nominal GDP. The analysis separates three quantities
@@ -55,21 +56,21 @@ new benchmark debt. It combines source-provenance review, national-accounts
 measurement, descriptive periodisation, discrete debt-dynamics accounting,
 cross-country Eurostat comparison, and deterministic refinancing simulations.
 The central empirical result is that Portugal's interest burden fell from
-5.50 percent of GDP in 1995 to 1.90 percent of GDP in 2025, despite a higher
-debt ratio in 2025 than in the mid-1990s and despite a material nominal
-interest bill of EUR 5.96 billion. Total general-government expenditure was
-EUR 130.94 billion, or 42.70 percent of GDP, while total revenue was
-EUR 133.00 billion, or 43.40 percent of GDP, in 2025. The sovereign-debt crisis and adjustment
+\InitialInterestPctGdp{} percent of GDP in \MainStartYear{} to \LatestInterestPctGdp{} percent of GDP in \LatestYear{}, despite a higher
+debt ratio in \LatestYear{} than in the mid-1990s and despite a material nominal
+interest bill of EUR \LatestInterestEurBn{} billion. Total general-government expenditure was
+EUR \LatestGovernmentExpenditureEurBn{} billion, or \LatestGovernmentExpenditurePctGdp{} percent of GDP, while total revenue was
+EUR \LatestGovernmentRevenueEurBn{} billion, or \LatestGovernmentRevenuePctGdp{} percent of GDP, in \LatestYear{}. The sovereign-debt crisis and adjustment
 period, 2011--2014, remains the highest-burden regime in the harmonised sample,
-with mean interest expenditure of 4.67 percent of GDP. The post-2015 decline is
+with mean interest expenditure of \CrisisMeanInterestPctGdp{} percent of GDP. The post-2015 decline is
 best understood as the joint result of lower effective interest rates, debt
-refinancing, nominal GDP growth, and later debt-ratio reduction. By 2025,
-Portugal ranked sixth among the twenty euro-area country comparators by
+refinancing, nominal GDP growth, and later debt-ratio reduction. By \LatestYear{},
+Portugal ranked \PortugalComparatorRankWord{} among the \ComparatorCountryCountWord{} euro-area country comparators by
 interest expenditure as a percentage of GDP, below Italy, Greece, Spain,
 Belgium, and France. The paper emphasises
 that rate shocks pass through gradually to the average cost of the outstanding
 stock; the static full-pass-through effect of a 100 basis-point shock at the
-2025 debt ratio is approximately 0.90 percentage points of GDP, but this is an
+\LatestYear{} debt ratio is approximately \ShockHundredApproxPp{} percentage points of GDP, but this is an
 arithmetic long-run sensitivity rather than a one-year forecast.
 \end{abstract}
 
@@ -120,7 +121,7 @@ The paper answers seven research questions:
         burden as empirical objects?
   \item What roles do the debt ratio, the effective interest rate, nominal GDP
         growth, and the primary balance play in the observed dynamics?
-  \item How did the burden vary across macro-fiscal regimes from 1995 to 2025?
+  \item How did the burden vary across macro-fiscal regimes from \MainStartYear{} to \LatestYear{}?
   \item How does Portugal compare with euro-area peers under harmonised
         Eurostat definitions?
   \item What is the arithmetic exposure of the burden to benchmark rate shocks?
@@ -128,10 +129,10 @@ The paper answers seven research questions:
 \end{enumerate}
 
 The central finding is that Portugal's public-debt interest burden declined
-substantially over the harmonised Eurostat period. The burden was 5.50 percent
-of GDP in 1995, 4.80 percent in 2014, 2.90 percent in 2019, and 1.90 percent in
-2025. This does not mean that interest payments became fiscally irrelevant. In
-2025 the general government still paid EUR 5.96 billion in interest. Rather,
+substantially over the harmonised Eurostat period. The burden was \InitialInterestPctGdp{} percent
+of GDP in \MainStartYear{}, \InterestPctGdpTwentyFourteen{} percent in 2014, \InterestPctGdpTwentyNineteen{} percent in 2019, and \LatestInterestPctGdp{} percent in
+\LatestYear{}. This does not mean that interest payments became fiscally irrelevant. In
+\LatestYear{} the general government still paid EUR \LatestInterestEurBn{} billion in interest. Rather,
 the result means that the economy's nominal scale and the effective cost of
 the outstanding debt stock changed enough to reduce the interest-to-GDP ratio.
 
@@ -300,8 +301,8 @@ The full-pass-through interest-burden effect of a rate shock is:
   \Delta b = d\Delta r.
   \label{eq:shock}
 \end{equation}
-At a debt ratio of 89.70 percent of GDP, a 100 basis-point rate shock applied
-to the full stock implies an additional burden of approximately 0.897
+At a debt ratio of \LatestDebtPctGdp{} percent of GDP, a 100 basis-point rate shock applied
+to the full stock implies an additional burden of approximately \ShockHundredAdditionalPp{}
 percentage points of GDP. This is a static sensitivity. It should not be
 interpreted as an immediate forecast because only a fraction of the debt stock
 is refinanced in a typical year.
@@ -326,21 +327,21 @@ are reported in the appendices rather than in the main argument.
 
 \section{Portuguese Interest Burden, 1995--2025}
 
-The harmonised ESA 2010 sample contains 31 annual observations from 1995 to
-2025. Table \ref{tab:summary-statistics} summarises the main variables. Over
-this period, interest expenditure averaged 3.29 percent of GDP, with a minimum
-of 1.90 percent and a maximum of 5.50 percent. The nominal interest bill
-averaged EUR 5.53 billion, with a maximum of EUR 8.33 billion in 2014. The
-debt ratio averaged 92.26 percent of GDP, with a minimum of 54.20 percent in
-2000 and a maximum of 134.10 percent in 2020.
+The harmonised ESA 2010 sample contains \MainSampleObservations{} annual observations from \MainStartYear{} to
+\LatestYear{}. Table \ref{tab:summary-statistics} summarises the main variables. Over
+this period, interest expenditure averaged \InterestMeanPctGdp{} percent of GDP, with a minimum
+of \InterestMinPctGdp{} percent and a maximum of \InterestMaxPctGdp{} percent. The nominal interest bill
+averaged EUR \InterestBillMeanEurBn{} billion, with a maximum of EUR \InterestBillMaxEurBn{} billion in \InterestBillMaxYear{}. The
+debt ratio averaged \DebtMeanPctGdp{} percent of GDP, with a minimum of \DebtMinPctGdp{} percent in
+\DebtMinYear{} and a maximum of \DebtMaxPctGdp{} percent in \DebtMaxYear{}.
 
 \input{../reports/tables/summary_statistics.tex}
 
 The most important descriptive fact is the decline in the interest burden. In
-1995, Portugal's general government paid interest equal to 5.50 percent of GDP.
-In 2025 the burden was 1.90 percent of GDP. The change is a reduction of
-3.60 percentage points of GDP. In nominal terms, however, the interest bill
-increased from EUR 5.04 billion to EUR 5.96 billion. This divergence is not a
+\MainStartYear{}, Portugal's general government paid interest equal to \InitialInterestPctGdp{} percent of GDP.
+In \LatestYear{} the burden was \LatestInterestPctGdp{} percent of GDP. The change is a reduction of
+\InterestBurdenDeclinePp{} percentage points of GDP. In nominal terms, however, the interest bill
+increased from EUR \InitialInterestEurBn{} billion to EUR \LatestInterestEurBn{} billion. This divergence is not a
 contradiction. It shows why the GDP denominator is essential for fiscal
 interpretation.
 
@@ -373,8 +374,8 @@ rapidly or when the debt ratio falls.
 \end{figure}
 
 Figure \ref{fig:government-expenditure} reports total general-government
-expenditure both in nominal euros and relative to GDP. In 2025, total
-expenditure was EUR 130.94 billion, equivalent to 42.70 percent of GDP. This
+expenditure both in nominal euros and relative to GDP. In \LatestYear{}, total
+expenditure was EUR \LatestGovernmentExpenditureEurBn{} billion, equivalent to \LatestGovernmentExpenditurePctGdp{} percent of GDP. This
 scale comparison clarifies that the interest bill is one component of a much
 larger expenditure envelope, not a proxy for total spending.
 
@@ -386,8 +387,8 @@ larger expenditure envelope, not a proxy for total spending.
 \end{figure}
 
 Figure \ref{fig:government-revenue} reports the matching total-revenue series.
-In 2025, general-government revenue was EUR 133.00 billion, equivalent to
-43.40 percent of GDP. Reading revenue and expenditure together gives the
+In \LatestYear{}, general-government revenue was EUR \LatestGovernmentRevenueEurBn{} billion, equivalent to
+\LatestGovernmentRevenuePctGdp{} percent of GDP. Reading revenue and expenditure together gives the
 fiscal envelope within which interest costs are financed and primary balances
 are formed.
 
@@ -399,12 +400,12 @@ are formed.
 \end{figure}
 
 Figure \ref{fig:debt-rate} shows the debt ratio and implicit interest rate.
-The debt ratio fell to 54.20 percent of GDP in 2000, rose to 132.50 percent by
-2014, peaked at 134.10 percent in 2020, and then declined to 89.70 percent in
-2025. The implicit interest rate moved in the opposite direction over much of
+The debt ratio fell to \DebtMinPctGdp{} percent of GDP in \DebtMinYear{}, rose to \DebtPctGdpTwentyFourteen{} percent by
+2014, peaked at \DebtMaxPctGdp{} percent in \DebtMaxYear{}, and then declined to \LatestDebtPctGdp{} percent in
+\LatestYear{}. The implicit interest rate moved in the opposite direction over much of
 the sample: it was very high in the 1990s, declined during monetary union,
-continued falling after the crisis, reached 1.71 percent in 2022, and was
-2.18 percent in 2025.
+continued falling after the crisis, reached \ImplicitRatePctTwentyTwentyTwo{} percent in 2022, and was
+\LatestImplicitRatePct{} percent in \LatestYear{}.
 
 \begin{figure}[H]
 \centering
@@ -426,8 +427,8 @@ Figure \ref{fig:balances} shows the overall balance and the primary balance.
 Portugal recorded large overall deficits during the global financial crisis,
 the sovereign-debt crisis, and the pandemic. The primary balance is less
 negative because it adds back interest expenditure. The difference between the
-two lines is precisely the interest burden. In 2025 the overall balance was
-0.70 percent of GDP and the primary balance was 2.60 percent of GDP.
+two lines is precisely the interest burden. In \LatestYear{} the overall balance was
+\LatestOverallBalancePctGdp{} percent of GDP and the primary balance was \LatestPrimaryBalancePctGdp{} percent of GDP.
 
 \begin{figure}[H]
 \centering
@@ -451,7 +452,7 @@ of the outstanding stock.
 
 This distinction is especially important after the monetary-policy tightening
 episode. Portugal's ten-year yield rose from exceptionally low levels in
-2020--2021 to 3.08 percent in 2025, but the implicit rate in 2025 was
+2020--2021 to \LatestTenYearYieldPct{} percent in \LatestYear{}, but the implicit rate in 2025 was
 2.18 percent. The budgetary effect of higher yields depends on refinancing,
 not on instant repricing of the entire stock.
 
@@ -485,8 +486,8 @@ rose rapidly, and the overall balance reached its sample minimum of
 to later sovereign stress, remaining around 3 percent of GDP on average.
 
 The sovereign-debt crisis and adjustment period is the highest-burden regime
-in the harmonised sample. Interest expenditure averaged 4.67 percent of GDP
-and EUR 8.03 billion. The debt ratio averaged 126.47 percent of GDP. Nominal
+in the harmonised sample. Interest expenditure averaged \CrisisMeanInterestPctGdp{} percent of GDP
+and EUR \CrisisMeanInterestEurBn{} billion. The debt ratio averaged \CrisisMeanDebtPctGdp{} percent of GDP. Nominal
 growth was negative on average, and the interest-growth differential was
 therefore unfavourable. The maximum nominal interest bill, EUR 8.33 billion,
 occurred in 2014.
@@ -501,22 +502,22 @@ The pandemic period illustrates denominator and stock effects. Real GDP fell
 8.20 percent in 2020, nominal GDP fell 6.27 percent, and the debt ratio jumped
 to 134.10 percent of GDP. Yet the interest burden did not rise; it was
 2.80 percent in 2020 and 2.40 percent in 2021. The reason is that the implicit
-interest rate continued to decline, reaching 1.90 percent in 2021.
+interest rate continued to decline, reaching \ImplicitRatePctTwentyTwentyOne{} percent in 2021.
 
 The recent period combines higher benchmark yields with strong nominal growth
-and a declining debt ratio. The interest burden averaged 1.98 percent of GDP.
-The implicit rate averaged 2.05 percent, while nominal GDP growth averaged
-9.14 percent. The debt ratio fell from 111.20 percent in 2022 to 89.70 percent
-in 2025. This period is not risk-free: nominal interest payments rose by
-EUR 1.36 billion from 2022 to 2025. But the interest-to-GDP ratio stayed at
+and a declining debt ratio. The interest burden averaged \RecentMeanInterestPctGdp{} percent of GDP.
+The implicit rate averaged \RecentMeanImplicitRatePct{} percent, while nominal GDP growth averaged
+\RecentMeanNominalGrowthPct{} percent. The debt ratio fell from \DebtPctGdpTwentyTwentyTwo{} percent in 2022 to \LatestDebtPctGdp{} percent
+in \LatestYear{}. This period is not risk-free: nominal interest payments rose by
+EUR \RecentInterestBillIncreaseEurBn{} billion from 2022 to \LatestYear{}. But the interest-to-GDP ratio stayed at
 approximately 2 percent because nominal GDP and the debt ratio moved
 favourably.
 
 Figure \ref{fig:growth} decomposes nominal GDP growth into real growth and GDP
 deflator growth. The recent period is dominated by strong nominal growth. In
-2022 nominal GDP grew 12.69 percent, real GDP grew 7.00 percent, and GDP
-deflator growth was 5.31 percent. In 2023 nominal GDP grew 10.82 percent and
-deflator growth was 7.49 percent. These values materially reduced debt-ratio
+2022 nominal GDP grew \NominalGdpGrowthTwentyTwentyTwo{} percent, real GDP grew \RealGdpGrowthTwentyTwentyTwo{} percent, and GDP
+deflator growth was \GdpDeflatorGrowthTwentyTwentyTwo{} percent. In 2023 nominal GDP grew \NominalGdpGrowthTwentyTwentyThree{} percent and
+deflator growth was \GdpDeflatorGrowthTwentyTwentyThree{} percent. These values materially reduced debt-ratio
 pressure because the denominator grew quickly.
 
 \begin{figure}[H]
@@ -564,11 +565,11 @@ through pass-through to the stock rather than through benchmark yields alone.
 \end{figure}
 
 Table \ref{tab:recent} provides recent annual observations. The key pattern is
-visible in the last four rows. From 2022 to 2025 the nominal interest bill rose
-from EUR 4.61 billion to EUR 5.96 billion, but interest as a share of GDP
-remained at 1.90 percent in both endpoint years. Over the same period the debt
-ratio fell by 21.50 percentage points, while the implicit interest rate rose by
-0.48 percentage points.
+visible in the last four rows. From 2022 to \LatestYear{} the nominal interest bill rose
+from EUR 4.61 billion to EUR \LatestInterestEurBn{} billion, but interest as a share of GDP
+remained at \LatestInterestPctGdp{} percent in both endpoint years. Over the same period the debt
+ratio fell by \RecentDebtDeclinePp{} percentage points, while the implicit interest rate rose by
+\RecentImplicitRateIncreasePp{} percentage points.
 
 \input{../reports/tables/recent_dynamics.tex}
 
@@ -582,8 +583,8 @@ and real growth. This prevents a common error in fiscal comparison: mixing
 country-specific cash or budgetary definitions with national-accounts
 definitions.
 
-Table \ref{tab:europe-2025} reports the 2025 country ranking by interest
-expenditure as a percentage of GDP. Portugal ranked sixth among twenty
+Table \ref{tab:europe-2025} reports the \LatestYear{} country ranking by interest
+expenditure as a percentage of GDP. Portugal ranked \PortugalComparatorRankWord{} among \ComparatorCountryCountWord{}
 euro-area countries. Its burden was below Italy, Greece, Spain, Belgium, and
 France, and above the remaining euro-area country observations in the panel.
 
@@ -605,10 +606,10 @@ therefore does not show that Portugal is low-risk in an absolute sense; it
 shows that its interest burden was below the highest-burden euro-area countries
 under harmonised definitions.
 
-Table \ref{tab:shock} reports static sensitivities at the 2025 debt ratio. A
-50 basis-point full-stock shock implies 0.449 percentage points of GDP in
-additional annual interest. A 100 basis-point shock implies 0.897 percentage
-points. A 200 basis-point shock implies 1.794 percentage points. These numbers
+Table \ref{tab:shock} reports static sensitivities at the \LatestYear{} debt ratio. A
+50 basis-point full-stock shock implies \ShockFiftyAdditionalPp{} percentage points of GDP in
+additional annual interest. A 100 basis-point shock implies \ShockHundredAdditionalPp{} percentage
+points. A 200 basis-point shock implies \ShockTwoHundredAdditionalPp{} percentage points. These numbers
 are useful for scale, but they deliberately overstate first-year budgetary
 effects when most debt is fixed-rate and matures gradually.
 
@@ -636,7 +637,7 @@ rate can rise gradually even without an immediate fiscal shock.
 \section{Discussion and Limitations}
 
 The evidence indicates that no single variable explains the full decline in
-Portugal's interest burden. The long-run decline from 1995 to 2025 reflects:
+Portugal's interest burden. The long-run decline from \MainStartYear{} to \LatestYear{} reflects:
 \begin{itemize}
   \item a large fall in the effective interest rate from high pre-euro and
         convergence-period levels;
@@ -691,9 +692,9 @@ and policy responses.
 \section{Conclusion}
 
 Portugal's general-government interest burden has declined dramatically in the
-harmonised ESA 2010 sample. The burden fell from 5.50 percent of GDP in 1995
-to 1.90 percent in 2025. The nominal interest bill, however, remained material:
-EUR 5.96 billion in 2025. This distinction is the core empirical lesson of the
+harmonised ESA 2010 sample. The burden fell from \InitialInterestPctGdp{} percent of GDP in \MainStartYear{}
+to \LatestInterestPctGdp{} percent in \LatestYear{}. The nominal interest bill, however, remained material:
+EUR \LatestInterestEurBn{} billion in \LatestYear{}. This distinction is the core empirical lesson of the
 paper. The euro amount, the GDP ratio, the debt ratio, the effective interest
 rate, and the market yield are related but distinct objects.
 
@@ -825,6 +826,7 @@ Review.
 \end{thebibliography}
 
 \end{document}
+
 
 
 

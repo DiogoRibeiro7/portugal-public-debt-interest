@@ -6,7 +6,7 @@ Date: 2026-07-28
 
 Commands completed successfully:
 
-- `pytest`: 145 passed, 5 warnings.
+- `pytest`: 147 passed, 5 warnings.
 - `ruff check .`: passed.
 - `mypy src`: passed.
 - `pt-debt all --config config/default.yaml`: completed.
@@ -27,6 +27,7 @@ Commands completed successfully:
 - Figure generation emits PNG, SVG, and vector PDF outputs; the LaTeX report embeds the PDF figures.
 - Debt/rate, expenditure, and revenue charts use stacked panels rather than mixed axes.
 - Main analytical paper tables are generated as tracked LaTeX fragments from processed outputs.
+- Recurring paper headline values are generated as LaTeX macros from processed outputs.
 
 ## Methodological Corrections Verified
 
@@ -41,6 +42,7 @@ Commands completed successfully:
 - Source provenance includes source database, source table or series, vintage, retrieval timestamp, and checksum fields where available.
 - Reproducibility metadata records package version, Python version, platform, git revision, config hash, and project settings.
 - The paper imports generated tables for summary statistics, regime averages, recent dynamics, European comparisons, static sensitivities, and the annual appendix table.
+- The paper imports generated headline macros for recurring abstract, introduction, interpretation, comparison, and sensitivity values.
 - The main paper no longer uses the previous level-correlation table as evidence.
 
 ## Remaining Warnings

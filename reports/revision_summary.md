@@ -17,6 +17,7 @@
 - Updated the paper's euro-area comparison table and added the exact decomposition figure.
 - Added reproducibility metadata and strengthened CI with `pip check`.
 - Replaced manually typed analytical paper tables with generated LaTeX fragments.
+- Replaced recurring manually typed headline values with generated LaTeX macros.
 
 ## Current Outputs
 
@@ -30,6 +31,7 @@
 - Reproducibility metadata: `reports/reproducibility.json`.
 - Figures: `reports/figures/` as PNG, SVG, and PDF files.
 - LaTeX table fragments: `reports/tables/`.
+- Headline macro fragment: `reports/tables/paper_headlines.tex`.
 
 ## Final State
 

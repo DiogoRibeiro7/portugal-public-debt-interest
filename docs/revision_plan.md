@@ -169,7 +169,7 @@ reconstructed_debt_ratio_change =
 
 9. **Replication metadata is incomplete.** No tracked lock file, no generated replication metadata, no report commit hash, no dirty-tree status, and no PDF/source checksum appendix.
 
-10. **Publication quality issues remain.** The remaining paper-level gap is fuller automation of prose headline values. Figure generation now includes vector PDF output, mixed-axis charts have been replaced by stacked-panel figures, LaTeX layout warnings have been cleared, and analytical tables are generated from processed data.
+10. **Publication quality issues remain.** Figure generation now includes vector PDF output, mixed-axis charts have been replaced by stacked-panel figures, LaTeX layout warnings have been cleared, analytical tables are generated from processed data, and recurring paper headline values are generated as LaTeX macros.
 
 ## File-by-file implementation plan
 
