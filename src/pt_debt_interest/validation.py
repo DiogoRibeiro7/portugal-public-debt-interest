@@ -246,6 +246,25 @@ def validate_dataset(
             )
         )
 
+    if "interest_burden_decomposition_residual_pp" in frame.columns:
+        burden_residual = frame["interest_burden_decomposition_residual_pp"].abs()
+        affected = frame.loc[
+            burden_residual > identity_tolerance_pp,
+            "year",
+        ].astype(int).tolist()
+        checks.append(
+            CheckResult(
+                name="interest_burden_decomposition",
+                passed=not affected,
+                severity="error",
+                detail=(
+                    "Interest-burden decomposition terms must reconstruct the "
+                    f"observed change within {identity_tolerance_pp} pp."
+                ),
+                affected_years=affected,
+            )
+        )
+
     observed_forecast_overlap: list[int] = []
     if {"year", "observation_status", "source"}.issubset(frame.columns):
         for year, group in frame.groupby("year"):

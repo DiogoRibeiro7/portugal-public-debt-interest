@@ -10,6 +10,7 @@ import pandas as pd
 
 from .config import EurostatSeriesSpec, Settings
 from .exceptions import SourceError
+from .interest_decomposition import build_interest_burden_decomposition
 from .metrics import calculate_metrics
 from .panel import (
     PANEL_MISSINGNESS_COLUMNS,
@@ -21,7 +22,7 @@ from .panel import (
 )
 from .sources.ameco import AmecoArchiveClient
 from .sources.eurostat import EurostatClient
-from .storage import save_processed
+from .storage import save_interest_decomposition, save_processed
 
 CANONICAL_PROVENANCE_COLUMNS = [
     "source",
@@ -365,5 +366,8 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
         denominator=settings.analysis.implicit_rate_denominator,
         regime_boundaries=boundaries,
     )
+    decomposition = build_interest_burden_decomposition(analytical)
+    analytical = analytical.merge(decomposition, on="year", how="left")
     save_processed(analytical, settings, root)
+    save_interest_decomposition(decomposition, settings, root)
     return analytical

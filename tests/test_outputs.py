@@ -25,6 +25,10 @@ def _fixture_frame() -> pd.DataFrame:
             "primary_balance_contribution_pp": [None, -1.7, -3.1],
             "stock_flow_adjustment_pp": [None, -1.0, 0.5],
             "observed_debt_ratio_change_pp": [None, -10.0, -10.0],
+            "rate_effect_pp": [None, 0.1, 0.2],
+            "average_debt_ratio_effect_pp": [None, -0.2, 0.1],
+            "interaction_effect_pp": [None, 0.0, 0.0],
+            "calculated_interest_burden_change_pp": [None, -0.1, 0.3],
             "source": ["Eurostat", "Eurostat", "Eurostat"],
             "accounting_basis": ["ESA2010", "ESA2010", "ESA2010"],
             "observation_status": ["observed", "observed", "observed"],
@@ -112,6 +116,7 @@ def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     assert "01_interest_pct_gdp.svg" in names
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
+    assert "10_interest_burden_decomposition.png" in names
     assert "figures_manifest.csv" in names
 
 

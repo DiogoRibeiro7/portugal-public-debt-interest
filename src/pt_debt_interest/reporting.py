@@ -67,6 +67,12 @@ interest divided by previous-year debt.
 {% if latest_deflator_growth is not none -%}
 - Latest observed GDP-deflator growth: **{{ latest_deflator_growth | round(2) }}%**.
 {% endif %}
+{% if latest_rate_effect is not none -%}
+- Latest exact interest-burden decomposition: rate effect
+  **{{ latest_rate_effect | round(2) }} pp**, average-debt-ratio effect
+  **{{ latest_average_debt_ratio_effect | round(2) }} pp**, and interaction
+  **{{ latest_interaction_effect | round(2) }} pp**.
+{% endif %}
 
 ## Fiscal-balance interpretation
 
@@ -236,6 +242,11 @@ def generate_report(
         latest_nominal_growth=_optional_float(latest, "nominal_gdp_growth_pct"),
         latest_real_growth=_optional_float(latest, "real_gdp_growth_pct"),
         latest_deflator_growth=_optional_float(latest, "gdp_deflator_growth_pct"),
+        latest_rate_effect=_optional_float(latest, "rate_effect_pp"),
+        latest_average_debt_ratio_effect=_optional_float(
+            latest, "average_debt_ratio_effect_pp"
+        ),
+        latest_interaction_effect=_optional_float(latest, "interaction_effect_pp"),
         peak_interest_ratio=float(peak_interest["interest_pct_gdp"]),
         peak_interest_year=int(peak_interest["year"]),
         sources=_joined_values(frame, "source"),

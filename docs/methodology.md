@@ -53,6 +53,19 @@ Debt dynamics are reported using a discrete approximation:
 
 Ratios are used internally and percentage-point outputs are written to the processed dataset. The stock-flow adjustment is calculated as the residual required to reconcile observed debt-ratio changes with the interest-growth term and primary balance.
 
+## Exact interest-burden decomposition
+
+Changes in the interest burden are decomposed as an accounting identity, not as a statistical model. The decomposed burden is reconstructed from euro interest expenditure and nominal GDP to avoid rounding differences in published percentage ratios. With \(r_t\) denoting interest expenditure divided by average debt and \(\bar{b}_t\) denoting average debt divided by GDP, the exact change is:
+
+\[
+\Delta(r_t\bar{b}_t) =
+\Delta r_t \bar{b}_{t-1}
++ r_{t-1}\Delta \bar{b}_t
++ \Delta r_t \Delta \bar{b}_t.
+\]
+
+The three terms are written as `rate_effect_pp`, `average_debt_ratio_effect_pp`, and `interaction_effect_pp`. Their sum must equal `calculated_interest_burden_change_pp` within numerical tolerance.
+
 ## Historical extension
 
 The main ESA 2010 series begins in 1995. Earlier AMECO observations are permitted only as a linked extension. Rows preserve:

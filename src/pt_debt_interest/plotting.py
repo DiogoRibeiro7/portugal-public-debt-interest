@@ -200,6 +200,46 @@ def plot_debt_dynamics(frame: pd.DataFrame, output_dir: Path) -> list[Path] | No
     return _save(fig, output_dir / "07_debt_dynamics")
 
 
+def plot_interest_burden_decomposition(
+    frame: pd.DataFrame,
+    output_dir: Path,
+) -> list[Path] | None:
+    """Plot the exact interest-burden decomposition."""
+    required = {
+        "rate_effect_pp",
+        "average_debt_ratio_effect_pp",
+        "interaction_effect_pp",
+        "calculated_interest_burden_change_pp",
+    }
+    if not required.issubset(frame.columns):
+        return None
+    complete = frame.dropna(subset=list(required))
+    if complete.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    ax.axhline(0.0, linewidth=1)
+    ax.plot(complete["year"], complete["rate_effect_pp"], label="Rate effect")
+    ax.plot(
+        complete["year"],
+        complete["average_debt_ratio_effect_pp"],
+        label="Average-debt ratio effect",
+    )
+    ax.plot(complete["year"], complete["interaction_effect_pp"], label="Interaction")
+    ax.plot(
+        complete["year"],
+        complete["calculated_interest_burden_change_pp"],
+        linestyle="--",
+        label="Observed change",
+    )
+    ax.set_title("Exact decomposition of the interest-burden change")
+    ax.set_xlabel("Year")
+    ax.set_ylabel("Percentage points of GDP")
+    ax.grid(True, alpha=0.25)
+    ax.legend()
+    _annotate_source(ax, complete)
+    return _save(fig, output_dir / "10_interest_burden_decomposition")
+
+
 def plot_european_comparison(
     panel_frame: pd.DataFrame | None,
     output_dir: Path,
@@ -357,6 +397,7 @@ def generate_all_plots(
         plot_debt_dynamics(frame, output_dir),
         plot_european_comparison(panel_frame, output_dir),
         plot_refinancing_shock_paths(scenario_frame, output_dir),
+        plot_interest_burden_decomposition(frame, output_dir),
     ]
     paths = [path for group in candidates if group is not None for path in group]
     paths.append(_write_manifest(paths, frame, output_dir))

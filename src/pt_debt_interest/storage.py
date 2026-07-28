@@ -63,6 +63,40 @@ def save_processed(
     return outputs
 
 
+def save_interest_decomposition(
+    frame: pd.DataFrame,
+    settings: Settings,
+    root: Path = Path("."),
+) -> dict[str, Path]:
+    """Save the exact interest-burden decomposition beside processed data."""
+    _validate_annual_keys(frame)
+    processed_dir = root / settings.paths.processed
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    outputs: dict[str, Path] = {}
+
+    if settings.storage.backend in {"csv", "both"}:
+        csv_path = processed_dir / "interest_burden_decomposition.csv"
+        frame.to_csv(csv_path, index=False)
+        outputs["csv"] = csv_path
+
+    if settings.storage.backend in {"sqlite", "both"}:
+        sqlite_path = processed_dir / settings.storage.sqlite_filename
+        with sqlite3.connect(sqlite_path) as connection:
+            frame.to_sql(
+                "interest_burden_decomposition",
+                connection,
+                if_exists="replace",
+                index=False,
+            )
+            connection.execute(
+                'CREATE UNIQUE INDEX IF NOT EXISTS idx_interest_burden_year '
+                'ON "interest_burden_decomposition" (year)'
+            )
+        outputs["sqlite"] = sqlite_path
+
+    return outputs
+
+
 def load_processed(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     """Load the processed analytical dataset, preferring CSV."""
     processed_dir = root / settings.paths.processed

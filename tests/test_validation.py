@@ -128,6 +128,24 @@ def test_validation_reports_missing_core_values_with_malformed_year() -> None:
     assert check["affected_years"] == []
 
 
+def test_validation_reports_interest_burden_decomposition_residual() -> None:
+    frame = pd.DataFrame(
+        {
+            "year": [2021, 2022],
+            "accounting_basis": ["ESA2010", "ESA2010"],
+            "interest_burden_decomposition_residual_pp": [0.0, 0.5],
+        }
+    )
+
+    result = validate_dataset(frame, 2021, 2022, 0.01, 0.001)
+    check = next(
+        item for item in result["checks"] if item["name"] == "interest_burden_decomposition"
+    )
+
+    assert result["passed"] is False
+    assert check["affected_years"] == [2022]
+
+
 def test_validation_reports_all_duplicate_year_rows() -> None:
     frame = pd.DataFrame(
         {

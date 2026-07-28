@@ -232,3 +232,31 @@ def test_build_eurostat_panel_writes_metrics_and_missingness(tmp_path: Path) -> 
 
     assert outputs["metrics"].exists()
     assert outputs["missingness"].exists()
+
+
+def test_build_dataset_writes_interest_decomposition(tmp_path: Path) -> None:
+    from pt_debt_interest.pipeline import build_dataset
+
+    settings = load_settings("config/default.yaml")
+    interim_dir = tmp_path / settings.paths.interim
+    interim_dir.mkdir(parents=True)
+    pd.DataFrame(
+        {
+            "year": [2021, 2022],
+            "interest_mio_eur": [2.0, 3.0],
+            "nominal_gdp_mio_eur": [100.0, 110.0],
+            "debt_mio_eur": [100.0, 120.0],
+            "source": ["Eurostat", "Eurostat"],
+            "accounting_basis": ["ESA2010", "ESA2010"],
+            "observation_status": ["observed", "observed"],
+        }
+    ).to_csv(interim_dir / "eurostat_main.csv", index=False)
+
+    result = build_dataset(settings, tmp_path)
+
+    assert "rate_effect_pp" in result.columns
+    assert (
+        tmp_path
+        / settings.paths.processed
+        / "interest_burden_decomposition.csv"
+    ).exists()
