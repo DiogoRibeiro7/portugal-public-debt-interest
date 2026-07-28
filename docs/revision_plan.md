@@ -169,7 +169,7 @@ reconstructed_debt_ratio_change =
 
 9. **Replication metadata is incomplete.** No tracked lock file, no generated replication metadata, no report commit hash, no dirty-tree status, and no PDF/source checksum appendix.
 
-10. **Publication quality issues remain.** Figures are PNG/SVG rather than vector PDF for LaTeX; `plot_debt_and_rate` uses a dual-axis chart; the LaTeX report contains manually typed analytical tables and values; the report has some overfull/underfull box warnings.
+10. **Publication quality issues remain.** The LaTeX report contains manually typed analytical tables and values, and the report has some overfull/underfull box warnings. Figure generation now includes vector PDF output, and mixed-axis charts have been replaced by stacked-panel figures.
 
 ## File-by-file implementation plan
 
@@ -268,7 +268,7 @@ reconstructed_debt_ratio_change =
 ### Stage 11: publication quality
 
 - Export PDF vector figures for LaTeX and PNG previews.
-- Remove dual-axis chart.
+- Replace mixed-axis charts with stacked-panel figures.
 - Generate analytical LaTeX tables from data.
 - Fix tied minima and maxima.
 - Add `docs/publication_quality_checklist.md`.

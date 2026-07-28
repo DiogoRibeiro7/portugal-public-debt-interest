@@ -24,6 +24,7 @@ Commands completed successfully:
 - Portugal 2025 interest-burden rank: 6.
 - Validation result: passed.
 - Figure generation emits PNG, SVG, and vector PDF outputs; the LaTeX report embeds the PDF figures.
+- Debt/rate, expenditure, and revenue charts use stacked panels rather than mixed axes.
 
 ## Methodological Corrections Verified
 

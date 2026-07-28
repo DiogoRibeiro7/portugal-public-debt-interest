@@ -82,24 +82,30 @@ def plot_interest_euros(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
 
 
 def plot_debt_and_rate(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
-    """Plot the debt ratio and implicit interest rate on separate axes."""
-    fig, ax_left = plt.subplots(figsize=(11, 6))
-    ax_right = ax_left.twinx()
-    ax_left.plot(frame["year"], frame["debt_pct_gdp"], label="Debt-to-GDP")
-    ax_right.plot(
+    """Plot the debt ratio and implicit interest rate in stacked panels."""
+    fig, (ax_debt, ax_rate) = plt.subplots(
+        2,
+        1,
+        figsize=(11, 7),
+        sharex=True,
+        gridspec_kw={"height_ratios": [1, 1]},
+    )
+    ax_debt.plot(frame["year"], frame["debt_pct_gdp"], label="Debt-to-GDP")
+    ax_debt.set_title("Debt stock and effective interest cost")
+    ax_debt.set_ylabel("Debt, percentage of GDP")
+    ax_debt.grid(True, alpha=0.25)
+    ax_debt.legend(loc="best")
+    ax_rate.plot(
         frame["year"],
         frame["implicit_interest_rate_average_debt_pct"],
         linestyle="--",
         label="Average-debt implicit rate",
     )
-    ax_left.set_title("Debt stock and effective interest cost")
-    ax_left.set_xlabel("Year")
-    ax_left.set_ylabel("Debt, percentage of GDP")
-    ax_right.set_ylabel("Implicit interest rate, percent")
-    ax_left.grid(True, alpha=0.25)
-    lines = [*ax_left.get_lines(), *ax_right.get_lines()]
-    ax_left.legend(lines, [str(line.get_label()) for line in lines], loc="best")
-    _annotate_source(ax_left, frame)
+    ax_rate.set_xlabel("Year")
+    ax_rate.set_ylabel("Implicit interest rate, percent")
+    ax_rate.grid(True, alpha=0.25)
+    ax_rate.legend(loc="best")
+    _annotate_source(ax_rate, frame)
     return _save(fig, output_dir / "03_debt_and_implicit_rate")
 
 
@@ -129,27 +135,27 @@ def plot_government_expenditure(frame: pd.DataFrame, output_dir: Path) -> list[P
     complete = frame.dropna(subset=list(required))
     if complete.empty:
         return None
-    fig, ax_left = plt.subplots(figsize=(11, 6))
-    ax_right = ax_left.twinx()
-    ax_left.plot(
+    fig, (ax_eur, ax_ratio) = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
+    ax_eur.plot(
         complete["year"],
         complete["government_expenditure_mio_eur"] / 1_000.0,
         label="Expenditure, EUR billion",
     )
-    ax_right.plot(
+    ax_eur.set_title("Portugal: general-government total expenditure")
+    ax_eur.set_ylabel("Billion euro")
+    ax_eur.grid(True, alpha=0.25)
+    ax_eur.legend(loc="best")
+    ax_ratio.plot(
         complete["year"],
         complete["government_expenditure_pct_gdp"],
         linestyle="--",
         label="Expenditure, % GDP",
     )
-    ax_left.set_title("Portugal: general-government total expenditure")
-    ax_left.set_xlabel("Year")
-    ax_left.set_ylabel("Billion euro")
-    ax_right.set_ylabel("Percentage of GDP")
-    ax_left.grid(True, alpha=0.25)
-    lines = [*ax_left.get_lines(), *ax_right.get_lines()]
-    ax_left.legend(lines, [str(line.get_label()) for line in lines], loc="best")
-    _annotate_source(ax_left, complete)
+    ax_ratio.set_xlabel("Year")
+    ax_ratio.set_ylabel("Percentage of GDP")
+    ax_ratio.grid(True, alpha=0.25)
+    ax_ratio.legend(loc="best")
+    _annotate_source(ax_ratio, complete)
     return _save(fig, output_dir / "11_government_expenditure")
 
 
@@ -161,27 +167,27 @@ def plot_government_revenue(frame: pd.DataFrame, output_dir: Path) -> list[Path]
     complete = frame.dropna(subset=list(required))
     if complete.empty:
         return None
-    fig, ax_left = plt.subplots(figsize=(11, 6))
-    ax_right = ax_left.twinx()
-    ax_left.plot(
+    fig, (ax_eur, ax_ratio) = plt.subplots(2, 1, figsize=(11, 7), sharex=True)
+    ax_eur.plot(
         complete["year"],
         complete["government_revenue_mio_eur"] / 1_000.0,
         label="Revenue, EUR billion",
     )
-    ax_right.plot(
+    ax_eur.set_title("Portugal: general-government total revenue")
+    ax_eur.set_ylabel("Billion euro")
+    ax_eur.grid(True, alpha=0.25)
+    ax_eur.legend(loc="best")
+    ax_ratio.plot(
         complete["year"],
         complete["government_revenue_pct_gdp"],
         linestyle="--",
         label="Revenue, % GDP",
     )
-    ax_left.set_title("Portugal: general-government total revenue")
-    ax_left.set_xlabel("Year")
-    ax_left.set_ylabel("Billion euro")
-    ax_right.set_ylabel("Percentage of GDP")
-    ax_left.grid(True, alpha=0.25)
-    lines = [*ax_left.get_lines(), *ax_right.get_lines()]
-    ax_left.legend(lines, [str(line.get_label()) for line in lines], loc="best")
-    _annotate_source(ax_left, complete)
+    ax_ratio.set_xlabel("Year")
+    ax_ratio.set_ylabel("Percentage of GDP")
+    ax_ratio.grid(True, alpha=0.25)
+    ax_ratio.legend(loc="best")
+    _annotate_source(ax_ratio, complete)
     return _save(fig, output_dir / "12_government_revenue")
 
 
