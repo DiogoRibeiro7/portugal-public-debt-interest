@@ -15,6 +15,8 @@
 \usepackage{enumitem}
 \usepackage{threeparttable}
 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
 \hypersetup{
   colorlinks=true,
   linkcolor=blue,
@@ -43,9 +45,9 @@
 
 \begin{abstract}
 This paper provides a reproducible empirical assessment of Portugal's
-general-government interest burden from 1995 to 2025, the harmonised Eurostat
+general government interest burden from 1995 to 2025, the harmonised Eurostat
 ESA 2010 period used for the main empirical sample. The dependent variable is
-interest payable by the general-government
+interest payable by the general government
 sector as a percentage of nominal GDP. The analysis separates three quantities
 that are frequently conflated in fiscal commentary: the national-accounts
 interest expense, the interest burden relative to GDP, and the market yield on
@@ -890,8 +892,8 @@ Year & Int./GDP & Interest & Debt/GDP & Impl. rate & Overall bal. & Primary bal.
 
 \section{Appendix B: Variable Definitions}
 
-\footnotesize
-\begin{longtable}{p{0.38\textwidth}p{0.14\textwidth}p{0.38\textwidth}}
+\scriptsize
+\begin{longtable}{L{0.40\textwidth}L{0.13\textwidth}L{0.37\textwidth}}
 \caption{Core analytical variables}\\
 \toprule
 Column & Unit & Definition \\
@@ -911,8 +913,8 @@ Column & Unit & Definition \\
 \texttt{nominal\_gdp\_mio\_eur} & EUR million & GDP at current market prices. \\
 \texttt{debt\_mio\_eur} & EUR million & Maastricht consolidated gross debt. \\
 \texttt{debt\_pct\_gdp} & percent of GDP & Preferred debt ratio. \\
-\texttt{implicit\_interest\_rate\_average\_debt\_pct} & percent & Interest payable divided by average debt. \\
-\texttt{effective\_interest\_rate\_debt\_dynamics\_pct} & percent & Interest payable divided by previous-year debt. \\
+\texttt{implicit\_interest\_rate\_}\\\texttt{average\_debt\_pct} & percent & Interest payable divided by average debt. \\
+\texttt{effective\_interest\_rate\_}\\\texttt{debt\_dynamics\_pct} & percent & Interest payable divided by previous-year debt. \\
 \texttt{overall\_balance\_pct\_gdp} & percent of GDP & Net lending or borrowing. \\
 \texttt{primary\_balance\_pct\_gdp} & percent of GDP & Overall balance plus interest expenditure. \\
 \texttt{nominal\_gdp\_growth\_pct} & percent & Annual growth of current-price GDP. \\

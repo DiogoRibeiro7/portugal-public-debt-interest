@@ -43,7 +43,7 @@ Commands completed successfully:
 ## Remaining Warnings
 
 - The validation report retains a warning for debt-ratio reconciliation in 1997 and 1998. This is a warning, not a failed check.
-- The LaTeX build reports minor overfull/underfull box warnings. The PDF builds successfully with vector figure inputs.
+- The LaTeX PDF builds successfully with vector figure inputs and no overfull, underfull, or warning entries in the build log.
 - The current AMECO archive did not yield complete pre-1995 analytical rows under the configured selectors; the generated main table therefore begins in 1995.
 
 ## Exclusion Check
