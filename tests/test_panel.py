@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from pt_debt_interest.config import EurostatSeriesSpec
+from pt_debt_interest.config import EurostatSeriesSpec, load_settings
 from pt_debt_interest.exceptions import ValidationError
 from pt_debt_interest.panel import (
     build_panel_metrics,
@@ -150,3 +150,32 @@ def test_build_panel_metrics_rejects_invalid_aggregate_flags() -> None:
 
     with pytest.raises(ValidationError, match="aggregate flags"):
         build_panel_metrics(frame, denominator="average_debt")
+
+
+def test_default_comparator_panel_covers_euro_area_members() -> None:
+    settings = load_settings("config/default.yaml")
+    expected = {
+        "AT",
+        "BE",
+        "CY",
+        "DE",
+        "EE",
+        "EL",
+        "ES",
+        "FI",
+        "FR",
+        "HR",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "PT",
+        "SI",
+        "SK",
+    }
+
+    assert expected.issubset(set(settings.project.comparison_geographies))
+    assert "EA20" in settings.project.comparison_geographies

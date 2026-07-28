@@ -5,7 +5,29 @@ project:
   main_start_year: 1995
   extended_start_year: 1960
   end_year: 2025
-  comparison_geographies: [PT, ES, IT, EL, IE, EA20, DE, NL]
+  comparison_geographies:
+    - PT
+    - BE
+    - DE
+    - EE
+    - IE
+    - EL
+    - ES
+    - FR
+    - HR
+    - IT
+    - CY
+    - LV
+    - LT
+    - LU
+    - MT
+    - NL
+    - AT
+    - SI
+    - SK
+    - FI
+    - EA20
+    - EU27_2020
 
 paths:
   raw: data/raw

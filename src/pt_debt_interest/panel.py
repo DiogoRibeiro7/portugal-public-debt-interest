@@ -12,17 +12,31 @@ from .exceptions import ValidationError
 from .metrics import calculate_metrics
 
 GEO_DISPLAY_NAMES = {
-    "PT": "Portugal",
-    "ES": "Spain",
-    "IT": "Italy",
-    "EL": "Greece",
-    "IE": "Ireland",
-    "EA20": "Euro area - 20 countries",
+    "AT": "Austria",
+    "BE": "Belgium",
+    "CY": "Cyprus",
     "DE": "Germany",
+    "EA20": "Euro area - 20 countries",
+    "EE": "Estonia",
+    "EL": "Greece",
+    "ES": "Spain",
+    "EU27_2020": "European Union - 27 countries",
+    "FI": "Finland",
+    "FR": "France",
+    "HR": "Croatia",
+    "IE": "Ireland",
+    "IT": "Italy",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "LV": "Latvia",
+    "MT": "Malta",
     "NL": "Netherlands",
+    "PT": "Portugal",
+    "SI": "Slovenia",
+    "SK": "Slovakia",
 }
 
-AGGREGATE_GEOS = {"EA", "EA12", "EA19", "EA20"}
+AGGREGATE_GEOS = {"EA", "EA12", "EA19", "EA20", "EU27_2020"}
 PANEL_MISSINGNESS_COLUMNS = [
     "interest_mio_eur",
     "interest_pct_gdp",
