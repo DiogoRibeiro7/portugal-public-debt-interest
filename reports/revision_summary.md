@@ -4,6 +4,7 @@
 
 - Added a methodological revision plan and committed it.
 - Added general-government total expenditure in both nominal and GDP-ratio terms.
+- Added general-government total revenue in both nominal and GDP-ratio terms.
 - Replaced the ambiguous implicit-rate treatment with explicit rate definitions.
 - Corrected debt-dynamics accounting to use interest divided by previous-year debt.
 - Added exact interest-burden decomposition outputs, tests, figure generation, and documentation.

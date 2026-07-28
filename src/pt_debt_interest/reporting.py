@@ -41,6 +41,11 @@ REPORT_TEMPLATE = Template(
   **EUR {{ latest_government_expenditure_bn | round(2) }} billion**,
   or **{{ latest_government_expenditure_ratio | round(2) }}% of GDP**.
 {% endif %}
+{% if latest_government_revenue_bn is not none -%}
+- Total general-government revenue:
+  **EUR {{ latest_government_revenue_bn | round(2) }} billion**,
+  or **{{ latest_government_revenue_ratio | round(2) }}% of GDP**.
+{% endif %}
 {% if latest_primary_balance is not none -%}
 - Primary balance: **{{ latest_primary_balance | round(2) }}% of GDP**.
 - Overall balance: **{{ latest_overall_balance | round(2) }}% of GDP**.
@@ -237,6 +242,10 @@ def generate_report(
         latest,
         "government_expenditure_mio_eur",
     )
+    latest_government_revenue_mio = _optional_float(
+        latest,
+        "government_revenue_mio_eur",
+    )
     figure_names = (
         ", ".join(path.name for path in figure_paths if path.suffix.lower() in {".png", ".svg"})
         if figure_paths
@@ -263,6 +272,12 @@ def generate_report(
         latest_government_expenditure_ratio=_optional_float(
             latest, "government_expenditure_pct_gdp"
         ),
+        latest_government_revenue_bn=(
+            latest_government_revenue_mio / 1_000.0
+            if latest_government_revenue_mio is not None
+            else None
+        ),
+        latest_government_revenue_ratio=_optional_float(latest, "government_revenue_pct_gdp"),
         latest_primary_balance=_optional_float(latest, "primary_balance_pct_gdp"),
         latest_overall_balance=_optional_float(latest, "overall_balance_pct_gdp"),
         latest_nominal_growth=_optional_float(latest, "nominal_gdp_growth_pct"),

@@ -52,6 +52,7 @@ def _validate_optional_percentages(frame: pd.DataFrame) -> None:
         "debt_pct_gdp_official",
         "overall_balance_pct_gdp",
         "government_expenditure_pct_gdp_official",
+        "government_revenue_pct_gdp_official",
     ]:
         if column not in frame.columns:
             continue
@@ -158,6 +159,10 @@ def calculate_metrics(
             / output["nominal_gdp_mio_eur"]
             * 100.0
         )
+    if "government_revenue_mio_eur" in output.columns:
+        output["government_revenue_pct_gdp_calculated"] = (
+            output["government_revenue_mio_eur"] / output["nominal_gdp_mio_eur"] * 100.0
+        )
     same_basis = _same_accounting_basis_as_previous(output)
     output["nominal_gdp_growth_pct"] = output["nominal_gdp_mio_eur"].pct_change() * 100.0
     output.loc[~same_basis, "nominal_gdp_growth_pct"] = np.nan
@@ -207,6 +212,13 @@ def calculate_metrics(
                 output["government_expenditure_pct_gdp_calculated"]
             )
         output["government_expenditure_pct_gdp"] = spending_ratio
+    if "government_revenue_mio_eur" in output.columns:
+        revenue_ratio = output.get("government_revenue_pct_gdp_official")
+        if revenue_ratio is None:
+            revenue_ratio = output["government_revenue_pct_gdp_calculated"]
+        else:
+            revenue_ratio = revenue_ratio.fillna(output["government_revenue_pct_gdp_calculated"])
+        output["government_revenue_pct_gdp"] = revenue_ratio
 
     if "overall_balance_pct_gdp" in output.columns:
         output["primary_balance_pct_gdp"] = (
@@ -261,6 +273,8 @@ def calculate_metrics(
         output["government_expenditure_eur"] = (
             output["government_expenditure_mio_eur"] * 1_000_000.0
         )
+    if "government_revenue_mio_eur" in output.columns:
+        output["government_revenue_eur"] = output["government_revenue_mio_eur"] * 1_000_000.0
     output["debt_eur"] = output["debt_mio_eur"] * 1_000_000.0
     output["nominal_gdp_eur"] = output["nominal_gdp_mio_eur"] * 1_000_000.0
 

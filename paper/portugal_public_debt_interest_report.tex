@@ -56,7 +56,8 @@ The central empirical result is that Portugal's interest burden fell from
 5.50 percent of GDP in 1995 to 1.90 percent of GDP in 2025, despite a higher
 debt ratio in 2025 than in the mid-1990s and despite a material nominal
 interest bill of EUR 5.96 billion. Total general-government expenditure was
-EUR 130.94 billion, or 42.70 percent of GDP, in 2025. The sovereign-debt crisis and adjustment
+EUR 130.94 billion, or 42.70 percent of GDP, while total revenue was
+EUR 133.00 billion, or 43.40 percent of GDP, in 2025. The sovereign-debt crisis and adjustment
 period, 2011--2014, remains the highest-burden regime in the harmonised sample,
 with mean interest expenditure of 4.67 percent of GDP. The post-2015 decline is
 best understood as the joint result of lower effective interest rates, debt
@@ -344,6 +345,8 @@ Interest/GDP (\%) & 3.287 & 0.969 & 1.900 & 2022 & 5.500 & 1995 \\
 Interest (EUR m) & 5531.365 & 1535.291 & 3475.400 & 1998 & 8334.400 & 2014 \\
 Government expenditure/GDP (\%) & 45.558 & 3.056 & 42.000 & 2023 & 51.900 & 2010 \\
 Government expenditure (EUR m) & 80221.719 & 23093.810 & 38798.300 & 1995 & 130941.400 & 2025 \\
+Government revenue/GDP (\%) & 41.526 & 2.023 & 37.400 & 1995 & 44.700 & 2013 \\
+Government revenue (EUR m) & 73889.542 & 24391.219 & 34084.900 & 1995 & 133000.000 & 2025 \\
 Debt/GDP (\%) & 92.258 & 29.324 & 54.200 & 2000 & 134.100 & 2020 \\
 Implicit interest rate (\%) & 3.849 & 1.470 & 1.708 & 2022 & 7.934 & 1996 \\
 Overall balance/GDP (\%) & -4.035 & 2.957 & -11.400 & 2010 & 1.100 & 2023 \\
@@ -407,6 +410,19 @@ larger expenditure envelope, not a proxy for total spending.
 \includegraphics[width=0.9\textwidth]{../reports/figures/11_government_expenditure.png}
 \caption{Portugal: total general-government expenditure.}
 \label{fig:government-expenditure}
+\end{figure}
+
+Figure \ref{fig:government-revenue} reports the matching total-revenue series.
+In 2025, general-government revenue was EUR 133.00 billion, equivalent to
+43.40 percent of GDP. Reading revenue and expenditure together gives the
+fiscal envelope within which interest costs are financed and primary balances
+are formed.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{../reports/figures/12_government_revenue.png}
+\caption{Portugal: total general-government revenue.}
+\label{fig:government-revenue}
 \end{figure}
 
 Figure \ref{fig:debt-rate} shows the debt ratio and implicit interest rate.
@@ -890,6 +906,8 @@ Column & Unit & Definition \\
 \texttt{interest\_pct\_gdp} & percent of GDP & Preferred interest burden: official Eurostat ratio with calculated fallback. \\
 \texttt{government\_expenditure\_mio\_eur} & EUR million & General-government total expenditure. \\
 \texttt{government\_expenditure\_pct\_gdp} & percent of GDP & Preferred total-expenditure ratio: official Eurostat ratio with calculated fallback. \\
+\texttt{government\_revenue\_mio\_eur} & EUR million & General-government total revenue. \\
+\texttt{government\_revenue\_pct\_gdp} & percent of GDP & Preferred total-revenue ratio: official Eurostat ratio with calculated fallback. \\
 \texttt{nominal\_gdp\_mio\_eur} & EUR million & GDP at current market prices. \\
 \texttt{debt\_mio\_eur} & EUR million & Maastricht consolidated gross debt. \\
 \texttt{debt\_pct\_gdp} & percent of GDP & Preferred debt ratio. \\

@@ -16,6 +16,11 @@
 | `government_expenditure_pct_gdp_calculated` | % GDP | Total expenditure in euros divided by current-price GDP |
 | `government_expenditure_pct_gdp` | % GDP | Preferred total-expenditure ratio: official, with calculated fallback |
 | `government_expenditure_eur` | € | General-government total expenditure in euros |
+| `government_revenue_mio_eur` | € million | General-government total revenue, Eurostat `TR` |
+| `government_revenue_pct_gdp_official` | % GDP | Official Eurostat total-revenue ratio |
+| `government_revenue_pct_gdp_calculated` | % GDP | Total revenue in euros divided by current-price GDP |
+| `government_revenue_pct_gdp` | % GDP | Preferred total-revenue ratio: official, with calculated fallback |
+| `government_revenue_eur` | € | General-government total revenue in euros |
 | `nominal_gdp_mio_eur` | € million | GDP at current market prices, `B1GQ` |
 | `nominal_gdp_growth_pct` | % | Annual current-price GDP growth |
 | `real_gdp_growth_pct` | % | Chain-linked volume change from previous year |

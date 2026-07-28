@@ -6,6 +6,8 @@
 
 - General-government total expenditure: Eurostat `gov_10a_main`, `sector=S13`,
   `na_item=TE`, units `MIO_EUR` and `PC_GDP`.
+- General-government total revenue: Eurostat `gov_10a_main`, `sector=S13`,
+  `na_item=TR`, units `MIO_EUR` and `PC_GDP`.
 - General-government interest payable: Eurostat `gov_10a_main`, `sector=S13`,
   `na_item=D41PAY`, units `MIO_EUR` and `PC_GDP`.
 - General-government net lending or borrowing: Eurostat `gov_10a_main`,

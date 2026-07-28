@@ -11,6 +11,8 @@ def test_calculate_core_metrics() -> None:
             "interest_mio_eur": [5000.0, 4800.0, 5500.0],
             "government_expenditure_mio_eur": [105000.0, 110000.0, 112000.0],
             "government_expenditure_pct_gdp_official": [47.7, 44.9, 42.3],
+            "government_revenue_mio_eur": [101000.0, 109000.0, 114000.0],
+            "government_revenue_pct_gdp_official": [45.9, 44.5, 43.0],
             "nominal_gdp_mio_eur": [220000.0, 245000.0, 265000.0],
             "debt_mio_eur": [270000.0, 272000.0, 265000.0],
             "overall_balance_pct_gdp": [-2.0, -0.3, 1.0],
@@ -24,6 +26,11 @@ def test_calculate_core_metrics() -> None:
         110000 / 245000 * 100
     )
     assert result.loc[1, "government_expenditure_eur"] == pytest.approx(110_000_000_000.0)
+    assert result.loc[1, "government_revenue_pct_gdp"] == pytest.approx(44.5)
+    assert result.loc[1, "government_revenue_pct_gdp_calculated"] == pytest.approx(
+        109000 / 245000 * 100
+    )
+    assert result.loc[1, "government_revenue_eur"] == pytest.approx(109_000_000_000.0)
     assert result.loc[1, "primary_balance_pct_gdp"] == pytest.approx(
         -0.3 + 4800 / 245000 * 100
     )

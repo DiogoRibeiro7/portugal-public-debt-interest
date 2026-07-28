@@ -45,6 +45,8 @@ PANEL_MISSINGNESS_COLUMNS = [
     "nominal_gdp_mio_eur",
     "government_expenditure_mio_eur",
     "government_expenditure_pct_gdp",
+    "government_revenue_mio_eur",
+    "government_revenue_pct_gdp",
     "implicit_interest_rate_average_debt_pct",
     "ten_year_yield_pct",
 ]

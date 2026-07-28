@@ -151,6 +151,38 @@ def plot_government_expenditure(frame: pd.DataFrame, output_dir: Path) -> list[P
     return _save(fig, output_dir / "11_government_expenditure")
 
 
+def plot_government_revenue(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
+    """Plot general-government revenue in euros and percent of GDP."""
+    required = {"government_revenue_mio_eur", "government_revenue_pct_gdp"}
+    if not required.issubset(frame.columns):
+        return None
+    complete = frame.dropna(subset=list(required))
+    if complete.empty:
+        return None
+    fig, ax_left = plt.subplots(figsize=(11, 6))
+    ax_right = ax_left.twinx()
+    ax_left.plot(
+        complete["year"],
+        complete["government_revenue_mio_eur"] / 1_000.0,
+        label="Revenue, EUR billion",
+    )
+    ax_right.plot(
+        complete["year"],
+        complete["government_revenue_pct_gdp"],
+        linestyle="--",
+        label="Revenue, % GDP",
+    )
+    ax_left.set_title("Portugal: general-government total revenue")
+    ax_left.set_xlabel("Year")
+    ax_left.set_ylabel("Billion euro")
+    ax_right.set_ylabel("Percentage of GDP")
+    ax_left.grid(True, alpha=0.25)
+    lines = [*ax_left.get_lines(), *ax_right.get_lines()]
+    ax_left.legend(lines, [str(line.get_label()) for line in lines], loc="best")
+    _annotate_source(ax_left, complete)
+    return _save(fig, output_dir / "12_government_revenue")
+
+
 def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
     """Compare market yield and whole-portfolio implicit interest rate."""
     if "ten_year_yield_pct" not in frame.columns:
@@ -445,6 +477,7 @@ def generate_all_plots(
         plot_refinancing_shock_paths(scenario_frame, output_dir),
         plot_interest_burden_decomposition(frame, output_dir),
         plot_government_expenditure(frame, output_dir),
+        plot_government_revenue(frame, output_dir),
     ]
     paths = [path for group in candidates if group is not None for path in group]
     scenario_path = write_refinancing_scenarios(scenario_frame, output_dir)
