@@ -15,7 +15,8 @@ Commands completed successfully:
 ## Data Checks
 
 - Annual analytical table: 31 rows, 1995-2025.
-- Annual analytical columns: 88.
+- Annual analytical columns: 101.
+- Total government expenditure fields: present in euro millions, euros, official percent of GDP, calculated percent of GDP, and preferred percent of GDP.
 - Generic implicit-rate output column: absent.
 - Euro-area comparator panel: 682 rows, 22 geographies.
 - Non-aggregate 2025 comparator countries: 20.
@@ -25,6 +26,7 @@ Commands completed successfully:
 ## Methodological Corrections Verified
 
 - Interest-rate concepts are separated into debt-dynamics and average-debt definitions.
+- General-government total expenditure is included as both a nominal value and percent of GDP.
 - Debt-dynamics contributions reconstruct observed debt-ratio changes within tolerance.
 - Interest-burden changes are decomposed exactly into rate, average-debt-ratio, and interaction effects.
 - Empty pre-1995 linked rows are excluded from the main analytical table.

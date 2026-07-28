@@ -13,6 +13,8 @@ def _fixture_frame() -> pd.DataFrame:
             "year": [2021, 2022, 2023],
             "interest_mio_eur": [5000.0, 4800.0, 5500.0],
             "interest_pct_gdp": [2.2, 2.0, 2.1],
+            "government_expenditure_mio_eur": [105000.0, 110000.0, 112000.0],
+            "government_expenditure_pct_gdp": [47.7, 44.9, 42.3],
             "debt_pct_gdp": [125.0, 115.0, 105.0],
             "implicit_interest_rate_average_debt_pct": [2.0, 1.8, 2.1],
             "overall_balance_pct_gdp": [-2.0, -0.3, 1.0],
@@ -117,6 +119,7 @@ def test_generate_all_plots_writes_png_svg_and_manifest(tmp_path: Path) -> None:
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
     assert "10_interest_burden_decomposition.png" in names
+    assert "11_government_expenditure.svg" in names
     assert "refinancing_scenarios.csv" in names
     assert "figures_manifest.csv" in names
 
@@ -199,6 +202,7 @@ def test_generate_report_writes_generated_values(tmp_path: Path) -> None:
 
     assert "2023" in content
     assert "5.5 billion" in content
+    assert "Total general-government expenditure" in content
     assert "European comparison" in content
     assert "Portugal ranked" in content
     assert "Static full-pass-through sensitivities" in content

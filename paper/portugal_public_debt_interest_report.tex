@@ -55,7 +55,8 @@ cross-country Eurostat comparison, and deterministic refinancing simulations.
 The central empirical result is that Portugal's interest burden fell from
 5.50 percent of GDP in 1995 to 1.90 percent of GDP in 2025, despite a higher
 debt ratio in 2025 than in the mid-1990s and despite a material nominal
-interest bill of EUR 5.96 billion. The sovereign-debt crisis and adjustment
+interest bill of EUR 5.96 billion. Total general-government expenditure was
+EUR 130.94 billion, or 42.70 percent of GDP, in 2025. The sovereign-debt crisis and adjustment
 period, 2011--2014, remains the highest-burden regime in the harmonised sample,
 with mean interest expenditure of 4.67 percent of GDP. The post-2015 decline is
 best understood as the joint result of lower effective interest rates, debt
@@ -223,11 +224,12 @@ year is marked as a basis break.
 The core evidence is drawn from Eurostat government-finance statistics,
 government-debt statistics, national accounts, and the harmonised long-term
 government bond yield series \cite{eurostatgov}. These sources provide the
-four empirical objects required by the paper: interest payable, gross public
-debt, nominal and real GDP, and a market-yield benchmark. The analysis uses
-million-euro values when the level of the interest bill is the object of
-interest and percentage-of-GDP measures when the fiscal burden is the object of
-interest.
+main empirical objects required by the paper: interest payable, total
+government expenditure, gross public debt, nominal and real GDP, and a
+market-yield benchmark. The analysis uses million-euro values when the level
+of the interest bill or total expenditure is the object of interest and
+percentage-of-GDP measures when the fiscal burden or fiscal scale is the object
+of interest.
 
 The European comparison is constructed under the same conceptual definitions:
 general government, annual frequency, harmonised national-accounts concepts,
@@ -340,6 +342,8 @@ Variable & Mean & Std. dev. & Min & Min year & Max & Max year \\
 \midrule
 Interest/GDP (\%) & 3.287 & 0.969 & 1.900 & 2022 & 5.500 & 1995 \\
 Interest (EUR m) & 5531.365 & 1535.291 & 3475.400 & 1998 & 8334.400 & 2014 \\
+Government expenditure/GDP (\%) & 45.558 & 3.056 & 42.000 & 2023 & 51.900 & 2010 \\
+Government expenditure (EUR m) & 80221.719 & 23093.810 & 38798.300 & 1995 & 130941.400 & 2025 \\
 Debt/GDP (\%) & 92.258 & 29.324 & 54.200 & 2000 & 134.100 & 2020 \\
 Implicit interest rate (\%) & 3.849 & 1.470 & 1.708 & 2022 & 7.934 & 1996 \\
 Overall balance/GDP (\%) & -4.035 & 2.957 & -11.400 & 2010 & 1.100 & 2023 \\
@@ -390,6 +394,19 @@ rapidly or when the debt ratio falls.
 \includegraphics[width=0.9\textwidth]{../reports/figures/02_interest_billion_eur.png}
 \caption{Portugal: interest expenditure in billion euros.}
 \label{fig:interest-eur}
+\end{figure}
+
+Figure \ref{fig:government-expenditure} reports total general-government
+expenditure both in nominal euros and relative to GDP. In 2025, total
+expenditure was EUR 130.94 billion, equivalent to 42.70 percent of GDP. This
+scale comparison clarifies that the interest bill is one component of a much
+larger expenditure envelope, not a proxy for total spending.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{../reports/figures/11_government_expenditure.png}
+\caption{Portugal: total general-government expenditure.}
+\label{fig:government-expenditure}
 \end{figure}
 
 Figure \ref{fig:debt-rate} shows the debt ratio and implicit interest rate.
@@ -871,18 +888,21 @@ Column & Unit & Definition \\
 \texttt{year} & year & Calendar year. \\
 \texttt{interest\_mio\_eur} & EUR million & General-government interest payable. \\
 \texttt{interest\_pct\_gdp} & percent of GDP & Preferred interest burden: official Eurostat ratio with calculated fallback. \\
+\texttt{government\_expenditure\_mio\_eur} & EUR million & General-government total expenditure. \\
+\texttt{government\_expenditure\_pct\_gdp} & percent of GDP & Preferred total-expenditure ratio: official Eurostat ratio with calculated fallback. \\
 \texttt{nominal\_gdp\_mio\_eur} & EUR million & GDP at current market prices. \\
 \texttt{debt\_mio\_eur} & EUR million & Maastricht consolidated gross debt. \\
 \texttt{debt\_pct\_gdp} & percent of GDP & Preferred debt ratio. \\
-\texttt{implicit\_interest\_rate\_pct} & percent & Interest payable divided by configured debt denominator. \\
+\texttt{implicit\_interest\_rate\_average\_debt\_pct} & percent & Interest payable divided by average debt. \\
+\texttt{effective\_interest\_rate\_debt\_dynamics\_pct} & percent & Interest payable divided by previous-year debt. \\
 \texttt{overall\_balance\_pct\_gdp} & percent of GDP & Net lending or borrowing. \\
 \texttt{primary\_balance\_pct\_gdp} & percent of GDP & Overall balance plus interest expenditure. \\
 \texttt{nominal\_gdp\_growth\_pct} & percent & Annual growth of current-price GDP. \\
 \texttt{real\_gdp\_growth\_pct} & percent & Chain-linked volume growth rate. \\
 \texttt{gdp\_deflator\_growth\_pct} & percent & Derived GDP deflator growth. \\
 \texttt{interest\_growth\_}\\\texttt{differential\_pct} & percentage points & Implicit interest rate minus nominal GDP growth. \\
-\texttt{debt\_stabilising\_}\\\texttt{primary\_balance\_pct\_gdp} & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
-\texttt{stock\_flow\_}\\\texttt{adjustment\_pct\_gdp} & percent of GDP & Debt-dynamics residual. \\
+\texttt{debt\_stabilising\_primary\_}\\\texttt{balance\_before\_sfa\_pct\_gdp} & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
+\texttt{stock\_flow\_adjustment\_pp} & percentage points & Debt-dynamics residual. \\
 \texttt{ten\_year\_yield\_pct} & percent & Long-term government bond yield. \\
 \texttt{source} & category & Source family, Eurostat or AMECO. \\
 \texttt{accounting\_basis} & category & Accounting framework label. \\

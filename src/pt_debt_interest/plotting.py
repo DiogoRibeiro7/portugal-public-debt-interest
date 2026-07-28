@@ -119,6 +119,38 @@ def plot_balances(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
     return _save(fig, output_dir / "04_overall_and_primary_balance")
 
 
+def plot_government_expenditure(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
+    """Plot general-government expenditure in euros and percent of GDP."""
+    required = {"government_expenditure_mio_eur", "government_expenditure_pct_gdp"}
+    if not required.issubset(frame.columns):
+        return None
+    complete = frame.dropna(subset=list(required))
+    if complete.empty:
+        return None
+    fig, ax_left = plt.subplots(figsize=(11, 6))
+    ax_right = ax_left.twinx()
+    ax_left.plot(
+        complete["year"],
+        complete["government_expenditure_mio_eur"] / 1_000.0,
+        label="Expenditure, EUR billion",
+    )
+    ax_right.plot(
+        complete["year"],
+        complete["government_expenditure_pct_gdp"],
+        linestyle="--",
+        label="Expenditure, % GDP",
+    )
+    ax_left.set_title("Portugal: general-government total expenditure")
+    ax_left.set_xlabel("Year")
+    ax_left.set_ylabel("Billion euro")
+    ax_right.set_ylabel("Percentage of GDP")
+    ax_left.grid(True, alpha=0.25)
+    lines = [*ax_left.get_lines(), *ax_right.get_lines()]
+    ax_left.legend(lines, [str(line.get_label()) for line in lines], loc="best")
+    _annotate_source(ax_left, complete)
+    return _save(fig, output_dir / "11_government_expenditure")
+
+
 def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
     """Compare market yield and whole-portfolio implicit interest rate."""
     if "ten_year_yield_pct" not in frame.columns:
@@ -412,6 +444,7 @@ def generate_all_plots(
         plot_european_comparison(panel_frame, output_dir),
         plot_refinancing_shock_paths(scenario_frame, output_dir),
         plot_interest_burden_decomposition(frame, output_dir),
+        plot_government_expenditure(frame, output_dir),
     ]
     paths = [path for group in candidates if group is not None for path in group]
     scenario_path = write_refinancing_scenarios(scenario_frame, output_dir)

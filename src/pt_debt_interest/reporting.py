@@ -36,6 +36,11 @@ REPORT_TEMPLATE = Template(
   **{{ latest_interest_ratio | round(2) }}% of GDP**.
 - Gross debt: **{{ latest_debt_ratio | round(2) }}% of GDP**.
 - Average-debt implicit interest rate: **{{ latest_implicit_rate | round(2) }}%**.
+{% if latest_government_expenditure_bn is not none -%}
+- Total general-government expenditure:
+  **EUR {{ latest_government_expenditure_bn | round(2) }} billion**,
+  or **{{ latest_government_expenditure_ratio | round(2) }}% of GDP**.
+{% endif %}
 {% if latest_primary_balance is not none -%}
 - Primary balance: **{{ latest_primary_balance | round(2) }}% of GDP**.
 - Overall balance: **{{ latest_overall_balance | round(2) }}% of GDP**.
@@ -228,6 +233,10 @@ def generate_report(
     peak_interest = observed.sort_values("interest_pct_gdp", ascending=False).iloc[0]
     shock_table = static_rate_shock_table(float(latest["debt_pct_gdp"]), shocks_bps)
     panel_summary = _panel_summary(panel_frame)
+    latest_government_expenditure_mio = _optional_float(
+        latest,
+        "government_expenditure_mio_eur",
+    )
     figure_names = (
         ", ".join(path.name for path in figure_paths if path.suffix.lower() in {".png", ".svg"})
         if figure_paths
@@ -246,6 +255,14 @@ def generate_report(
         latest_interest_ratio=float(latest["interest_pct_gdp"]),
         latest_debt_ratio=float(latest["debt_pct_gdp"]),
         latest_implicit_rate=float(latest["implicit_interest_rate_average_debt_pct"]),
+        latest_government_expenditure_bn=(
+            latest_government_expenditure_mio / 1_000.0
+            if latest_government_expenditure_mio is not None
+            else None
+        ),
+        latest_government_expenditure_ratio=_optional_float(
+            latest, "government_expenditure_pct_gdp"
+        ),
         latest_primary_balance=_optional_float(latest, "primary_balance_pct_gdp"),
         latest_overall_balance=_optional_float(latest, "overall_balance_pct_gdp"),
         latest_nominal_growth=_optional_float(latest, "nominal_gdp_growth_pct"),

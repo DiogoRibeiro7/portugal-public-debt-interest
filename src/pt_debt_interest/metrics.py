@@ -51,6 +51,7 @@ def _validate_optional_percentages(frame: pd.DataFrame) -> None:
         "interest_pct_gdp_official",
         "debt_pct_gdp_official",
         "overall_balance_pct_gdp",
+        "government_expenditure_pct_gdp_official",
     ]:
         if column not in frame.columns:
             continue
@@ -151,6 +152,12 @@ def calculate_metrics(
     output["debt_pct_gdp_calculated"] = (
         output["debt_mio_eur"] / output["nominal_gdp_mio_eur"] * 100.0
     )
+    if "government_expenditure_mio_eur" in output.columns:
+        output["government_expenditure_pct_gdp_calculated"] = (
+            output["government_expenditure_mio_eur"]
+            / output["nominal_gdp_mio_eur"]
+            * 100.0
+        )
     same_basis = _same_accounting_basis_as_previous(output)
     output["nominal_gdp_growth_pct"] = output["nominal_gdp_mio_eur"].pct_change() * 100.0
     output.loc[~same_basis, "nominal_gdp_growth_pct"] = np.nan
@@ -190,6 +197,16 @@ def calculate_metrics(
     else:
         debt_ratio = debt_ratio.fillna(output["debt_pct_gdp_calculated"])
     output["debt_pct_gdp"] = debt_ratio
+
+    if "government_expenditure_mio_eur" in output.columns:
+        spending_ratio = output.get("government_expenditure_pct_gdp_official")
+        if spending_ratio is None:
+            spending_ratio = output["government_expenditure_pct_gdp_calculated"]
+        else:
+            spending_ratio = spending_ratio.fillna(
+                output["government_expenditure_pct_gdp_calculated"]
+            )
+        output["government_expenditure_pct_gdp"] = spending_ratio
 
     if "overall_balance_pct_gdp" in output.columns:
         output["primary_balance_pct_gdp"] = (
@@ -240,6 +257,10 @@ def calculate_metrics(
     ] = np.nan
 
     output["interest_eur"] = output["interest_mio_eur"] * 1_000_000.0
+    if "government_expenditure_mio_eur" in output.columns:
+        output["government_expenditure_eur"] = (
+            output["government_expenditure_mio_eur"] * 1_000_000.0
+        )
     output["debt_eur"] = output["debt_mio_eur"] * 1_000_000.0
     output["nominal_gdp_eur"] = output["nominal_gdp_mio_eur"] * 1_000_000.0
 

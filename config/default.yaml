@@ -61,6 +61,14 @@ eurostat:
       dataset: gov_10a_main
       filters: {freq: A, unit: PC_GDP, sector: S13, na_item: B9, geo: PT}
       value_name: overall_balance_pct_gdp
+    government_expenditure_mio_eur:
+      dataset: gov_10a_main
+      filters: {freq: A, unit: MIO_EUR, sector: S13, na_item: TE, geo: PT}
+      value_name: government_expenditure_mio_eur
+    government_expenditure_pct_gdp_official:
+      dataset: gov_10a_main
+      filters: {freq: A, unit: PC_GDP, sector: S13, na_item: TE, geo: PT}
+      value_name: government_expenditure_pct_gdp_official
     debt_mio_eur:
       dataset: gov_10dd_edpt1
       filters: {freq: A, unit: MIO_EUR, sector: S13, na_item: GD, geo: PT}

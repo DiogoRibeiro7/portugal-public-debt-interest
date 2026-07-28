@@ -11,6 +11,11 @@
 | `interest_pct_gdp_official` | % GDP | Official Eurostat ratio |
 | `interest_pct_gdp_calculated` | % GDP | Interest in euros divided by current-price GDP |
 | `interest_pct_gdp` | % GDP | Preferred ratio: official, with calculated fallback |
+| `government_expenditure_mio_eur` | € million | General-government total expenditure, Eurostat `TE` |
+| `government_expenditure_pct_gdp_official` | % GDP | Official Eurostat total-expenditure ratio |
+| `government_expenditure_pct_gdp_calculated` | % GDP | Total expenditure in euros divided by current-price GDP |
+| `government_expenditure_pct_gdp` | % GDP | Preferred total-expenditure ratio: official, with calculated fallback |
+| `government_expenditure_eur` | € | General-government total expenditure in euros |
 | `nominal_gdp_mio_eur` | € million | GDP at current market prices, `B1GQ` |
 | `nominal_gdp_growth_pct` | % | Annual current-price GDP growth |
 | `real_gdp_growth_pct` | % | Chain-linked volume change from previous year |
