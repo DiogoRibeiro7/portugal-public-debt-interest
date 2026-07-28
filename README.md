@@ -82,6 +82,11 @@ Tests use local JSON-stat and AMECO fixtures. No network access is required:
 pytest
 ```
 
+## Citation
+
+Citation metadata is provided in `CITATION.cff` for GitHub and reference-manager
+workflows.
+
 ## Repository layout
 
 ```text

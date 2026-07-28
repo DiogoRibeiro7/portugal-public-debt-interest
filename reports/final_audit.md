@@ -28,6 +28,7 @@ Commands completed successfully:
 - Debt/rate, expenditure, and revenue charts use stacked panels rather than mixed axes.
 - Main analytical paper tables are generated as tracked LaTeX fragments from processed outputs.
 - Recurring paper headline values are generated as LaTeX macros from processed outputs.
+- Citation metadata is available in `CITATION.cff`.
 
 ## Methodological Corrections Verified
 

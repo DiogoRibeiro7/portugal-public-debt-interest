@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this project, please cite it using the metadata below."
+type: software
+title: "Portugal Public-Debt Interest Burden"
+authors:
+  - family-names: "Ribeiro"
+    given-names: "Diogo"
+repository-code: "https://github.com/DiogoRibeiro7/portugal-public-debt-interest"
+url: "https://github.com/DiogoRibeiro7/portugal-public-debt-interest"
+abstract: "Reproducible analysis of Portugal's general-government public-debt interest burden using harmonised Eurostat ESA 2010 data, AMECO-linked historical context, validation checks, figures, and a publication-oriented LaTeX report."
+keywords:
+  - "Portugal"
+  - "public debt"
+  - "interest expenditure"
+  - "fiscal policy"
+  - "debt dynamics"
+  - "Eurostat"
+  - "ESA 2010"
+license: "MIT"
+version: "0.1.0"
+date-released: "2026-07-28"

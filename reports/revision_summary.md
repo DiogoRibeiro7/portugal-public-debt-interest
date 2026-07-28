@@ -18,6 +18,7 @@
 - Added reproducibility metadata and strengthened CI with `pip check`.
 - Replaced manually typed analytical paper tables with generated LaTeX fragments.
 - Replaced recurring manually typed headline values with generated LaTeX macros.
+- Added citation metadata for software reuse.
 
 ## Current Outputs
 
@@ -32,6 +33,7 @@
 - Figures: `reports/figures/` as PNG, SVG, and PDF files.
 - LaTeX table fragments: `reports/tables/`.
 - Headline macro fragment: `reports/tables/paper_headlines.tex`.
+- Citation metadata: `CITATION.cff`.
 
 ## Final State
 

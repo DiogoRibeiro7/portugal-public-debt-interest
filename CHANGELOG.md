@@ -7,13 +7,16 @@
 - Added CSV and SQLite persistence with validation on write and read.
 - Hardened source parsing, configuration validation, annual-key handling, scenario inputs, report inputs, and comparator-panel flags.
 - Added local fixture-based tests, linting, type checking, and GitHub Actions CI configuration.
+- Added government expenditure and revenue measures in euros and as percentages of GDP.
+- Added generated LaTeX table fragments, headline macros, vector figure outputs, and citation metadata.
 
 ## Verification
 
-- `pytest`: 133 tests passed.
+- `pytest`: 147 tests passed.
 - `ruff check .`: passed.
 - `mypy src`: passed.
 - Live configured pipeline completed with `python -m pt_debt_interest.cli all --config config/default.yaml`.
+- LaTeX table generation and report compilation completed.
 
 ## Known External Blocker
 

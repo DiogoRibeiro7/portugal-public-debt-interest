@@ -276,6 +276,10 @@ reconstructed_debt_ratio_change =
 
 ### Stage 12: reproducibility metadata
 
+Status note: citation metadata and README citation guidance are now present.
+The remaining reproducibility items are lock/resolver documentation and any
+CI expansion that requires cached analytical fixtures or LaTeX availability.
+
 - Add/commit lock file or clearly document the supported resolver.
 - Add replication metadata generation:
   - project version;
