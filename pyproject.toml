@@ -67,6 +67,9 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["pt_debt_interest", "nbtools"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true

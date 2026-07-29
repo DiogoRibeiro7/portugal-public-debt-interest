@@ -74,6 +74,39 @@ use the refinancing shares and rate shocks configured in `config/default.yaml`.
 
 The default pipeline writes both CSV and SQLite outputs. Set `storage.backend: csv` or `storage.backend: sqlite` in the configuration to write only one format.
 
+## Notebooks
+
+`notebooks/` holds the guided analysis. Each notebook is a reader: it consumes
+the artefacts written by `pt-debt all` and never fetches from the network or
+writes to `data/`. They are committed **with their outputs**, so the figures and
+tables are readable on GitHub even though `data/processed/` and
+`reports/figures/` are git-ignored.
+
+| Notebook | Question it answers |
+| --- | --- |
+| `01_portugal_debt_interest.ipynb` | How large is the interest bill, why did the euro amount and the GDP ratio move in opposite directions, and how much of total public spending does it absorb? |
+| `02_data_quality_and_provenance.ipynb` | What is in the dataset, where did each value come from, and where do the official and calculated figures disagree? |
+| `03_debt_dynamics_and_decomposition.ipynb` | Was the change in the burden the price of the debt or its quantity, and what moved the debt ratio? |
+| `04_rate_pass_through_and_scenarios.ipynb` | How fast do market yields reach the effective cost of the stock, and what would a rate shock do? |
+| `05_european_comparison.ipynb` | Where does Portugal sit in the euro-area distribution, and is that about price or quantity? |
+
+The notebooks reuse `pt_debt_interest` rather than reimplementing its formulas.
+Notebook 03 recomputes the burden decomposition from the library and asserts
+that both accounting identities close before interpreting them, so a change in
+the library surfaces as a failing cell rather than a stale chart.
+
+`notebooks/nbtools.py` is shared infrastructure, not analysis: artefact loading,
+the harmonised-sample filter, and one chart style. It also puts `src/` on the
+path, so the notebooks run from a plain checkout without an editable install.
+
+To re-execute them after refreshing the data:
+
+```bash
+pt-debt all --config config/default.yaml
+cd notebooks
+jupyter nbconvert --to notebook --execute --inplace *.ipynb
+```
+
 ## Offline development
 
 Tests use local JSON-stat and AMECO fixtures. No network access is required:
@@ -92,7 +125,7 @@ workflows.
 ```text
 config/       Data sources and analysis settings
 data/         Raw, interim, and processed data
-notebooks/    Guided exploratory analysis
+notebooks/    Guided analysis, committed with executed outputs
 reports/      Generated figures, tables, and reports
 src/          Python package
 tests/       Unit and integration tests with fixtures
