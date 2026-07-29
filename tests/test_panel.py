@@ -101,7 +101,7 @@ def test_build_panel_metrics_adds_country_ranks() -> None:
         }
     )
 
-    result = build_panel_metrics(frame, denominator="average_debt")
+    result = build_panel_metrics(frame)
 
     pt_2022 = result.loc[(result["geo"] == "PT") & (result["year"] == 2022)].iloc[0]
     es_2022 = result.loc[(result["geo"] == "ES") & (result["year"] == 2022)].iloc[0]
@@ -128,7 +128,7 @@ def test_build_panel_metrics_parses_string_aggregate_flags() -> None:
         }
     )
 
-    result = build_panel_metrics(frame, denominator="average_debt")
+    result = build_panel_metrics(frame)
 
     pt = result.loc[result["geo"] == "PT"].iloc[0]
     ea = result.loc[result["geo"] == "EA20"].iloc[0]
@@ -149,7 +149,7 @@ def test_build_panel_metrics_rejects_invalid_aggregate_flags() -> None:
     )
 
     with pytest.raises(ValidationError, match="aggregate flags"):
-        build_panel_metrics(frame, denominator="average_debt")
+        build_panel_metrics(frame)
 
 
 def test_default_comparator_panel_covers_euro_area_members() -> None:

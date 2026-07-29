@@ -153,9 +153,9 @@ def refinancing_path_from_gdp(
 
 def comparator_rate_counterfactual(
     debt_pct_gdp: pd.Series,
-    portugal_implicit_rate_pct: pd.Series,
-    comparator_implicit_rate_pct: pd.Series,
+    portugal_average_debt_rate_pct: pd.Series,
+    comparator_average_debt_rate_pct: pd.Series,
 ) -> pd.Series:
-    """Estimate the GDP burden at a comparator's effective interest rate."""
-    del portugal_implicit_rate_pct  # retained in the signature for transparent comparisons
-    return debt_pct_gdp * comparator_implicit_rate_pct / 100.0
+    """Estimate the GDP burden at a comparator's average-debt rate."""
+    del portugal_average_debt_rate_pct
+    return debt_pct_gdp * comparator_average_debt_rate_pct / 100.0

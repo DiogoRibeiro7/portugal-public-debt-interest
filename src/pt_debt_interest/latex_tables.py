@@ -150,7 +150,7 @@ def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_y
         ("Government revenue/GDP (\\%)", "government_revenue_pct_gdp"),
         ("Government revenue (EUR m)", "government_revenue_mio_eur"),
         ("Debt/GDP (\\%)", "debt_pct_gdp"),
-        ("Implicit interest rate (\\%)", "implicit_interest_rate_average_debt_pct"),
+        ("Average-debt rate (\\%)", "average_debt_interest_rate_pct"),
         ("Overall balance/GDP (\\%)", "overall_balance_pct_gdp"),
         ("Primary balance/GDP (\\%)", "primary_balance_pct_gdp"),
         ("Nominal GDP growth (\\%)", "nominal_gdp_growth_pct"),
@@ -181,8 +181,8 @@ def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_y
         header=["Variable", "Mean", "Std. dev.", "Min", "Min year", "Max", "Max year"],
         rows=rows,
         notes=(
-            "Notes: Observed Eurostat ESA 2010 Portugal rows only. The implicit rate "
-            "uses average debt. Interest is general-government interest payable."
+            "Notes: Observed Eurostat ESA 2010 Portugal rows only. The average-debt "
+            "rate uses average debt. Interest is general-government interest payable."
         ),
     )
     return _write(output_dir / "summary_statistics.tex", content)
@@ -200,7 +200,7 @@ def regime_averages_table(frame: pd.DataFrame, output_dir: Path, main_start_year
                 _fmt(group["interest_pct_gdp"].mean(), 2),
                 _fmt(group["interest_mio_eur"].mean(), 2),
                 _fmt(group["debt_pct_gdp"].mean(), 2),
-                _fmt(group["implicit_interest_rate_average_debt_pct"].mean(), 2),
+                _fmt(group["average_debt_interest_rate_pct"].mean(), 2),
                 _fmt(group["nominal_gdp_growth_pct"].mean(), 2),
                 _fmt(group["primary_balance_pct_gdp"].mean(), 2),
             ]
@@ -215,7 +215,7 @@ def regime_averages_table(frame: pd.DataFrame, output_dir: Path, main_start_year
             "Int./GDP",
             "Int. EUR m",
             "Debt/GDP",
-            "Impl. rate",
+            "Avg. debt rate",
             "Nom. growth",
             "Prim. bal.",
         ],
@@ -241,7 +241,7 @@ def recent_dynamics_table(frame: pd.DataFrame, output_dir: Path, start_year: int
             _fmt(row.interest_pct_gdp, 1),
             _fmt(row.interest_mio_eur, 1),
             _fmt(row.debt_pct_gdp, 1),
-            _fmt(row.implicit_interest_rate_average_debt_pct, 2),
+            _fmt(row.average_debt_interest_rate_pct, 2),
             _fmt(row.overall_balance_pct_gdp, 1),
             _fmt(row.primary_balance_pct_gdp, 1),
             _fmt(row.nominal_gdp_growth_pct, 2),
@@ -257,7 +257,7 @@ def recent_dynamics_table(frame: pd.DataFrame, output_dir: Path, start_year: int
             "Int./GDP (\\%)",
             "Interest (EUR m)",
             "Debt/GDP (\\%)",
-            "Impl. rate (\\%)",
+            "Avg. debt rate (\\%)",
             "Overall bal. (\\% GDP)",
             "Primary bal. (\\% GDP)",
             "Nom. growth (\\%)",
@@ -265,6 +265,66 @@ def recent_dynamics_table(frame: pd.DataFrame, output_dir: Path, start_year: int
         rows=rows,
     )
     return _write(output_dir / "recent_dynamics.tex", content)
+
+
+def debt_dynamics_diagnostic_table(
+    frame: pd.DataFrame,
+    output_dir: Path,
+    start_year: int = 2020,
+    end_year: int = 2025,
+) -> Path:
+    """Write the generated debt-dynamics diagnostic table."""
+    source = frame.copy()
+    source["year"] = pd.to_numeric(source["year"], errors="raise").astype(int)
+    source = source.sort_values("year")
+    source["previous_debt_ratio"] = source["debt_pct_gdp"].shift(1) / 100.0
+    data = source.loc[
+        source["observation_status"].eq("observed") & source["year"].between(start_year, end_year)
+    ].copy()
+    data["year"] = pd.to_numeric(data["year"], errors="raise").astype(int)
+    rows = [
+        [
+            _int_text(row.year),
+            _fmt(row.interest_pct_gdp, 2),
+            _fmt(row.previous_debt_ratio, 4),
+            _fmt(_num(row.nominal_gdp_growth_pct) / 100.0, 4),
+            _fmt(row.average_debt_interest_rate, 4),
+            _fmt(row.debt_dynamics_interest_rate, 4),
+            _fmt(row.interest_growth_contribution, 4),
+            _fmt(row.primary_balance_contribution, 4),
+            _fmt(row.stock_flow_adjustment, 4),
+            _fmt(row.observed_debt_ratio_change, 4),
+            _fmt(row.reconstructed_debt_ratio_change, 4),
+            _fmt(row.debt_dynamics_reconciliation_error, 8),
+        ]
+        for row in data.sort_values("year").itertuples()
+    ]
+    content = _table(
+        caption="Debt-dynamics diagnostic table, Portugal, 2020--2025",
+        label="tab:debt-dynamics-diagnostic",
+        columns="rrrrrrrrrrrr",
+        header=[
+            "Year",
+            "Int./GDP",
+            "Lag debt/GDP",
+            "Nom. growth",
+            "$r^{AVG}$",
+            "$r^{DD}$",
+            "Int.-growth",
+            "Primary bal.",
+            "SFA",
+            "Observed $\\Delta d$",
+            "Rebuilt $\\Delta d$",
+            "Error",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: Rates and contribution terms are decimal ratios. The first row "
+            "uses the previous debt ratio available in the processed dataset; blank "
+            "entries indicate missing lagged inputs."
+        ),
+    )
+    return _write(output_dir / "debt_dynamics_diagnostic_2020_2025.tex", content)
 
 
 def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year: int) -> Path:
@@ -282,7 +342,7 @@ def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year:
             _escape(row.geo_name),
             _fmt(row.interest_pct_gdp, 1),
             _fmt(row.debt_pct_gdp, 1),
-            _fmt(row.implicit_interest_rate_average_debt_pct, 2),
+            _fmt(row.average_debt_interest_rate_pct, 2),
             _fmt(row.ten_year_yield_pct, 2),
             _fmt(row.primary_balance_pct_gdp, 1),
         ]
@@ -297,7 +357,7 @@ def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year:
             "Country",
             "Interest/GDP (\\%)",
             "Debt/GDP (\\%)",
-            "Impl. rate (\\%)",
+            "Avg. debt rate (\\%)",
             "Ten-year yield (\\%)",
             "Primary bal. (\\% GDP)",
         ],
@@ -349,7 +409,7 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
             _fmt(row.interest_pct_gdp, 1),
             _fmt(row.interest_mio_eur, 1),
             _fmt(row.debt_pct_gdp, 1),
-            _fmt(row.implicit_interest_rate_average_debt_pct, 2),
+            _fmt(row.average_debt_interest_rate_pct, 2),
             _fmt(row.overall_balance_pct_gdp, 1),
             _fmt(row.primary_balance_pct_gdp, 1),
             _fmt(row.nominal_gdp_growth_pct, 2),
@@ -363,7 +423,7 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
         r"\label{tab:annual-all}\\",
         r"\toprule",
         (
-            r"Year & Int./GDP & Interest & Debt/GDP & Impl. rate & "
+            r"Year & Int./GDP & Interest & Debt/GDP & Avg. debt rate & "
             r"Overall bal. & Primary bal. & Nom. growth \\"
         ),
         (
@@ -374,7 +434,7 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
         r"\endfirsthead",
         r"\toprule",
         (
-            r"Year & Int./GDP & Interest & Debt/GDP & Impl. rate & "
+            r"Year & Int./GDP & Interest & Debt/GDP & Avg. debt rate & "
             r"Overall bal. & Primary bal. & Nom. growth \\"
         ),
         (
@@ -454,7 +514,7 @@ def headline_macros(
         ),
         _macro("LatestGovernmentRevenuePctGdp", _fmt(latest["government_revenue_pct_gdp"], 2)),
         _macro("LatestDebtPctGdp", _fmt(latest["debt_pct_gdp"], 2)),
-        _macro("LatestImplicitRatePct", _fmt(latest["implicit_interest_rate_average_debt_pct"], 2)),
+        _macro("LatestAverageDebtRatePct", _fmt(latest["average_debt_interest_rate_pct"], 2)),
         _macro("LatestTenYearYieldPct", _fmt(latest["ten_year_yield_pct"], 2)),
         _macro("LatestOverallBalancePctGdp", _fmt(latest["overall_balance_pct_gdp"], 2)),
         _macro("LatestPrimaryBalancePctGdp", _fmt(latest["primary_balance_pct_gdp"], 2)),
@@ -485,23 +545,23 @@ def headline_macros(
         _macro("InterestPctGdpTwentyNineteen", _fmt(year_2019["interest_pct_gdp"], 2)),
         _macro("InterestPctGdpTwentyTwentyOne", _fmt(year_2021["interest_pct_gdp"], 2)),
         _macro(
-            "ImplicitRatePctTwentyTwentyOne",
-            _fmt(year_2021["implicit_interest_rate_average_debt_pct"], 2),
+            "AverageDebtRatePctTwentyTwentyOne",
+            _fmt(year_2021["average_debt_interest_rate_pct"], 2),
         ),
         _macro("DebtPctGdpTwentyFourteen", _fmt(year_2014["debt_pct_gdp"], 2)),
         _macro("DebtPctGdpTwentyTwenty", _fmt(year_2020["debt_pct_gdp"], 2)),
         _macro("DebtPctGdpTwentyTwentyTwo", _fmt(year_2022["debt_pct_gdp"], 2)),
         _macro(
-            "ImplicitRatePctTwentyTwentyTwo",
-            _fmt(year_2022["implicit_interest_rate_average_debt_pct"], 2),
+            "AverageDebtRatePctTwentyTwentyTwo",
+            _fmt(year_2022["average_debt_interest_rate_pct"], 2),
         ),
         _macro("CrisisMeanInterestPctGdp", _fmt(crisis["interest_pct_gdp"].mean(), 2)),
         _macro("CrisisMeanInterestEurBn", _fmt(crisis["interest_mio_eur"].mean() / 1_000.0, 2)),
         _macro("CrisisMeanDebtPctGdp", _fmt(crisis["debt_pct_gdp"].mean(), 2)),
         _macro("RecentMeanInterestPctGdp", _fmt(recent["interest_pct_gdp"].mean(), 2)),
         _macro(
-            "RecentMeanImplicitRatePct",
-            _fmt(recent["implicit_interest_rate_average_debt_pct"].mean(), 2),
+            "RecentMeanAverageDebtRatePct",
+            _fmt(recent["average_debt_interest_rate_pct"].mean(), 2),
         ),
         _macro("RecentMeanNominalGrowthPct", _fmt(recent["nominal_gdp_growth_pct"].mean(), 2)),
         _macro("NominalGdpGrowthTwentyTwentyTwo", _fmt(year_2022["nominal_gdp_growth_pct"], 2)),
@@ -522,10 +582,10 @@ def headline_macros(
             ),
         ),
         _macro(
-            "RecentImplicitRateIncreasePp",
+            "RecentAverageDebtRateIncreasePp",
             _fmt(
-                _num(latest["implicit_interest_rate_average_debt_pct"])
-                - _num(year_2022["implicit_interest_rate_average_debt_pct"]),
+                _num(latest["average_debt_interest_rate_pct"])
+                - _num(year_2022["average_debt_interest_rate_pct"]),
                 2,
             ),
         ),
@@ -566,6 +626,7 @@ def generate_latex_tables(
         summary_statistics_table(frame, output_dir, main_start_year),
         regime_averages_table(frame, output_dir, main_start_year),
         recent_dynamics_table(frame, output_dir),
+        debt_dynamics_diagnostic_table(frame, output_dir),
         static_sensitivities_table(frame, output_dir, shocks_bps),
         annual_portugal_table(frame, output_dir, main_start_year),
     ]

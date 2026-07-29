@@ -10,7 +10,7 @@ from .exceptions import ValidationError
 REQUIRED_COLUMNS = {
     "year",
     "interest_mio_eur",
-    "implicit_interest_rate_average_debt_decimal",
+    "average_debt_interest_rate",
     "debt_mio_eur",
     "nominal_gdp_mio_eur",
 }
@@ -23,7 +23,7 @@ def build_interest_burden_decomposition(frame: pd.DataFrame) -> pd.DataFrame:
 
         Delta(r * b) = Delta(r) * b[-1] + r[-1] * Delta(b) + Delta(r) * Delta(b)
 
-    where r is the average-debt implicit interest rate in decimal form and b is
+    where r is the average-debt interest rate in decimal form and b is
     average debt divided by nominal GDP. The decomposed burden is reconstructed
     from euro interest and euro GDP so the identity is not contaminated by
     rounded official percentage ratios. Outputs are percentage points of GDP.
@@ -41,7 +41,7 @@ def build_interest_burden_decomposition(frame: pd.DataFrame) -> pd.DataFrame:
         raise ValidationError("interest-burden decomposition requires whole-number years")
     average_debt = (ordered["debt_mio_eur"].shift(1) + ordered["debt_mio_eur"]) / 2.0
     average_debt_ratio = average_debt / ordered["nominal_gdp_mio_eur"]
-    rate = ordered["implicit_interest_rate_average_debt_decimal"]
+    rate = ordered["average_debt_interest_rate"]
     burden = ordered["interest_mio_eur"] / ordered["nominal_gdp_mio_eur"] * 100.0
 
     lag_rate = rate.shift(1)

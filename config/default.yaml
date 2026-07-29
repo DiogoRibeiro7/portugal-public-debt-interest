@@ -127,7 +127,6 @@ ameco:
 analysis:
   ratio_tolerance_pp: 0.15
   identity_tolerance_pp: 0.05
-  implicit_rate_denominator: average_debt
   static_rate_shocks_bps: [50, 100, 200]
   default_refinancing_shares: [0.12, 0.13, 0.14, 0.15, 0.16, 0.15, 0.15]
   observed_only_by_default: true

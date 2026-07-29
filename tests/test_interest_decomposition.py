@@ -13,7 +13,7 @@ def _frame() -> pd.DataFrame:
         {
             "year": [2020, 2021, 2022],
             "interest_mio_eur": [2.0, 2.31, 2.875],
-            "implicit_interest_rate_average_debt_decimal": [0.02, 0.022, 0.025],
+            "average_debt_interest_rate": [0.02, 0.022, 0.025],
             "debt_mio_eur": [100.0, 110.0, 120.0],
             "nominal_gdp_mio_eur": [100.0, 105.0, 112.0],
         }

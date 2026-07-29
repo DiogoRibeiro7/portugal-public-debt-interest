@@ -13,16 +13,23 @@ One row represents one calendar year. The principal population is Portugal's gen
 
 The authoritative numerator is Eurostat item `D41PAY`, general-government interest payable. The project retains both the official Eurostat percentage-of-GDP series and a ratio reconstructed from million-euro interest and GDP values.
 
-## Effective interest rate
+## Interest-rate definitions
 
-The default estimate is:
+The descriptive average-debt rate is:
 
 \[
-r_t^{\text{implicit}} =
-\frac{I_t}{(D_{t-1}+D_t)/2}\times 100.
+r_t^{AVG} =
+\frac{I_t}{(D_{t-1}+D_t)/2}.
 \]
 
-The average-debt denominator is intended to reduce distortion when the year-end debt stock changes sharply. A previous-year-debt definition is supported through configuration. The definition must be reported with every result.
+The debt-dynamics rate is:
+
+\[
+r_t^{DD} =
+\frac{I_t}{D_{t-1}}.
+\]
+
+Both rates are decimal ratios internally. Percentage conversion occurs only in reporting outputs. The average-debt denominator is intended to reduce distortion when the year-end debt stock changes sharply in descriptive average-cost analysis. The debt-dynamics denominator is previous-year debt because the discrete debt-ratio identity is written from \(D_{t-1}\) to \(D_t\).
 
 ## Primary balance
 
@@ -47,7 +54,7 @@ Debt dynamics are reported using a discrete approximation:
 
 \[
 \Delta d_t =
-\frac{r_t-g_t}{1+g_t}d_{t-1}
+\frac{r_t^{DD}-g_t}{1+g_t}d_{t-1}
 -pb_t+sfa_t.
 \]
 
@@ -55,13 +62,13 @@ Ratios are used internally and percentage-point outputs are written to the proce
 
 ## Exact interest-burden decomposition
 
-Changes in the interest burden are decomposed as an accounting identity, not as a statistical model. The decomposed burden is reconstructed from euro interest expenditure and nominal GDP to avoid rounding differences in published percentage ratios. With \(r_t\) denoting interest expenditure divided by average debt and \(\bar{b}_t\) denoting average debt divided by GDP, the exact change is:
+Changes in the interest burden are decomposed as an accounting identity, not as a statistical model. The decomposed burden is reconstructed from euro interest expenditure and nominal GDP to avoid rounding differences in published percentage ratios. With \(r_t^{AVG}\) denoting interest expenditure divided by average debt and \(\bar{b}_t\) denoting average debt divided by GDP, the exact change is:
 
 \[
-\Delta(r_t\bar{b}_t) =
-\Delta r_t \bar{b}_{t-1}
-+ r_{t-1}\Delta \bar{b}_t
-+ \Delta r_t \Delta \bar{b}_t.
+\Delta(r_t^{AVG}\bar{b}_t) =
+\Delta r_t^{AVG} \bar{b}_{t-1}
++ r_{t-1}^{AVG}\Delta \bar{b}_t
++ \Delta r_t^{AVG} \Delta \bar{b}_t.
 \]
 
 The three terms are written as `rate_effect_pp`, `average_debt_ratio_effect_pp`, and `interaction_effect_pp`. Their sum must equal `calculated_interest_burden_change_pp` within numerical tolerance.

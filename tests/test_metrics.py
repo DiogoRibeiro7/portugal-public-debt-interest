@@ -51,10 +51,10 @@ def test_calculate_core_metrics() -> None:
     assert result.loc[1, "primary_balance_pct_gdp"] == pytest.approx(
         -0.3 + 4800 / 245000 * 100
     )
-    assert result.loc[1, "implicit_interest_rate_average_debt_pct"] == pytest.approx(
+    assert result.loc[1, "average_debt_interest_rate_pct"] == pytest.approx(
         4800 / ((270000 + 272000) / 2) * 100
     )
-    assert result.loc[1, "effective_interest_rate_debt_dynamics_pct"] == pytest.approx(
+    assert result.loc[1, "debt_dynamics_interest_rate_pct"] == pytest.approx(
         4800 / 270000 * 100
     )
     assert "stock_flow_adjustment_pp" in result.columns
@@ -66,7 +66,7 @@ def test_calculate_core_metrics() -> None:
 def test_average_debt_rate_uses_average_stock() -> None:
     result = calculate_metrics(_sharp_debt_change_frame())
 
-    assert result.loc[1, "implicit_interest_rate_average_debt_decimal"] == pytest.approx(
+    assert result.loc[1, "average_debt_interest_rate"] == pytest.approx(
         8.0 / ((100.0 + 160.0) / 2.0)
     )
 
@@ -74,7 +74,7 @@ def test_average_debt_rate_uses_average_stock() -> None:
 def test_debt_dynamics_rate_uses_previous_debt() -> None:
     result = calculate_metrics(_sharp_debt_change_frame())
 
-    assert result.loc[1, "effective_interest_rate_debt_dynamics_decimal"] == pytest.approx(
+    assert result.loc[1, "debt_dynamics_interest_rate"] == pytest.approx(
         8.0 / 100.0
     )
 
@@ -82,8 +82,8 @@ def test_debt_dynamics_rate_uses_previous_debt() -> None:
 def test_rates_differ_when_debt_changes() -> None:
     result = calculate_metrics(_sharp_debt_change_frame())
 
-    average_rate = result.loc[1, "implicit_interest_rate_average_debt_decimal"]
-    debt_dynamics_rate = result.loc[1, "effective_interest_rate_debt_dynamics_decimal"]
+    average_rate = result.loc[1, "average_debt_interest_rate"]
+    debt_dynamics_rate = result.loc[1, "debt_dynamics_interest_rate"]
     assert average_rate == pytest.approx(8.0 / 130.0)
     assert debt_dynamics_rate == pytest.approx(8.0 / 100.0)
     assert debt_dynamics_rate - average_rate > 0.018
@@ -93,7 +93,7 @@ def test_debt_dynamics_rejects_average_rate_series() -> None:
     result = calculate_metrics(_sharp_debt_change_frame())
     previous_debt_ratio = result.loc[0, "debt_pct_gdp"] / 100.0
     growth = result.loc[1, "nominal_gdp_growth_pct"] / 100.0
-    average_rate = result.loc[1, "implicit_interest_rate_average_debt_decimal"]
+    average_rate = result.loc[1, "average_debt_interest_rate"]
     average_rate_contribution_pp = (
         ((average_rate - growth) / (1.0 + growth)) * previous_debt_ratio * 100.0
     )
@@ -124,20 +124,39 @@ def test_debt_dynamics_reconstructs_observed_debt_change() -> None:
     )
 
 
+def test_debt_stabilising_primary_balance_uses_debt_dynamics_rate() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+    previous_debt_ratio = result.loc[0, "debt_pct_gdp"] / 100.0
+    growth = result.loc[1, "nominal_gdp_growth_pct"] / 100.0
+    debt_dynamics_rate = result.loc[1, "debt_dynamics_interest_rate"]
+    average_debt_rate = result.loc[1, "average_debt_interest_rate"]
+    expected = ((debt_dynamics_rate - growth) / (1.0 + growth)) * previous_debt_ratio
+    wrong_average_rate_value = (
+        ((average_debt_rate - growth) / (1.0 + growth)) * previous_debt_ratio
+    )
+
+    assert result.loc[1, "debt_stabilising_primary_balance_before_sfa"] == pytest.approx(
+        expected
+    )
+    assert result.loc[1, "debt_stabilising_primary_balance_before_sfa"] != pytest.approx(
+        wrong_average_rate_value
+    ), "stabilising primary balance used the average-debt denominator"
+
+
 def test_first_year_rate_is_missing_without_previous_debt() -> None:
     result = calculate_metrics(_sharp_debt_change_frame())
 
-    assert pd.isna(result.loc[0, "implicit_interest_rate_average_debt_decimal"])
-    assert pd.isna(result.loc[0, "effective_interest_rate_debt_dynamics_decimal"])
+    assert pd.isna(result.loc[0, "average_debt_interest_rate"])
+    assert pd.isna(result.loc[0, "debt_dynamics_interest_rate"])
 
 
 def test_decimal_rate_not_confused_with_percent_rate() -> None:
     result = calculate_metrics(_sharp_debt_change_frame())
 
-    assert result.loc[1, "effective_interest_rate_debt_dynamics_decimal"] == pytest.approx(
+    assert result.loc[1, "debt_dynamics_interest_rate"] == pytest.approx(
         0.08
     )
-    assert result.loc[1, "effective_interest_rate_debt_dynamics_pct"] == pytest.approx(
+    assert result.loc[1, "debt_dynamics_interest_rate_pct"] == pytest.approx(
         8.0
     )
     assert result.loc[1, "interest_growth_contribution_pp"] == pytest.approx(
@@ -361,8 +380,8 @@ def test_calculate_metrics_nulls_lagged_values_across_basis_break() -> None:
     result = calculate_metrics(frame)
 
     assert pd.isna(result.loc[1, "nominal_gdp_growth_pct"])
-    assert pd.isna(result.loc[1, "effective_interest_rate_debt_dynamics_pct"])
-    assert pd.isna(result.loc[1, "implicit_interest_rate_average_debt_pct"])
+    assert pd.isna(result.loc[1, "debt_dynamics_interest_rate_pct"])
+    assert pd.isna(result.loc[1, "average_debt_interest_rate_pct"])
 
 
 def test_calculate_metrics_rejects_fractional_regime_boundary_years() -> None:

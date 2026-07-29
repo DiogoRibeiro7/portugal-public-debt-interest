@@ -82,7 +82,10 @@ def plot_interest_euros(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
 
 
 def plot_debt_and_rate(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
-    """Plot the debt ratio and implicit interest rate in stacked panels."""
+    """Plot the debt ratio and average-debt interest rate in stacked panels."""
+    required = {"debt_pct_gdp", "average_debt_interest_rate_pct"}
+    if not required.issubset(frame.columns):
+        return []
     fig, (ax_debt, ax_rate) = plt.subplots(
         2,
         1,
@@ -97,16 +100,16 @@ def plot_debt_and_rate(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
     ax_debt.legend(loc="best")
     ax_rate.plot(
         frame["year"],
-        frame["implicit_interest_rate_average_debt_pct"],
+        frame["average_debt_interest_rate_pct"],
         linestyle="--",
-        label="Average-debt implicit rate",
+        label="Average-debt rate",
     )
     ax_rate.set_xlabel("Year")
-    ax_rate.set_ylabel("Implicit interest rate, percent")
+    ax_rate.set_ylabel("Average-debt interest rate, percent")
     ax_rate.grid(True, alpha=0.25)
     ax_rate.legend(loc="best")
     _annotate_source(ax_rate, frame)
-    return _save(fig, output_dir / "03_debt_and_implicit_rate")
+    return _save(fig, output_dir / "03_debt_and_average_debt_rate")
 
 
 def plot_balances(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
@@ -192,15 +195,16 @@ def plot_government_revenue(frame: pd.DataFrame, output_dir: Path) -> list[Path]
 
 
 def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
-    """Compare market yield and whole-portfolio implicit interest rate."""
-    if "ten_year_yield_pct" not in frame.columns:
+    """Compare market yield and whole-portfolio average-debt rate."""
+    required = {"ten_year_yield_pct", "average_debt_interest_rate_pct"}
+    if not required.issubset(frame.columns):
         return None
     fig, ax = plt.subplots(figsize=(11, 6))
     ax.plot(frame["year"], frame["ten_year_yield_pct"], label="10-year convergence yield")
     ax.plot(
         frame["year"],
-        frame["implicit_interest_rate_average_debt_pct"],
-        label="Average-debt implicit rate",
+        frame["average_debt_interest_rate_pct"],
+        label="Average-debt rate",
     )
     ax.set_title("Market yield versus effective cost of the debt stock")
     ax.set_xlabel("Year")
@@ -208,7 +212,7 @@ def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path]
     ax.grid(True, alpha=0.25)
     ax.legend()
     _annotate_source(ax, frame)
-    return _save(fig, output_dir / "05_market_yield_vs_implicit_rate")
+    return _save(fig, output_dir / "05_market_yield_vs_average_debt_rate")
 
 
 def plot_growth_decomposition(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:

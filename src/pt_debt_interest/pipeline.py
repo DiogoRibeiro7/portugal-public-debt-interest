@@ -246,7 +246,6 @@ def build_eurostat_panel(settings: Settings, root: Path = Path(".")) -> dict[str
     boundaries = [boundary.model_dump() for boundary in settings.analysis.regime_boundaries]
     metrics = build_panel_metrics(
         raw_panel,
-        denominator=settings.analysis.implicit_rate_denominator,
         regime_boundaries=boundaries,
     )
     validate_country_year_panel(metrics)
@@ -480,7 +479,6 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     boundaries = [boundary.model_dump() for boundary in settings.analysis.regime_boundaries]
     analytical = calculate_metrics(
         combined,
-        denominator=settings.analysis.implicit_rate_denominator,
         regime_boundaries=boundaries,
     )
     decomposition = build_interest_burden_decomposition(analytical)

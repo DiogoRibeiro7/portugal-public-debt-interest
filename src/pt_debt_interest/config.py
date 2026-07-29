@@ -161,7 +161,6 @@ class AnalysisSection(BaseModel):
 
     ratio_tolerance_pp: float = 0.15
     identity_tolerance_pp: float = 0.05
-    implicit_rate_denominator: Literal["previous_debt", "average_debt"] = "average_debt"
     static_rate_shocks_bps: list[int] = Field(default_factory=lambda: [50, 100, 200])
     default_refinancing_shares: list[float] = Field(default_factory=list)
     observed_only_by_default: bool = True

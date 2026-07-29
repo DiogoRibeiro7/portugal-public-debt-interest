@@ -3,7 +3,12 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from pt_debt_interest.plotting import generate_all_plots, refinancing_shock_paths
+from pt_debt_interest.plotting import (
+    generate_all_plots,
+    plot_debt_dynamics,
+    plot_yield_pass_through,
+    refinancing_shock_paths,
+)
 from pt_debt_interest.reporting import generate_report
 
 
@@ -18,7 +23,7 @@ def _fixture_frame() -> pd.DataFrame:
             "government_revenue_mio_eur": [101000.0, 109000.0, 114000.0],
             "government_revenue_pct_gdp": [45.9, 44.5, 43.0],
             "debt_pct_gdp": [125.0, 115.0, 105.0],
-            "implicit_interest_rate_average_debt_pct": [2.0, 1.8, 2.1],
+            "average_debt_interest_rate_pct": [2.0, 1.8, 2.1],
             "overall_balance_pct_gdp": [-2.0, -0.3, 1.0],
             "primary_balance_pct_gdp": [0.2, 1.7, 3.1],
             "ten_year_yield_pct": [0.3, 1.7, 3.0],
@@ -129,6 +134,32 @@ def test_generate_all_plots_writes_png_svg_pdf_and_manifest(tmp_path: Path) -> N
     assert "12_government_revenue.pdf" in names
     assert "refinancing_scenarios.csv" in names
     assert "figures_manifest.csv" in names
+
+
+def test_debt_dynamics_plot_does_not_receive_average_debt_rate(tmp_path: Path) -> None:
+    frame = _fixture_frame().drop(columns=["average_debt_interest_rate_pct"])
+
+    paths = plot_debt_dynamics(frame, tmp_path)
+
+    assert paths is not None
+    assert {path.name for path in paths} == {
+        "07_debt_dynamics.png",
+        "07_debt_dynamics.svg",
+        "07_debt_dynamics.pdf",
+    }
+
+
+def test_market_yield_comparison_receives_average_debt_rate(tmp_path: Path) -> None:
+    paths = plot_yield_pass_through(_fixture_frame(), tmp_path)
+
+    assert paths is not None
+    assert "05_market_yield_vs_average_debt_rate.png" in {path.name for path in paths}
+
+
+def test_market_yield_comparison_rejects_missing_average_debt_rate(tmp_path: Path) -> None:
+    frame = _fixture_frame().drop(columns=["average_debt_interest_rate_pct"])
+
+    assert plot_yield_pass_through(frame, tmp_path) is None
 
 
 def test_generate_all_plots_parses_string_aggregate_flags(tmp_path: Path) -> None:
@@ -272,7 +303,7 @@ def test_generate_report_skips_fractional_panel_year(tmp_path: Path) -> None:
 
 
 def test_generate_report_rejects_missing_required_columns(tmp_path: Path) -> None:
-    frame = _fixture_frame().drop(columns=["implicit_interest_rate_average_debt_pct"])
+    frame = _fixture_frame().drop(columns=["average_debt_interest_rate_pct"])
 
     with pytest.raises(ValueError, match="missing required columns"):
         generate_report(frame, tmp_path / "summary.md", 1995, [100])
@@ -280,7 +311,7 @@ def test_generate_report_rejects_missing_required_columns(tmp_path: Path) -> Non
 
 def test_generate_report_rejects_incomplete_headline_rows(tmp_path: Path) -> None:
     frame = _fixture_frame()
-    frame["implicit_interest_rate_average_debt_pct"] = pd.NA
+    frame["average_debt_interest_rate_pct"] = pd.NA
 
     with pytest.raises(ValueError, match="complete headline metrics"):
         generate_report(frame, tmp_path / "summary.md", 1995, [100])

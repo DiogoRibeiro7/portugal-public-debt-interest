@@ -44,7 +44,7 @@ def _annual_frame() -> pd.DataFrame:
                 133000.0,
             ],
             "debt_pct_gdp": [132.5, 116.1, 134.1, 123.9, 111.2, 96.9, 93.5, 89.7],
-            "implicit_interest_rate_average_debt_pct": [
+            "average_debt_interest_rate_pct": [
                 3.68,
                 2.50,
                 2.20,
@@ -54,6 +54,77 @@ def _annual_frame() -> pd.DataFrame:
                 2.23,
                 2.18,
             ],
+            "average_debt_interest_rate": [
+                0.0368,
+                0.0250,
+                0.0220,
+                0.0190,
+                0.0171,
+                0.0208,
+                0.0223,
+                0.0218,
+            ],
+            "debt_dynamics_interest_rate": [
+                0.0380,
+                0.0252,
+                0.0221,
+                0.0192,
+                0.0173,
+                0.0210,
+                0.0225,
+                0.0220,
+            ],
+            "interest_growth_contribution": [
+                0.0100,
+                -0.0200,
+                0.1000,
+                -0.0700,
+                -0.1050,
+                -0.0780,
+                -0.0430,
+                -0.0320,
+            ],
+            "primary_balance_contribution": [
+                0.0260,
+                -0.0300,
+                0.0300,
+                0.0040,
+                -0.0160,
+                -0.0320,
+                -0.0260,
+                -0.0260,
+            ],
+            "stock_flow_adjustment": [
+                -0.0200,
+                0.0000,
+                0.0200,
+                -0.0360,
+                -0.0060,
+                -0.0330,
+                0.0350,
+                0.0200,
+            ],
+            "observed_debt_ratio_change": [
+                0.0160,
+                -0.0500,
+                0.1500,
+                -0.1020,
+                -0.1270,
+                -0.1430,
+                -0.0340,
+                -0.0380,
+            ],
+            "reconstructed_debt_ratio_change": [
+                0.0160,
+                -0.0500,
+                0.1500,
+                -0.1020,
+                -0.1270,
+                -0.1430,
+                -0.0340,
+                -0.0380,
+            ],
+            "debt_dynamics_reconciliation_error": [0.0] * len(years),
             "overall_balance_pct_gdp": [-7.4, 0.1, -5.8, -2.8, -0.3, 1.1, 0.6, 0.7],
             "primary_balance_pct_gdp": [-2.6, 3.0, -3.0, -0.4, 1.6, 3.2, 2.6, 2.6],
             "nominal_gdp_growth_pct": [1.47, 4.63, -6.27, 7.69, 12.69, 10.82, 7.19, 5.85],
@@ -84,7 +155,7 @@ def _panel_frame() -> pd.DataFrame:
             "interest_burden_rank": [2, 1],
             "interest_pct_gdp": [1.9, 3.9],
             "debt_pct_gdp": [89.7, 137.1],
-            "implicit_interest_rate_average_debt_pct": [2.18, 2.87],
+            "average_debt_interest_rate_pct": [2.18, 2.87],
             "ten_year_yield_pct": [3.08, 3.59],
             "primary_balance_pct_gdp": [2.6, 0.8],
             "is_aggregate": [False, False],
@@ -110,6 +181,7 @@ def test_generate_latex_tables_writes_expected_fragments(tmp_path: Path) -> None
     assert "european_comparison_2025.tex" in names
     assert "static_sensitivities.tex" in names
     assert "annual_portugal_table.tex" in names
+    assert "debt_dynamics_diagnostic_2020_2025.tex" in names
 
 
 def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
@@ -126,6 +198,9 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     comparison = (tmp_path / "european_comparison_2025.tex").read_text(encoding="utf-8")
     shock = (tmp_path / "static_sensitivities.tex").read_text(encoding="utf-8")
     headlines = (tmp_path / "paper_headlines.tex").read_text(encoding="utf-8")
+    diagnostic = (tmp_path / "debt_dynamics_diagnostic_2020_2025.tex").read_text(
+        encoding="utf-8"
+    )
 
     assert "Interest/GDP" in summary
     assert "1.900" in summary
@@ -134,3 +209,5 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     assert "89.70 & 100 & 0.010 & 0.897" in shock
     assert r"\newcommand{\LatestInterestPctGdp}{1.90}" in headlines
     assert r"\newcommand{\PortugalComparatorRankWord}{second}" in headlines
+    assert "Debt-dynamics diagnostic table" in diagnostic
+    assert "2025 & 1.90" in diagnostic

@@ -17,13 +17,13 @@ REQUIRED_REPORT_COLUMNS = {
     "interest_mio_eur",
     "interest_pct_gdp",
     "debt_pct_gdp",
-    "implicit_interest_rate_average_debt_pct",
+    "average_debt_interest_rate_pct",
 }
 HEADLINE_NUMERIC_COLUMNS = [
     "interest_mio_eur",
     "interest_pct_gdp",
     "debt_pct_gdp",
-    "implicit_interest_rate_average_debt_pct",
+    "average_debt_interest_rate_pct",
 ]
 
 REPORT_TEMPLATE = Template(
@@ -35,7 +35,7 @@ REPORT_TEMPLATE = Template(
 - Interest expenditure: **EUR {{ latest_interest_bn | round(2) }} billion**, or
   **{{ latest_interest_ratio | round(2) }}% of GDP**.
 - Gross debt: **{{ latest_debt_ratio | round(2) }}% of GDP**.
-- Average-debt implicit interest rate: **{{ latest_implicit_rate | round(2) }}%**.
+- Average-debt interest rate: **{{ latest_average_debt_rate | round(2) }}%**.
 {% if latest_government_expenditure_bn is not none -%}
 - Total general-government expenditure:
   **EUR {{ latest_government_expenditure_bn | round(2) }} billion**,
@@ -55,7 +55,7 @@ REPORT_TEMPLATE = Template(
 
 Interest expenditure is Eurostat ESA 2010 general-government interest payable
 (`D41PAY`). The main burden measure is interest divided by nominal GDP. The
-average-debt implicit interest rate is an average-stock measure and is not the
+average-debt interest rate is an average-stock measure and is not the
 same object as the ten-year sovereign yield. Debt-dynamics calculations use
 interest divided by previous-year debt.
 
@@ -267,7 +267,7 @@ def generate_report(
         latest_interest_bn=float(latest["interest_mio_eur"]) / 1_000.0,
         latest_interest_ratio=float(latest["interest_pct_gdp"]),
         latest_debt_ratio=float(latest["debt_pct_gdp"]),
-        latest_implicit_rate=float(latest["implicit_interest_rate_average_debt_pct"]),
+        latest_average_debt_rate=float(latest["average_debt_interest_rate_pct"]),
         latest_government_expenditure_bn=(
             latest_government_expenditure_mio / 1_000.0
             if latest_government_expenditure_mio is not None

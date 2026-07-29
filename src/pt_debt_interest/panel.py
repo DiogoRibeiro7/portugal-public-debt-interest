@@ -47,7 +47,7 @@ PANEL_MISSINGNESS_COLUMNS = [
     "government_expenditure_pct_gdp",
     "government_revenue_mio_eur",
     "government_revenue_pct_gdp",
-    "implicit_interest_rate_average_debt_pct",
+    "average_debt_interest_rate_pct",
     "ten_year_yield_pct",
 ]
 _TRUE_FLAG_VALUES = {"1", "true", "t", "yes", "y"}
@@ -157,7 +157,6 @@ def panel_missingness(frame: pd.DataFrame, value_columns: list[str]) -> pd.DataF
 
 def build_panel_metrics(
     frame: pd.DataFrame,
-    denominator: str,
     regime_boundaries: list[dict[str, object]] | None = None,
 ) -> pd.DataFrame:
     """Calculate fiscal metrics for each geography in a country-year panel."""
@@ -167,7 +166,6 @@ def build_panel_metrics(
         pieces.append(
             calculate_metrics(
                 group.sort_values("year"),
-                denominator=denominator,
                 regime_boundaries=regime_boundaries,
             )
         )
@@ -186,7 +184,7 @@ def add_panel_ranks(frame: pd.DataFrame) -> pd.DataFrame:
     output["average_debt_rate_rank"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
     rank_columns = {
         "interest_burden_rank": "interest_pct_gdp",
-        "average_debt_rate_rank": "implicit_interest_rate_average_debt_pct",
+        "average_debt_rate_rank": "average_debt_interest_rate_pct",
     }
     for rank_column, value_column in rank_columns.items():
         if value_column not in output.columns:
