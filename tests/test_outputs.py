@@ -6,6 +6,7 @@ import pytest
 from pt_debt_interest.plotting import (
     generate_all_plots,
     plot_debt_dynamics,
+    plot_interest_burden_decomposition,
     plot_yield_pass_through,
     refinancing_shock_paths,
 )
@@ -34,10 +35,6 @@ def _fixture_frame() -> pd.DataFrame:
             "primary_balance_contribution_pp": [None, -1.7, -3.1],
             "stock_flow_adjustment_pp": [None, -1.0, 0.5],
             "observed_debt_ratio_change_pp": [None, -10.0, -10.0],
-            "rate_effect_pp": [None, 0.1, 0.2],
-            "average_debt_ratio_effect_pp": [None, -0.2, 0.1],
-            "interaction_effect_pp": [None, 0.0, 0.0],
-            "calculated_interest_burden_change_pp": [None, -0.1, 0.3],
             "source": ["Eurostat", "Eurostat", "Eurostat"],
             "accounting_basis": ["ESA2010", "ESA2010", "ESA2010"],
             "observation_status": ["observed", "observed", "observed"],
@@ -127,13 +124,29 @@ def test_generate_all_plots_writes_png_svg_pdf_and_manifest(tmp_path: Path) -> N
     assert "08_european_comparison.png" in names
     assert "09_refinancing_shock_paths.svg" in names
     assert "09_refinancing_shock_paths.pdf" in names
-    assert "10_interest_burden_decomposition.png" in names
     assert "11_government_expenditure.svg" in names
     assert "11_government_expenditure.pdf" in names
     assert "12_government_revenue.svg" in names
     assert "12_government_revenue.pdf" in names
     assert "refinancing_scenarios.csv" in names
     assert "figures_manifest.csv" in names
+
+
+def test_interest_burden_decomposition_plot_uses_interval_table(tmp_path: Path) -> None:
+    frame = pd.DataFrame(
+        {
+            "start_year": [2014, 2022],
+            "end_year": [2025, 2025],
+            "rate_effect_pp": [-1.5, 0.2],
+            "debt_exposure_effect_pp": [-0.3, -0.1],
+            "total_change_pp": [-1.8, 0.1],
+        }
+    )
+
+    paths = plot_interest_burden_decomposition(frame, tmp_path)
+
+    assert paths is not None
+    assert "10_interest_burden_decomposition.png" in {path.name for path in paths}
 
 
 def test_debt_dynamics_plot_does_not_receive_average_debt_rate(tmp_path: Path) -> None:

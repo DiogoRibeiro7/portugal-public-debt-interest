@@ -64,7 +64,12 @@ EUR \LatestGovernmentRevenueEurBn{} billion, or \LatestGovernmentRevenuePctGdp{}
 period, 2011--2014, remains the highest-burden regime in the harmonised sample,
 with mean interest expenditure of \CrisisMeanInterestPctGdp{} percent of GDP. The post-2015 decline is
 best understood as the joint result of lower effective interest rates, debt
-refinancing, nominal GDP growth, and later debt-ratio reduction. By \LatestYear{},
+refinancing, nominal GDP growth, and later debt-ratio reduction. In the exact
+2014--\LatestYear{} decomposition, the reconstructed burden changed by
+\DecompTotalTwentyFourteenToLatestPp{} percentage points, with
+\DecompRateTwentyFourteenToLatestPp{} percentage points from the average
+financing-cost effect and \DecompExposureTwentyFourteenToLatestPp{} percentage
+points from the debt-exposure effect. By \LatestYear{},
 Portugal ranked \PortugalComparatorRankWord{} among the \ComparatorCountryCountWord{} euro-area country comparators by
 interest expenditure as a percentage of GDP, below Italy, Greece, Spain,
 Belgium, and France. The paper emphasises
@@ -274,6 +279,26 @@ The denominator is the average of prior-year and current-year debt. This
 choice reduces mechanical distortion when year-end debt moves sharply. It also
 matches the paper's emphasis on the average cost of the outstanding stock
 rather than the marginal cost of new borrowing.
+
+The interest-burden decomposition uses the exact factorisation
+\(b_t^{R}=r_t^{AVG}d_t^{AVG}\), where
+\(d_t^{AVG}=((D_{t-1}+D_t)/2)/Y_t\) and \(b_t^{R}\) is the reconstructed
+burden from unrounded nominal interest and GDP. Between endpoint years 0 and
+1, the symmetric exact decomposition is:
+\begin{equation}
+  b_1^{R}-b_0^{R}
+  =
+  \frac{d_1^{AVG}+d_0^{AVG}}{2}
+  \left(r_1^{AVG}-r_0^{AVG}\right)
+  +
+  \frac{r_1^{AVG}+r_0^{AVG}}{2}
+  \left(d_1^{AVG}-d_0^{AVG}\right).
+  \label{eq:burden-decomposition}
+\end{equation}
+The first component is the average financing-cost effect. The second is the
+debt-exposure effect. No separate interaction term is used in the principal
+decomposition because the symmetric formula allocates the full endpoint change
+exactly to the two reported components.
 
 Interest expenditure is recorded as a positive expense. Therefore:
 \begin{equation}
@@ -551,20 +576,39 @@ dataset, it ranges from -4.29 percentage points of GDP in 1997 to
 4.67 percentage points in 2011. It should not be interpreted as an estimated
 policy instrument. It is an accounting reconciliation term.
 
-Figure \ref{fig:interest-burden-decomposition} decomposes annual changes in the
-interest burden into an average financing-cost effect, an average-debt-ratio
-effect, and their interaction. The figure reinforces the central measurement
-point: the burden can fall even when the nominal interest bill remains large if
-the average cost of the outstanding stock declines or if debt falls relative to
-GDP. It also shows why the post-2022 tightening episode should be interpreted
-through pass-through to the stock rather than through benchmark yields alone.
+Figure \ref{fig:interest-burden-decomposition} applies Equation
+\ref{eq:burden-decomposition} to selected endpoint intervals. The principal
+decomposition has two components: the average financing-cost effect and the
+debt-exposure effect. For 2014--\LatestYear{}, the reconstructed interest
+burden changed by \DecompTotalTwentyFourteenToLatestPp{} percentage points of
+GDP. The average financing-cost effect contributed
+\DecompRateTwentyFourteenToLatestPp{} percentage points, while the debt-exposure
+effect contributed \DecompExposureTwentyFourteenToLatestPp{} percentage points.
+The dominant component was \DecompDominantTwentyFourteenToLatest{}, and the
+reconciliation error was \DecompErrorTwentyFourteenToLatestPp{} percentage
+points. For 1996--\LatestYear{}, the reconstructed burden changed by
+\DecompTotalNineteenNinetySixToLatestPp{} percentage points. The average
+financing-cost effect contributed \DecompRateNineteenNinetySixToLatestPp{}
+percentage points, while the debt-exposure effect contributed
+\DecompExposureNineteenNinetySixToLatestPp{} percentage points. The dominant
+component was \DecompDominantNineteenNinetySixToLatest{}, and the reconciliation
+error was \DecompErrorNineteenNinetySixToLatestPp{} percentage points.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{../reports/figures/10_interest_burden_decomposition.pdf}
-\caption{Portugal: exact decomposition of the interest-burden change.}
+\caption{Portugal: endpoint decomposition of the reconstructed interest-burden change.}
 \label{fig:interest-burden-decomposition}
 \end{figure}
+
+\input{../reports/tables/interest_burden_decomposition_endpoints.tex}
+
+Table \ref{tab:interest-burden-counterfactuals} reports arithmetic
+counterfactuals for 2014 and \LatestYear{}. These calculations hold one factor
+fixed while replacing the other with the endpoint value. They are accounting
+comparisons, not causal estimates.
+
+\input{../reports/tables/interest_burden_counterfactuals.tex}
 
 Table \ref{tab:recent} provides recent annual observations. The key pattern is
 visible in the last four rows. From 2022 to \LatestYear{} the nominal interest bill rose
@@ -704,11 +748,21 @@ rate, and the market yield are related but distinct objects.
 The sovereign-debt crisis and adjustment period remains the highest-burden
 regime in the sample. The post-2015 decline reflects a lower average cost of
 debt, refinancing effects, primary-balance improvement, and later nominal GDP
-growth and debt-ratio reduction. The recent tightening period has not yet
-translated one-for-one into the interest burden because the debt stock reprices
-gradually and because the GDP denominator grew strongly. This does not remove
-the risk from sustained higher rates; it clarifies the channel through which
-that risk reaches the budget.
+growth and debt-ratio reduction. The generated endpoint decomposition shows
+that from 2014 to \LatestYear{} the reconstructed interest burden changed by
+\DecompTotalTwentyFourteenToLatestPp{} percentage points: the average
+financing-cost effect contributed \DecompRateTwentyFourteenToLatestPp{}
+percentage points and the debt-exposure effect contributed
+\DecompExposureTwentyFourteenToLatestPp{} percentage points. Over 1996--\LatestYear{},
+the corresponding total change was \DecompTotalNineteenNinetySixToLatestPp{}
+percentage points, with \DecompRateNineteenNinetySixToLatestPp{} percentage
+points from the average financing-cost effect and
+\DecompExposureNineteenNinetySixToLatestPp{} percentage points from
+debt exposure. The recent tightening period has not yet translated one-for-one
+into the interest burden because the debt stock reprices gradually and because
+the GDP denominator grew strongly. This does not remove the risk from sustained
+higher rates; it clarifies the channel through which that risk reaches the
+budget.
 
 In the 2025 comparator panel, Portugal occupied an intermediate position among
 euro-area countries. It had a lower interest burden than Italy, Greece, Spain,

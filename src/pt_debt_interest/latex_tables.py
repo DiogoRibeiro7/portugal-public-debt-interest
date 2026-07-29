@@ -8,6 +8,10 @@ from typing import Any
 
 import pandas as pd
 
+from .interest_decomposition import (
+    build_interest_burden_counterfactuals,
+    build_interest_burden_decomposition,
+)
 from .panel import aggregate_flag_mask
 from .scenarios import static_rate_shock_table
 
@@ -401,6 +405,82 @@ def static_sensitivities_table(
     return _write(output_dir / "static_sensitivities.tex", content)
 
 
+def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -> Path:
+    decomposition = build_interest_burden_decomposition(frame)
+    rows = [
+        [
+            _int_text(row.start_year),
+            _int_text(row.end_year),
+            _fmt(row.start_reconstructed_burden_pct_gdp, 2),
+            _fmt(row.end_reconstructed_burden_pct_gdp, 2),
+            _fmt(row.total_change_pp, 2),
+            _fmt(row.rate_effect_pp, 2),
+            _fmt(row.debt_exposure_effect_pp, 2),
+            _fmt(row.decomposition_reconciliation_error_pp, 8),
+            _escape(row.dominant_effect),
+            _fmt(row.official_start_burden_pct_gdp, 2),
+            _fmt(row.official_end_burden_pct_gdp, 2),
+        ]
+        for row in decomposition.itertuples()
+    ]
+    content = _table(
+        caption="Endpoint decomposition of reconstructed interest-burden changes",
+        label="tab:interest-burden-endpoints",
+        columns="rrrrrrrrlrr",
+        header=[
+            "Start",
+            "End",
+            "Start burden",
+            "End burden",
+            "Total",
+            "Rate",
+            "Debt exposure",
+            "Error",
+            "Dominant",
+            "Official start",
+            "Official end",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: Burdens are percent of GDP. Effects and errors are percentage "
+            "points. The decomposition uses unrounded nominal interest, debt, and GDP."
+        ),
+    )
+    return _write(output_dir / "interest_burden_decomposition_endpoints.tex", content)
+
+
+def interest_burden_counterfactuals_table(frame: pd.DataFrame, output_dir: Path) -> Path:
+    counterfactuals = build_interest_burden_counterfactuals(frame)
+    rows = [
+        [
+            _int_text(row.year),
+            _escape(row.counterfactual),
+            _fmt(_num(row.average_debt_rate) * 100.0, 2),
+            _fmt(_num(row.average_debt_exposure) * 100.0, 2),
+            _fmt(row.interest_burden_pct_gdp, 2),
+        ]
+        for row in counterfactuals.itertuples()
+    ]
+    content = _table(
+        caption="Arithmetic interest-burden counterfactuals, 2014 and 2025",
+        label="tab:interest-burden-counterfactuals",
+        columns="rlrrr",
+        header=[
+            "Year",
+            "Scenario",
+            "Average-debt rate",
+            "Debt exposure",
+            "Burden",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: These are arithmetic counterfactuals, not causal estimates. "
+            "Rates, debt exposure, and burden are reported in percent."
+        ),
+    )
+    return _write(output_dir / "interest_burden_counterfactuals.tex", content)
+
+
 def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year: int) -> Path:
     data = _observed_portugal(frame, main_start_year)
     rows = [
@@ -476,6 +556,13 @@ def headline_macros(
     recent = data.loc[data["regime"].eq("Inflation and monetary tightening")]
     shock_table = static_rate_shock_table(_num(latest["debt_pct_gdp"]), shocks_bps)
     shock_by_bps = {int(_num(row.shock_bps)): row for row in shock_table.itertuples()}
+    decomposition = build_interest_burden_decomposition(frame)
+    interval_2014_2025 = decomposition.loc[
+        decomposition["start_year"].eq(2014) & decomposition["end_year"].eq(2025)
+    ].iloc[0]
+    interval_1996_2025 = decomposition.loc[
+        decomposition["start_year"].eq(1996) & decomposition["end_year"].eq(2025)
+    ].iloc[0]
     panel_rank = ""
     panel_count = ""
     if panel_frame is not None:
@@ -589,6 +676,46 @@ def headline_macros(
                 2,
             ),
         ),
+        _macro(
+            "DecompTotalTwentyFourteenToLatestPp",
+            _fmt(interval_2014_2025.total_change_pp, 2),
+        ),
+        _macro(
+            "DecompRateTwentyFourteenToLatestPp",
+            _fmt(interval_2014_2025.rate_effect_pp, 2),
+        ),
+        _macro(
+            "DecompExposureTwentyFourteenToLatestPp",
+            _fmt(interval_2014_2025.debt_exposure_effect_pp, 2),
+        ),
+        _macro(
+            "DecompErrorTwentyFourteenToLatestPp",
+            _fmt(interval_2014_2025.decomposition_reconciliation_error_pp, 8),
+        ),
+        _macro(
+            "DecompDominantTwentyFourteenToLatest",
+            _escape(interval_2014_2025.dominant_effect),
+        ),
+        _macro(
+            "DecompTotalNineteenNinetySixToLatestPp",
+            _fmt(interval_1996_2025.total_change_pp, 2),
+        ),
+        _macro(
+            "DecompRateNineteenNinetySixToLatestPp",
+            _fmt(interval_1996_2025.rate_effect_pp, 2),
+        ),
+        _macro(
+            "DecompExposureNineteenNinetySixToLatestPp",
+            _fmt(interval_1996_2025.debt_exposure_effect_pp, 2),
+        ),
+        _macro(
+            "DecompErrorNineteenNinetySixToLatestPp",
+            _fmt(interval_1996_2025.decomposition_reconciliation_error_pp, 8),
+        ),
+        _macro(
+            "DecompDominantNineteenNinetySixToLatest",
+            _escape(interval_1996_2025.dominant_effect),
+        ),
         _macro("PortugalComparatorRankWord", panel_rank),
         _macro("ComparatorCountryCountWord", panel_count),
         _macro(
@@ -627,6 +754,8 @@ def generate_latex_tables(
         regime_averages_table(frame, output_dir, main_start_year),
         recent_dynamics_table(frame, output_dir),
         debt_dynamics_diagnostic_table(frame, output_dir),
+        interest_burden_decomposition_table(frame, output_dir),
+        interest_burden_counterfactuals_table(frame, output_dir),
         static_sensitivities_table(frame, output_dir, shocks_bps),
         annual_portugal_table(frame, output_dir, main_start_year),
     ]

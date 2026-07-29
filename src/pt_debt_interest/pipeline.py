@@ -15,7 +15,12 @@ import pandas as pd
 
 from .config import EurostatSeriesSpec, Settings
 from .exceptions import SourceError
-from .interest_decomposition import build_interest_burden_decomposition
+from .interest_decomposition import (
+    build_interest_burden_counterfactuals,
+    build_interest_burden_decomposition,
+    build_interest_burden_decomposition_inputs,
+    validate_decomposition_reconciliation,
+)
 from .metrics import calculate_metrics
 from .panel import (
     PANEL_MISSINGNESS_COLUMNS,
@@ -27,7 +32,11 @@ from .panel import (
 )
 from .sources.ameco import AmecoArchiveClient
 from .sources.eurostat import EurostatClient
-from .storage import save_interest_decomposition, save_processed
+from .storage import (
+    save_interest_counterfactuals,
+    save_interest_decomposition,
+    save_processed,
+)
 
 CANONICAL_PROVENANCE_COLUMNS = [
     "source",
@@ -481,10 +490,14 @@ def build_dataset(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
         combined,
         regime_boundaries=boundaries,
     )
+    decomposition_inputs = build_interest_burden_decomposition_inputs(analytical)
     decomposition = build_interest_burden_decomposition(analytical)
-    analytical = analytical.merge(decomposition, on="year", how="left")
+    validate_decomposition_reconciliation(decomposition)
+    counterfactuals = build_interest_burden_counterfactuals(analytical)
+    analytical = analytical.merge(decomposition_inputs, on="year", how="left")
     save_processed(analytical, settings, root)
     save_interest_decomposition(decomposition, settings, root)
+    save_interest_counterfactuals(counterfactuals, settings, root)
     write_source_coverage_report(analytical, settings, root)
     write_reproducibility_metadata(settings, root)
     return analytical

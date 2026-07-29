@@ -258,22 +258,25 @@ def test_build_dataset_writes_interest_decomposition(tmp_path: Path) -> None:
     settings = load_settings("config/default.yaml")
     interim_dir = tmp_path / settings.paths.interim
     interim_dir.mkdir(parents=True)
+    years = [1995, 1996, 2000, 2007, 2014, 2019, 2022, 2025]
+    debt = [95.0, 100.0, 110.0, 140.0, 210.0, 230.0, 220.0, 200.0]
+    gdp = [100.0, 108.0, 140.0, 180.0, 210.0, 250.0, 280.0, 310.0]
     pd.DataFrame(
         {
-            "year": [2021, 2022],
-            "interest_mio_eur": [2.0, 3.0],
-            "nominal_gdp_mio_eur": [100.0, 110.0],
-            "debt_mio_eur": [100.0, 120.0],
-            "source": ["Eurostat", "Eurostat"],
-            "accounting_basis": ["ESA2010", "ESA2010"],
-            "observation_status": ["observed", "observed"],
+            "year": years,
+            "interest_mio_eur": [2.0, 2.2, 2.5, 3.0, 4.0, 3.5, 3.0, 4.0],
+            "nominal_gdp_mio_eur": gdp,
+            "debt_mio_eur": debt,
+            "source": ["Eurostat"] * len(years),
+            "accounting_basis": ["ESA2010"] * len(years),
+            "observation_status": ["observed"] * len(years),
         }
     ).to_csv(interim_dir / "eurostat_main.csv", index=False)
 
     result = build_dataset(settings, tmp_path)
 
-    assert "rate_effect_pp" in result.columns
-    assert result["is_harmonised_main_sample"].tolist() == [True, True]
+    assert "reconstructed_interest_burden_pct_gdp" in result.columns
+    assert result["is_harmonised_main_sample"].all()
     assert (
         tmp_path
         / settings.paths.reports
@@ -283,4 +286,9 @@ def test_build_dataset_writes_interest_decomposition(tmp_path: Path) -> None:
         tmp_path
         / settings.paths.processed
         / "interest_burden_decomposition.csv"
+    ).exists()
+    assert (
+        tmp_path
+        / settings.paths.processed
+        / "interest_burden_counterfactuals.csv"
     ).exists()

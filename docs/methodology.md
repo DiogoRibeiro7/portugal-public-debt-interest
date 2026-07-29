@@ -62,16 +62,17 @@ Ratios are used internally and percentage-point outputs are written to the proce
 
 ## Exact interest-burden decomposition
 
-Changes in the interest burden are decomposed as an accounting identity, not as a statistical model. The decomposed burden is reconstructed from euro interest expenditure and nominal GDP to avoid rounding differences in published percentage ratios. With \(r_t^{AVG}\) denoting interest expenditure divided by average debt and \(\bar{b}_t\) denoting average debt divided by GDP, the exact change is:
+Changes in the interest burden are decomposed as an accounting identity, not as a statistical model. The decomposed burden is reconstructed from euro interest expenditure and nominal GDP to avoid rounding differences in published percentage ratios. With \(r_t^{AVG}\) denoting interest expenditure divided by average debt and \(\bar{d}_t\) denoting average debt divided by GDP, endpoint changes use the symmetric exact two-component decomposition:
 
 \[
-\Delta(r_t^{AVG}\bar{b}_t) =
-\Delta r_t^{AVG} \bar{b}_{t-1}
-+ r_{t-1}^{AVG}\Delta \bar{b}_t
-+ \Delta r_t^{AVG} \Delta \bar{b}_t.
+b_1^R-b_0^R =
+\frac{\bar{d}_1+\bar{d}_0}{2}
+(r_1^{AVG}-r_0^{AVG})
++\frac{r_1^{AVG}+r_0^{AVG}}{2}
+(\bar{d}_1-\bar{d}_0).
 \]
 
-The three terms are written as `rate_effect_pp`, `average_debt_ratio_effect_pp`, and `interaction_effect_pp`. Their sum must equal `calculated_interest_burden_change_pp` within numerical tolerance.
+The two terms are written as `rate_effect_pp` and `debt_exposure_effect_pp`. Their sum must equal `total_change_pp` within numerical tolerance. No separate interaction term is used in the principal decomposition.
 
 ## Historical extension
 

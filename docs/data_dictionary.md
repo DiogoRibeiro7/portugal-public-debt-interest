@@ -33,18 +33,19 @@
 | `debt_dynamics_interest_rate_pct` | % | Display version of the debt-dynamics interest rate |
 | `average_debt_interest_rate` | ratio | Interest divided by average of previous and current debt; internal average-cost rate |
 | `average_debt_interest_rate_pct` | % | Display version of the average-debt interest rate |
-| `calculated_interest_burden_pct_gdp` | % GDP | Interest burden reconstructed from euro interest expenditure and nominal GDP for exact decomposition |
-| `lag_calculated_interest_burden_pct_gdp` | % GDP | Previous observed value of the reconstructed interest burden |
-| `calculated_interest_burden_change_pp` | percentage points | Annual change in the reconstructed interest burden |
+| `reconstructed_interest_burden` | ratio | Interest burden reconstructed from euro interest expenditure and nominal GDP for exact decomposition |
+| `reconstructed_interest_burden_pct_gdp` | % GDP | Display version of the reconstructed interest burden |
+| `official_interest_burden_pct_gdp` | % GDP | Official rounded burden used for endpoint comparison |
 | `average_debt_ratio_pct_gdp` | % GDP | Average of previous and current debt divided by current-price GDP |
-| `lag_average_debt_ratio_pct_gdp` | % GDP | Previous observed value of the average-debt ratio |
-| `average_debt_rate_decimal` | ratio | Average-debt interest rate used in the interest-burden decomposition |
-| `lag_average_debt_rate_decimal` | ratio | Previous observed value of the average-debt interest rate |
-| `rate_effect_pp` | percentage points | Exact contribution of the average-debt implicit-rate change to the interest-burden change |
-| `average_debt_ratio_effect_pp` | percentage points | Exact contribution of the change in average debt relative to GDP |
-| `interaction_effect_pp` | percentage points | Exact interaction between the rate change and the average-debt-ratio change |
-| `reconstructed_interest_burden_change_pp` | percentage points | Sum of rate, average-debt-ratio, and interaction effects |
-| `interest_burden_decomposition_residual_pp` | percentage points | Observed calculated interest-burden change minus reconstructed change |
+| `average_debt_rate` | ratio | Average-debt interest rate used in the endpoint interest-burden decomposition |
+| `average_debt_rate_pct` | % | Display version of the average-debt interest rate used in decomposition |
+| `start_year` | year | First endpoint in an interest-burden decomposition interval |
+| `end_year` | year | Second endpoint in an interest-burden decomposition interval |
+| `total_change_pp` | percentage points | Endpoint change in reconstructed interest burden |
+| `rate_effect_pp` | percentage points | Symmetric endpoint contribution of the average financing-cost change |
+| `debt_exposure_effect_pp` | percentage points | Symmetric endpoint contribution of the average debt-exposure change |
+| `decomposition_reconciliation_error_pp` | percentage points | Total endpoint change minus the two decomposition components |
+| `dominant_effect` | category | Larger absolute contribution in the endpoint decomposition |
 | `interest_burden_rank` | rank | Per-year rank among non-aggregate comparator countries by interest burden |
 | `average_debt_rate_rank` | rank | Per-year rank among non-aggregate comparator countries by average-debt interest rate |
 | `interest_growth_differential` | ratio | Debt-dynamics interest rate minus nominal GDP growth |

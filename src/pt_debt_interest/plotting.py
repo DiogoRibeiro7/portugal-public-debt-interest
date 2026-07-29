@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from .interest_decomposition import build_interest_burden_decomposition
 from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
 
@@ -280,36 +281,67 @@ def plot_interest_burden_decomposition(
     frame: pd.DataFrame,
     output_dir: Path,
 ) -> list[Path] | None:
-    """Plot the exact interest-burden decomposition."""
+    """Plot interval endpoint interest-burden decompositions."""
     required = {
         "rate_effect_pp",
-        "average_debt_ratio_effect_pp",
-        "interaction_effect_pp",
-        "calculated_interest_burden_change_pp",
+        "debt_exposure_effect_pp",
+        "total_change_pp",
+        "start_year",
+        "end_year",
+    }
+    if not required.issubset(frame.columns):
+        try:
+            frame = build_interest_burden_decomposition(frame)
+        except Exception:
+            return None
+    required = {
+        "rate_effect_pp",
+        "debt_exposure_effect_pp",
+        "total_change_pp",
+        "start_year",
+        "end_year",
     }
     if not required.issubset(frame.columns):
         return None
     complete = frame.dropna(subset=list(required))
     if complete.empty:
         return None
-    fig, ax = plt.subplots(figsize=(11, 6))
+    complete = complete.sort_values(["start_year", "end_year"]).copy()
+    complete["interval"] = (
+        complete["start_year"].astype(int).astype(str)
+        + "-"
+        + complete["end_year"].astype(int).astype(str)
+    )
+    positions = np.arange(len(complete))
+    width = 0.36
+    fig, ax = plt.subplots(figsize=(12, 6))
     ax.axhline(0.0, linewidth=1)
-    ax.plot(complete["year"], complete["rate_effect_pp"], label="Rate effect")
-    ax.plot(
-        complete["year"],
-        complete["average_debt_ratio_effect_pp"],
-        label="Average-debt ratio effect",
+    ax.bar(
+        positions - width / 2,
+        complete["rate_effect_pp"],
+        width=width,
+        label="Average financing-cost effect",
     )
-    ax.plot(complete["year"], complete["interaction_effect_pp"], label="Interaction")
-    ax.plot(
-        complete["year"],
-        complete["calculated_interest_burden_change_pp"],
-        linestyle="--",
-        label="Observed change",
+    ax.bar(
+        positions + width / 2,
+        complete["debt_exposure_effect_pp"],
+        width=width,
+        label="Debt-exposure effect",
     )
-    ax.set_title("Exact decomposition of the interest-burden change")
-    ax.set_xlabel("Year")
+    ax.scatter(
+        positions,
+        complete["total_change_pp"],
+        color="#111827",
+        marker="D",
+        s=36,
+        zorder=3,
+        label="Total reconstructed change",
+    )
+    ax.set_title("Endpoint decomposition of the interest-burden change")
+    ax.set_xlabel("Interval")
     ax.set_ylabel("Percentage points of GDP")
+    ax.set_xticks(positions)
+    ax.set_xticklabels(complete["interval"], rotation=30, ha="right")
     ax.grid(True, alpha=0.25)
     ax.legend()
     _annotate_source(ax, complete)
