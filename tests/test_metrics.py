@@ -4,6 +4,23 @@ import pytest
 from pt_debt_interest.metrics import calculate_metrics
 
 
+def _sharp_debt_change_frame() -> pd.DataFrame:
+    interest_pct_gdp = 8.0 / 110.0 * 100.0
+    primary_balance_pct_gdp = 2.0
+    return pd.DataFrame(
+        {
+            "year": [2020, 2021],
+            "interest_mio_eur": [5.0, 8.0],
+            "nominal_gdp_mio_eur": [100.0, 110.0],
+            "debt_mio_eur": [100.0, 160.0],
+            "overall_balance_pct_gdp": [
+                0.0,
+                primary_balance_pct_gdp - interest_pct_gdp,
+            ],
+        }
+    )
+
+
 def test_calculate_core_metrics() -> None:
     frame = pd.DataFrame(
         {
@@ -43,6 +60,88 @@ def test_calculate_core_metrics() -> None:
     assert "stock_flow_adjustment_pp" in result.columns
     assert result.loc[1, "reconstructed_debt_ratio_change_pp"] == pytest.approx(
         result.loc[1, "observed_debt_ratio_change_pp"]
+    )
+
+
+def test_average_debt_rate_uses_average_stock() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+
+    assert result.loc[1, "implicit_interest_rate_average_debt_decimal"] == pytest.approx(
+        8.0 / ((100.0 + 160.0) / 2.0)
+    )
+
+
+def test_debt_dynamics_rate_uses_previous_debt() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+
+    assert result.loc[1, "effective_interest_rate_debt_dynamics_decimal"] == pytest.approx(
+        8.0 / 100.0
+    )
+
+
+def test_rates_differ_when_debt_changes() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+
+    average_rate = result.loc[1, "implicit_interest_rate_average_debt_decimal"]
+    debt_dynamics_rate = result.loc[1, "effective_interest_rate_debt_dynamics_decimal"]
+    assert average_rate == pytest.approx(8.0 / 130.0)
+    assert debt_dynamics_rate == pytest.approx(8.0 / 100.0)
+    assert debt_dynamics_rate - average_rate > 0.018
+
+
+def test_debt_dynamics_rejects_average_rate_series() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+    previous_debt_ratio = result.loc[0, "debt_pct_gdp"] / 100.0
+    growth = result.loc[1, "nominal_gdp_growth_pct"] / 100.0
+    average_rate = result.loc[1, "implicit_interest_rate_average_debt_decimal"]
+    average_rate_contribution_pp = (
+        ((average_rate - growth) / (1.0 + growth)) * previous_debt_ratio * 100.0
+    )
+
+    assert result.loc[1, "interest_growth_contribution_pp"] != pytest.approx(
+        average_rate_contribution_pp
+    ), "debt dynamics used the average-debt denominator instead of previous-year debt"
+
+
+def test_debt_dynamics_reconstructs_observed_debt_change() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+    previous_debt_ratio = 100.0 / 100.0
+    current_debt_ratio = 160.0 / 110.0
+    delta_d = current_debt_ratio - previous_debt_ratio
+    growth = 0.10
+    debt_dynamics_rate = 8.0 / 100.0
+    primary_balance = 0.02
+    interest_growth_contribution = (
+        ((debt_dynamics_rate - growth) / (1.0 + growth)) * previous_debt_ratio
+    )
+    stock_flow_adjustment = result.loc[1, "stock_flow_adjustment_pp"] / 100.0
+
+    assert delta_d == pytest.approx(
+        interest_growth_contribution - primary_balance + stock_flow_adjustment
+    )
+    assert result.loc[1, "reconstructed_debt_ratio_change_pp"] == pytest.approx(
+        result.loc[1, "observed_debt_ratio_change_pp"]
+    )
+
+
+def test_first_year_rate_is_missing_without_previous_debt() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+
+    assert pd.isna(result.loc[0, "implicit_interest_rate_average_debt_decimal"])
+    assert pd.isna(result.loc[0, "effective_interest_rate_debt_dynamics_decimal"])
+
+
+def test_decimal_rate_not_confused_with_percent_rate() -> None:
+    result = calculate_metrics(_sharp_debt_change_frame())
+
+    assert result.loc[1, "effective_interest_rate_debt_dynamics_decimal"] == pytest.approx(
+        0.08
+    )
+    assert result.loc[1, "effective_interest_rate_debt_dynamics_pct"] == pytest.approx(
+        8.0
+    )
+    assert result.loc[1, "interest_growth_contribution_pp"] == pytest.approx(
+        ((0.08 - 0.10) / 1.10) * 100.0
     )
 
 
