@@ -8,6 +8,12 @@ from typing import Any
 
 import pandas as pd
 
+from .display import (
+    SOURCE_NOTE,
+    format_residual,
+    publication_label,
+    round_components_to_total,
+)
 from .interest_decomposition import (
     build_interest_burden_counterfactuals,
     build_interest_burden_decomposition,
@@ -285,25 +291,28 @@ def debt_dynamics_diagnostic_table(
     source = frame.copy()
     source["year"] = pd.to_numeric(source["year"], errors="raise").astype(int)
     source = source.sort_values("year")
-    source["previous_debt_ratio"] = source["debt_pct_gdp"].shift(1) / 100.0
+    source["previous_debt_pct_gdp"] = source["debt_pct_gdp"].shift(1)
     data = source.loc[
         source["observation_status"].eq("observed") & source["year"].between(start_year, end_year)
     ].copy()
     data["year"] = pd.to_numeric(data["year"], errors="raise").astype(int)
+    # Every column below is already a percentage or a percentage point. The
+    # analytical decimals are never printed, so a reader cannot mistake 1.1610
+    # for a debt ratio of 1.16 percent.
     rows = [
         [
             _int_text(row.year),
             _fmt(row.interest_pct_gdp, 2),
-            _fmt(row.previous_debt_ratio, 4),
-            _fmt(_num(row.nominal_gdp_growth_pct) / 100.0, 4),
-            _fmt(row.average_debt_interest_rate, 4),
-            _fmt(row.debt_dynamics_interest_rate, 4),
-            _fmt(row.interest_growth_contribution, 4),
-            _fmt(row.primary_balance_contribution, 4),
-            _fmt(row.stock_flow_adjustment, 4),
-            _fmt(row.observed_debt_ratio_change, 4),
-            _fmt(row.reconstructed_debt_ratio_change, 4),
-            _fmt(row.debt_dynamics_reconciliation_error, 8),
+            _fmt(row.previous_debt_pct_gdp, 2),
+            _fmt(row.nominal_gdp_growth_pct, 2),
+            _fmt(row.average_debt_interest_rate_pct, 2),
+            _fmt(row.debt_dynamics_interest_rate_pct, 2),
+            _fmt(row.interest_growth_contribution_pp, 2),
+            _fmt(row.primary_balance_contribution_pp, 2),
+            _fmt(row.stock_flow_adjustment_pp, 2),
+            _fmt(row.observed_debt_ratio_change_pp, 2),
+            _fmt(row.reconstructed_debt_ratio_change_pp, 2),
+            format_residual(row.debt_dynamics_reconciliation_error_pp),
         ]
         for row in data.sort_values("year").itertuples()
     ]
@@ -313,23 +322,25 @@ def debt_dynamics_diagnostic_table(
         columns="rrrrrrrrrrrr",
         header=[
             "Year",
-            "Int./GDP",
-            "Lag debt/GDP",
-            "Nom. growth",
-            "$r^{AVG}$",
-            "$r^{DD}$",
-            "Int.-growth",
-            "Primary bal.",
-            "SFA",
-            "Observed $\\Delta d$",
-            "Rebuilt $\\Delta d$",
-            "Error",
+            "Interest/GDP (\\%)",
+            "Lagged debt/GDP (\\%)",
+            "Nominal growth (\\%)",
+            "$r^{AVG}$ (\\%)",
+            "$r^{DD}$ (\\%)",
+            "Interest-growth (pp)",
+            "Primary balance (pp)",
+            "Stock-flow (pp)",
+            "Observed $\\Delta d$ (pp)",
+            "Rebuilt $\\Delta d$ (pp)",
+            "Error (pp)",
         ],
         rows=rows,
         notes=(
-            "Notes: Rates and contribution terms are decimal ratios. The first row "
-            "uses the previous debt ratio available in the processed dataset; blank "
-            "entries indicate missing lagged inputs."
+            "Notes: Every column is a percentage (\\%) or a percentage point (pp), "
+            "as marked in the heading; no decimal ratios are displayed. "
+            "$r^{AVG}$ is the average-debt rate and $r^{DD}$ the debt-dynamics "
+            "rate. The first row uses the previous debt ratio available in the "
+            "processed dataset. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "debt_dynamics_diagnostic_2020_2025.tex", content)
@@ -409,6 +420,17 @@ def static_sensitivities_table(
     return _write(output_dir / "static_sensitivities.tex", content)
 
 
+def _decomposition_effects(row: Any) -> tuple[float, float, float]:
+    """Return the displayed total and its two effects, rounded to add up."""
+    total = _num(row.total_change_pp)
+    effects = round_components_to_total(
+        [_num(row.rate_effect_pp), _num(row.debt_exposure_effect_pp)],
+        total,
+        3,
+    )
+    return round(total, 3), effects[0], effects[1]
+
+
 def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -> Path:
     decomposition = build_interest_burden_decomposition(frame)
     rows = [
@@ -417,11 +439,11 @@ def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -
             _int_text(row.end_year),
             _fmt(row.start_reconstructed_burden_pct_gdp, 2),
             _fmt(row.end_reconstructed_burden_pct_gdp, 2),
-            _fmt(row.total_change_pp, 2),
-            _fmt(row.rate_effect_pp, 2),
-            _fmt(row.debt_exposure_effect_pp, 2),
-            _fmt(row.decomposition_reconciliation_error_pp, 8),
-            _escape(row.dominant_effect),
+            _fmt(_decomposition_effects(row)[0], 3),
+            _fmt(_decomposition_effects(row)[1], 3),
+            _fmt(_decomposition_effects(row)[2], 3),
+            format_residual(row.decomposition_reconciliation_error_pp),
+            _escape(publication_label(row.dominant_effect)),
             _fmt(row.official_start_burden_pct_gdp, 2),
             _fmt(row.official_end_burden_pct_gdp, 2),
         ]
@@ -436,18 +458,20 @@ def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -
             "End",
             "Start burden",
             "End burden",
-            "Total",
-            "Rate",
-            "Debt exposure",
-            "Error",
+            "Total (pp)",
+            "Financing cost (pp)",
+            "Debt exposure (pp)",
+            "Error (pp)",
             "Dominant",
             "Official start",
             "Official end",
         ],
         rows=rows,
         notes=(
-            "Notes: Burdens are percent of GDP. Effects and errors are percentage "
-            "points. The decomposition uses unrounded nominal interest, debt, and GDP."
+            "Notes: Burdens are percent of GDP; effects and errors are percentage "
+            "points. Effects are shown to three decimals so that the two "
+            "components add to the displayed total. The decomposition uses "
+            "unrounded nominal interest, debt, and GDP. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "interest_burden_decomposition_endpoints.tex", content)
@@ -458,7 +482,7 @@ def interest_burden_counterfactuals_table(frame: pd.DataFrame, output_dir: Path)
     rows = [
         [
             _int_text(row.year),
-            _escape(row.counterfactual),
+            _escape(publication_label(row.counterfactual)),
             _fmt(_num(row.average_debt_rate) * 100.0, 2),
             _fmt(_num(row.average_debt_exposure) * 100.0, 2),
             _fmt(row.interest_burden_pct_gdp, 2),
@@ -472,14 +496,14 @@ def interest_burden_counterfactuals_table(frame: pd.DataFrame, output_dir: Path)
         header=[
             "Year",
             "Scenario",
-            "Average-debt rate",
-            "Debt exposure",
-            "Burden",
+            "Average-debt rate (\\%)",
+            "Debt exposure (\\% of GDP)",
+            "Burden (\\% of GDP)",
         ],
         rows=rows,
         notes=(
             "Notes: These are arithmetic counterfactuals, not causal estimates. "
-            "Rates, debt exposure, and burden are reported in percent."
+            "Every column is a percentage, as marked in the heading. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "interest_burden_counterfactuals.tex", content)
@@ -751,7 +775,7 @@ def headline_macros(
         ),
         _macro(
             "DecompErrorTwentyFourteenToLatestPp",
-            _fmt(interval_2014_2025.decomposition_reconciliation_error_pp, 8),
+            format_residual(interval_2014_2025.decomposition_reconciliation_error_pp),
         ),
         _macro(
             "DecompDominantTwentyFourteenToLatest",
@@ -771,7 +795,7 @@ def headline_macros(
         ),
         _macro(
             "DecompErrorNineteenNinetySixToLatestPp",
-            _fmt(interval_1996_2025.decomposition_reconciliation_error_pp, 8),
+            format_residual(interval_1996_2025.decomposition_reconciliation_error_pp),
         ),
         _macro(
             "DecompDominantNineteenNinetySixToLatest",

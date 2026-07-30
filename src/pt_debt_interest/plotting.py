@@ -15,15 +15,26 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from .display import SOURCE_NOTE
 from .interest_decomposition import build_interest_burden_decomposition
 from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
 
 
 def _source_note(frame: pd.DataFrame) -> str:
-    sources = _metadata_values(frame, "source", "processed data")
-    bases = _metadata_values(frame, "accounting_basis", "not applicable")
-    statuses = _metadata_values(frame, "observation_status", "not applicable")
+    """Build a human-readable source note.
+
+    Derived series carry no accounting basis or observation status of their
+    own. Rather than printing "not applicable" twice, the note falls back to a
+    plain attribution.
+    """
+    if "accounting_basis" not in frame.columns or "observation_status" not in frame.columns:
+        return SOURCE_NOTE
+    sources = _metadata_values(frame, "source", "Eurostat")
+    bases = _metadata_values(frame, "accounting_basis", "")
+    statuses = _metadata_values(frame, "observation_status", "")
+    if not bases or not statuses:
+        return SOURCE_NOTE
     return f"Source: {sources}; basis: {bases}; status: {statuses}"
 
 
