@@ -16,6 +16,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from .display import SOURCE_NOTE
+from .eligibility import EURO_AREA_MEMBERS, derive_observation_status
 from .interest_decomposition import build_interest_burden_decomposition
 from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
@@ -370,10 +371,11 @@ def plot_european_comparison(
     if not required.issubset(panel_frame.columns):
         return None
     panel = panel_frame.copy()
-    if "observation_status" in panel.columns:
-        panel = panel.loc[panel["observation_status"] == "observed"]
+    # Eligibility is decided by the eligibility layer, not by the panel's own
+    # observation_status column, which labels every row "observed".
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~aggregate_flag_mask(panel["is_aggregate"])]
+    panel = panel.loc[panel["geo"].astype(str).isin(EURO_AREA_MEMBERS)]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.loc[
         np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)
@@ -389,19 +391,42 @@ def plot_european_comparison(
     latest = panel.loc[panel["year_numeric"].eq(latest_year)].copy()
     if latest.empty:
         return None
+    latest["_derived_status"] = latest.apply(derive_observation_status, axis=1)
     latest["label"] = latest.get("geo_name", latest["geo"]).fillna(latest["geo"])
     latest = latest.sort_values("interest_pct_gdp", ascending=True)
     colors = ["#2563eb" if geo == "PT" else "#6b7280" for geo in latest["geo"].astype(str)]
 
-    fig, ax = plt.subplots(figsize=(11, 6))
+    median_value = float(latest["interest_pct_gdp"].median())
+
+    fig, ax = plt.subplots(figsize=(11, 7))
     ax.barh(latest["label"], latest["interest_pct_gdp"], color=colors)
-    ax.set_title(f"European comparison of interest burden, {latest_year}")
+    ax.axvline(
+        median_value,
+        color="#b91c1c",
+        linewidth=1.4,
+        label=f"Median {median_value:.2f}",
+    )
     ax.set_xlabel("Interest expenditure, percentage of GDP")
     ax.set_ylabel("")
     ax.grid(axis="x", alpha=0.25)
+    ax.legend(loc="lower right")
     for index, value in enumerate(latest["interest_pct_gdp"]):
         ax.text(float(value), index, f" {float(value):.2f}", va="center", fontsize=8)
-    _annotate_source(ax, latest)
+
+    provisional = 0
+    if "_derived_status" in latest.columns:
+        provisional = int((latest["_derived_status"] != "observed").sum())
+    ax.text(
+        0.0,
+        -0.12,
+        SOURCE_NOTE
+        + f" {len(latest)} eligible euro-area countries; aggregates excluded;"
+        + f" {provisional} carry provisional Eurostat flags."
+        + " Portugal highlighted.",
+        transform=ax.transAxes,
+        fontsize=8,
+        alpha=0.8,
+    )
     return _save(fig, output_dir / "08_european_comparison")
 
 

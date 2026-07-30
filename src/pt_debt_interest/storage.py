@@ -176,6 +176,35 @@ def save_refinancing_outputs(
     return outputs
 
 
+def save_euro_area_eligibility(
+    frame: pd.DataFrame,
+    settings: Settings,
+    root: Path = Path("."),
+) -> dict[str, Path]:
+    """Save the euro-area eligibility and exclusion record."""
+    processed_dir = root / settings.paths.processed
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    outputs: dict[str, Path] = {}
+
+    if settings.storage.backend in {"csv", "both"}:
+        csv_path = processed_dir / "euro_area_eligibility.csv"
+        frame.to_csv(csv_path, index=False)
+        outputs["csv"] = csv_path
+
+    if settings.storage.backend in {"sqlite", "both"}:
+        sqlite_path = processed_dir / settings.storage.sqlite_filename
+        with sqlite3.connect(sqlite_path) as connection:
+            frame.to_sql(
+                "euro_area_eligibility",
+                connection,
+                if_exists="replace",
+                index=False,
+            )
+        outputs["sqlite"] = sqlite_path
+
+    return outputs
+
+
 def load_processed(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     """Load the processed analytical dataset, preferring CSV."""
     processed_dir = root / settings.paths.processed

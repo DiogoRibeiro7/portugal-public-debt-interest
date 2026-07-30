@@ -10,6 +10,7 @@ import pandas as pd
 import typer
 
 from .config import Settings, load_settings
+from .eligibility import build_eligibility_table
 from .latex_tables import generate_latex_tables
 from .pipeline import (
     build_dataset,
@@ -27,7 +28,11 @@ from .refinancing import (
 )
 from .reporting import generate_report
 from .sources.ameco import AmecoArchiveClient
-from .storage import load_processed, save_refinancing_outputs
+from .storage import (
+    load_processed,
+    save_euro_area_eligibility,
+    save_refinancing_outputs,
+)
 from .validation import validate_dataset
 
 app = typer.Typer(no_args_is_help=True, help="Portugal public-debt interest analysis")
@@ -187,6 +192,17 @@ def tables_command(config: Path = DEFAULT_CONFIG) -> None:
     frame = load_processed(settings)
     assumptions, results, main_scenario = _refinancing()
     save_refinancing_outputs(assumptions, results, settings)
+    panel = _load_optional_panel_metrics(settings)
+    if panel is not None and not panel.empty:
+        latest = int(pd.to_numeric(panel["year"], errors="coerce").max())
+        save_euro_area_eligibility(
+            build_eligibility_table(
+                panel,
+                latest,
+                accepted_statuses=tuple(settings.analysis.accepted_observation_statuses),
+            ),
+            settings,
+        )
     paths = generate_latex_tables(
         frame,
         settings.paths.reports / "tables",

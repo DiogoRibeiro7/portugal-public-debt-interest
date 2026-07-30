@@ -636,17 +636,47 @@ and real growth. This prevents a common error in fiscal comparison: mixing
 country-specific cash or budgetary definitions with national-accounts
 definitions.
 
-Table \ref{tab:europe-2025} reports the \LatestYear{} country ranking by interest
-expenditure as a percentage of GDP. Portugal ranked \PortugalComparatorRankWord{} among \ComparatorCountryCountWord{}
-euro-area countries. Its burden was below Italy, Greece, Spain, Belgium, and
-France, and above the remaining euro-area country observations in the panel.
+\paragraph{Eligibility and ranking method.} A rank without a denominator is not
+a finding, so both are stated. A geography enters the ranking only if it is a
+euro-area member, is not an aggregate, and carries every required series:
+interest in euro and as a share of GDP, the debt ratio, nominal GDP, and the
+average-debt rate. Eligibility, availability, observation status, and the
+reason for every exclusion are written to
+\texttt{data/processed/euro\_area\_eligibility.csv}.
+
+Observation status is derived from Eurostat's per-series flags rather than
+asserted. This matters: the panel's own status column labels every row as
+observed, while Eurostat flags \ProvisionalComparatorCount{} of the geographies
+as provisional in \ComparisonYear{}, Portugal among them. The accepted statuses
+are configured, and provisional values are admitted but disclosed.
+
+Ranking uses the \ComparisonRankingMethod{} convention, so tied values share
+the better rank and the next rank is skipped: 1, 2, 2, 4. The latest year in
+which every eligible country carries every required series is
+\LatestCommonYear{}.
+
+\paragraph{Portugal's position.} Table \ref{tab:europe-2025} reports the
+\ComparisonYear{} ranking by interest expenditure as a percentage of GDP.
+Portugal ranked \PortugalComparisonRank{} of \EligibleComparatorCount{}
+eligible euro-area countries, at the \PortugalComparisonPercentile{}th
+percentile of the eligible distribution. The median burden was
+\ComparatorMedianPctGdp{} percent of GDP, with an interquartile range from
+\ComparatorFirstQuartilePctGdp{} to \ComparatorThirdQuartilePctGdp{} percent;
+Portugal sat \PortugalMinusMedianPp{} percentage points above the median.
+\ExcludedComparatorCount{} geographies were excluded
+(\ComparisonExclusionReasons{}). Portugal's own \ComparisonYear{} observation
+status is \PortugalComparisonStatus{}.
+
+This is a comparison of the current interest burden. It is not a ranking of
+fiscal sustainability, which would require assumptions about growth, primary
+balances, and maturity structure that this table does not make.
 
 \input{../reports/tables/european_comparison_2025.tex}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{../reports/figures/08_european_comparison.pdf}
-\caption{European comparison of interest expenditure as a percentage of GDP.}
+\caption{European comparison of interest expenditure as a percentage of GDP. Eligible euro-area countries only, aggregates excluded; the vertical line marks the median. \ProvisionalComparatorCount{} geographies carry provisional Eurostat flags in \ComparisonYear{}.}
 \label{fig:europe}
 \end{figure}
 

@@ -14,6 +14,12 @@ from .display import (
     publication_label,
     round_components_to_total,
 )
+from .eligibility import (
+    build_comparison_summary,
+    build_eligibility_table,
+    latest_common_year,
+)
+from .exceptions import ValidationError
 from .interest_decomposition import (
     build_interest_burden_counterfactuals,
     build_interest_burden_decomposition,
@@ -802,6 +808,7 @@ def headline_macros(
             _escape(interval_1996_2025.dominant_effect),
         ),
         *_debt_dynamics_macros(frame),
+        *_comparison_macros(panel_frame),
         _macro("PortugalComparatorRankWord", panel_rank),
         _macro("ComparatorCountryCountWord", panel_count),
         _macro(
@@ -822,6 +829,43 @@ def headline_macros(
         ),
     ]
     return _write(output_dir / "paper_headlines.tex", "\n".join(macros) + "\n")
+
+
+def _comparison_macros(panel_frame: pd.DataFrame | None) -> list[str]:
+    """Emit the euro-area comparison macros with their denominator."""
+    if panel_frame is None or panel_frame.empty:
+        return []
+    year = int(pd.to_numeric(panel_frame["year"], errors="coerce").max())
+    try:
+        eligibility = build_eligibility_table(panel_frame, year)
+        summary = build_comparison_summary(panel_frame, eligibility, year)
+    except ValidationError:
+        # A partial panel still produces every other table; the eligibility
+        # record and its tests carry the strict requirements.
+        return []
+    try:
+        common_year = latest_common_year(panel_frame)
+    except Exception:
+        common_year = year
+    return [
+        _macro("ComparisonYear", str(summary["comparison_year"])),
+        _macro("ComparisonRankingMethod", _escape(str(summary["ranking_method"]))),
+        _macro("PortugalComparisonRank", str(summary["home_rank"])),
+        _macro("EligibleComparatorCount", str(summary["eligible_countries"])),
+        _macro("PortugalComparisonPercentile", _fmt(summary["percentile"], 1)),
+        _macro("ComparatorMedianPctGdp", _fmt(summary["median"], 2)),
+        _macro("ComparatorFirstQuartilePctGdp", _fmt(summary["first_quartile"], 2)),
+        _macro("ComparatorThirdQuartilePctGdp", _fmt(summary["third_quartile"], 2)),
+        _macro("PortugalMinusMedianPp", _fmt(summary["home_minus_median"], 2)),
+        _macro("ExcludedComparatorCount", str(summary["excluded_count"])),
+        _macro("ComparisonExclusionReasons", _escape(str(summary["exclusion_reasons"]))),
+        _macro(
+            "PortugalComparisonStatus",
+            _escape(str(summary["home_observation_status"])),
+        ),
+        _macro("ProvisionalComparatorCount", str(summary["provisional_countries"])),
+        _macro("LatestCommonYear", str(common_year)),
+    ]
 
 
 def refinancing_assumptions_table(

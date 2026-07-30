@@ -164,6 +164,14 @@ class AnalysisSection(BaseModel):
     static_rate_shocks_bps: list[int] = Field(default_factory=lambda: [50, 100, 200])
     default_refinancing_shares: list[float] = Field(default_factory=list)
     observed_only_by_default: bool = True
+    # Which Eurostat observation statuses may enter the euro-area ranking.
+    # Every row is NOT simply "observed": the status is derived from Eurostat's
+    # per-series flags, so provisional values are named as such.
+    accepted_observation_statuses: list[str] = Field(
+        default_factory=lambda: ["observed", "provisional"]
+    )
+    ranking_method: str = "competition"
+    three_year_minimum_observations: int = 2
     regime_boundaries: list[RegimeBoundary] = Field(default_factory=list)
 
     @field_validator("ratio_tolerance_pp", "identity_tolerance_pp")
