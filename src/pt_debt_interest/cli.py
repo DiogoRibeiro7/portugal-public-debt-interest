@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import typer
@@ -19,9 +20,14 @@ from .pipeline import (
     fetch_eurostat_panel,
 )
 from .plotting import generate_all_plots
+from .refinancing import (
+    build_refinancing_assumptions,
+    build_refinancing_results,
+    load_refinancing_scenarios,
+)
 from .reporting import generate_report
 from .sources.ameco import AmecoArchiveClient
-from .storage import load_processed
+from .storage import load_processed, save_refinancing_outputs
 from .validation import validate_dataset
 
 app = typer.Typer(no_args_is_help=True, help="Portugal public-debt interest analysis")
@@ -124,12 +130,15 @@ def plot_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate all available charts."""
     settings = _settings(config)
     frame = load_processed(settings)
+    _, results, main_scenario = _refinancing()
     paths = generate_all_plots(
         frame,
         settings.paths.figures,
         panel_frame=_load_optional_panel_metrics(settings),
         shocks_bps=settings.analysis.static_rate_shocks_bps,
         refinancing_shares=settings.analysis.default_refinancing_shares,
+        refinancing_results=results,
+        refinancing_main_scenario=main_scenario,
     )
     for path in paths:
         typer.echo(path)
@@ -151,17 +160,41 @@ def report_command(config: Path = DEFAULT_CONFIG) -> None:
     typer.echo(destination)
 
 
+
+REFINANCING_CONFIG = Path("config/refinancing_scenarios.yaml")
+
+
+def _refinancing(config_path: Path = REFINANCING_CONFIG) -> tuple[Any, Any, str]:
+    """Load the scenarios and run the stylised cohort simulation."""
+    import yaml
+
+    scenarios = load_refinancing_scenarios(config_path)
+    with config_path.open(encoding="utf-8") as handle:
+        raw = yaml.safe_load(handle) or {}
+    shocks = tuple(int(value) for value in raw.get("shocks_bps", [0, 50, 100, 200]))
+    main_scenario = str(raw.get("main_scenario", "central"))
+    return (
+        build_refinancing_assumptions(scenarios, shocks),
+        build_refinancing_results(scenarios, shocks),
+        main_scenario,
+    )
+
+
 @app.command("tables")
 def tables_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate LaTeX tables from processed analytical data."""
     settings = _settings(config)
     frame = load_processed(settings)
+    assumptions, results, main_scenario = _refinancing()
+    save_refinancing_outputs(assumptions, results, settings)
     paths = generate_latex_tables(
         frame,
         settings.paths.reports / "tables",
         settings.project.main_start_year,
         settings.analysis.static_rate_shocks_bps,
         panel_frame=_load_optional_panel_metrics(settings),
+        refinancing_assumptions=assumptions,
+        refinancing_main_scenario=main_scenario,
     )
     for path in paths:
         typer.echo(path)

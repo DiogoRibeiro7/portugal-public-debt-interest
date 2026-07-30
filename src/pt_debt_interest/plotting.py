@@ -495,6 +495,118 @@ def write_refinancing_scenarios(
     return destination
 
 
+def plot_refinancing_repricing(results: pd.DataFrame | None, output_dir: Path) -> list[Path] | None:
+    """Plot the cumulative share of the original stock that has been repriced."""
+    if results is None or results.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for scenario, group in results.groupby("scenario"):
+        path = group.loc[group["shock_bps"].eq(0)].sort_values("horizon_year")
+        ax.plot(
+            path["horizon_year"],
+            path["cumulative_refinancing_share"] * 100.0,
+            marker="o",
+            markersize=3,
+            label=str(scenario),
+        )
+    ax.axhline(100.0, color="grey", linewidth=0.8)
+    ax.set_xlabel("Years after the shock")
+    ax.set_ylabel("Cumulative share of the original stock repriced, percent")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Scenario")
+    ax.text(
+        0.0,
+        -0.16,
+        SOURCE_NOTE + " Stylised cohort model; not a forecast.",
+        transform=ax.transAxes,
+        fontsize=8,
+        alpha=0.75,
+    )
+    return _save(fig, output_dir / "14_refinancing_cumulative_repricing")
+
+
+def plot_refinancing_incremental_burden(
+    results: pd.DataFrame | None,
+    output_dir: Path,
+    main_scenario: str,
+) -> list[Path] | None:
+    """Plot the incremental burden: shocked path minus the no-shock baseline.
+
+    Plotting total burden paths would hide the baseline, so the shock and the
+    starting level could not be told apart. Only the increment is shown.
+    """
+    if results is None or results.empty:
+        return None
+    data = results.loc[results["scenario"].eq(main_scenario)]
+    if data.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for shock, group in data.sort_values(["shock_bps", "horizon_year"]).groupby("shock_bps"):
+        path = group.sort_values("horizon_year")
+        ax.plot(
+            path["horizon_year"],
+            path["incremental_burden_pct_gdp"],
+            marker="o",
+            markersize=3,
+            label=f"+{int(cast(float, shock))} bps",
+        )
+    ax.axhline(0.0, color="grey", linewidth=0.8)
+    ax.set_xlabel("Years after the shock")
+    ax.set_ylabel("Additional interest, percentage points of GDP")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Shock")
+    ax.text(
+        0.0,
+        -0.16,
+        SOURCE_NOTE
+        + f" Incremental over the zero-shock baseline; {main_scenario} scenario;"
+        + " stylised cohort model, not a forecast.",
+        transform=ax.transAxes,
+        fontsize=8,
+        alpha=0.75,
+    )
+    return _save(fig, output_dir / "15_refinancing_incremental_burden")
+
+
+def plot_refinancing_cumulative_cost(
+    results: pd.DataFrame | None,
+    output_dir: Path,
+    main_scenario: str,
+) -> list[Path] | None:
+    """Plot the cumulative incremental interest bill in euro."""
+    if results is None or results.empty:
+        return None
+    data = results.loc[results["scenario"].eq(main_scenario)]
+    if data.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for shock, group in data.sort_values(["shock_bps", "horizon_year"]).groupby("shock_bps"):
+        path = group.sort_values("horizon_year")
+        ax.plot(
+            path["horizon_year"],
+            path["cumulative_incremental_interest_mio_eur"] / 1000.0,
+            marker="o",
+            markersize=3,
+            label=f"+{int(cast(float, shock))} bps",
+        )
+    ax.axhline(0.0, color="grey", linewidth=0.8)
+    ax.set_xlabel("Years after the shock")
+    ax.set_ylabel("Cumulative additional interest, EUR billion")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Shock")
+    ax.text(
+        0.0,
+        -0.16,
+        SOURCE_NOTE
+        + f" Cumulative over the zero-shock baseline; {main_scenario} scenario;"
+        + " debt stock and GDP held fixed; not a forecast.",
+        transform=ax.transAxes,
+        fontsize=8,
+        alpha=0.75,
+    )
+    return _save(fig, output_dir / "16_refinancing_cumulative_cost")
+
+
 def _write_manifest(paths: list[Path], frame: pd.DataFrame, output_dir: Path) -> Path:
     manifest = pd.DataFrame(
         {
@@ -513,6 +625,8 @@ def generate_all_plots(
     panel_frame: pd.DataFrame | None = None,
     shocks_bps: list[int] | None = None,
     refinancing_shares: list[float] | None = None,
+    refinancing_results: pd.DataFrame | None = None,
+    refinancing_main_scenario: str = "central",
 ) -> list[Path]:
     """Generate all available charts."""
     scenario_frame = refinancing_shock_paths(
@@ -521,6 +635,13 @@ def generate_all_plots(
         refinancing_shares or [],
     )
     candidates = [
+        plot_refinancing_repricing(refinancing_results, output_dir),
+        plot_refinancing_incremental_burden(
+            refinancing_results, output_dir, refinancing_main_scenario
+        ),
+        plot_refinancing_cumulative_cost(
+            refinancing_results, output_dir, refinancing_main_scenario
+        ),
         plot_interest_burden(frame, output_dir),
         plot_interest_euros(frame, output_dir),
         plot_debt_and_rate(frame, output_dir),

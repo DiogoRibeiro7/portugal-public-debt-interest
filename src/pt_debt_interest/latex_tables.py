@@ -31,7 +31,7 @@ def _escape(value: object) -> str:
     replacements = {
         "\\": r"\textbackslash{}",
         "&": r"\&",
-        "%": r"\%",
+        "%": r"\\%",
         "$": r"\$",
         "#": r"\#",
         "_": r"\_",
@@ -535,8 +535,8 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
             r"Overall bal. & Primary bal. & Nom. growth \\"
         ),
         (
-            r" & (\%) & (EUR m) & (\%) & (\%) & (\% GDP) & "
-            r"(\% GDP) & (\%) \\"
+            r" & (\\%) & (EUR m) & (\\%) & (\\%) & (\\% GDP) & "
+            r"(\\% GDP) & (\\%) \\"
         ),
         r"\midrule",
         r"\endfirsthead",
@@ -546,8 +546,8 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
             r"Overall bal. & Primary bal. & Nom. growth \\"
         ),
         (
-            r" & (\%) & (EUR m) & (\%) & (\%) & (\% GDP) & "
-            r"(\% GDP) & (\%) \\"
+            r" & (\\%) & (EUR m) & (\\%) & (\\%) & (\\% GDP) & "
+            r"(\\% GDP) & (\\%) \\"
         ),
         r"\midrule",
         r"\endhead",
@@ -824,6 +824,61 @@ def headline_macros(
     return _write(output_dir / "paper_headlines.tex", "\n".join(macros) + "\n")
 
 
+def refinancing_assumptions_table(
+    assumptions: pd.DataFrame,
+    output_dir: Path,
+    main_scenario: str,
+) -> Path:
+    """Write the refinancing assumptions so the reader can audit the model."""
+    per_scenario = (
+        assumptions.sort_values(["scenario", "horizon_year"])
+        .groupby("scenario", as_index=False)
+        .first()
+    )
+    rows = []
+    for row in per_scenario.itertuples():
+        marker = " (main)" if str(row.scenario) == main_scenario else ""
+        rows.append(
+            [
+                _escape(str(row.scenario).capitalize() + marker),
+                _fmt(_num(row.annual_refinancing_share) * 100.0, 2),
+                _fmt(row.implied_average_maturity_years, 1),
+                _int_text(row.horizon_years),
+                _fmt(row.initial_average_portfolio_rate_pct, 2),
+                _fmt(row.baseline_new_issuance_rate_pct, 2),
+                _fmt(row.debt_pct_gdp, 2),
+                _escape(str(row.debt_ratio_path)),
+            ]
+        )
+    content = _table(
+        caption="Stylised refinancing scenario assumptions",
+        label="tab:refinancing-assumptions",
+        columns="lrrrrrrl",
+        header=[
+            "Scenario",
+            "Annual repricing (\\%)",
+            "Implied maturity (years)",
+            "Horizon (years)",
+            "Initial portfolio rate (\\%)",
+            "Baseline issuance rate (\\%)",
+            "Debt (\\% of GDP)",
+            "Debt and GDP paths",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: A stylised cohort model, not a forecast. The central "
+            "scenario applies a uniform annual repricing share consistent with "
+            "the published average maturity of the debt stock of 7.2 years in "
+            "2024 (IGCP, Annual Report 2024, page 22); the uniform shape is an "
+            "approximation applied here, not IGCP's redemption schedule. The "
+            "slow and fast scenarios carry no external source and exist to "
+            "bracket the assumption. The debt ratio and nominal GDP are held "
+            "fixed across the horizon. " + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "refinancing_assumptions.tex", content)
+
+
 def generate_latex_tables(
     frame: pd.DataFrame,
     output_dir: Path,
@@ -831,6 +886,8 @@ def generate_latex_tables(
     shocks_bps: list[int],
     panel_frame: pd.DataFrame | None = None,
     context_dir: Path | None = None,
+    refinancing_assumptions: pd.DataFrame | None = None,
+    refinancing_main_scenario: str = "central",
 ) -> list[Path]:
     """Generate every LaTeX table fragment and numeric context used by the paper."""
     observed = _observed_portugal(frame, main_start_year)
@@ -850,4 +907,10 @@ def generate_latex_tables(
     ]
     if panel_frame is not None:
         paths.append(european_comparison_table(panel_frame, output_dir, latest_year))
+    if refinancing_assumptions is not None and not refinancing_assumptions.empty:
+        paths.append(
+            refinancing_assumptions_table(
+                refinancing_assumptions, output_dir, refinancing_main_scenario
+            )
+        )
     return paths

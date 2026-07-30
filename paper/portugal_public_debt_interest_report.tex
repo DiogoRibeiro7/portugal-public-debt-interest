@@ -668,24 +668,76 @@ effects when most debt is fixed-rate and matures gradually.
 
 \input{../reports/tables/static_sensitivities.tex}
 
-Figure \ref{fig:refinancing} reports deterministic refinancing paths using the
-configured refinancing shares. The purpose is not to forecast Portugal's
-future debt-servicing cost. The purpose is to show that the arithmetic effect
-of rate shocks is distributed over time when only part of the stock is repriced
-each year.
+The static bound above assumes the whole stock reprices at once. It does not.
+Only the part of the portfolio that matures is rolled over at the new rate, so
+the arithmetic effect of a shock arrives gradually. To make that explicit the
+paper uses a stylised cohort model.
+
+\paragraph{The cohort recurrence.} At the horizon origin the entire initial
+stock sits in a legacy cohort carrying the initial average portfolio rate
+$r_0$. In year $t$ a configured share $s_t$ of the \emph{original} stock leaves
+the legacy cohort and is repriced at that year's new-issuance rate. Cohorts
+already repriced keep the rate they were assigned, so no cohort is repriced
+twice. Writing $S_t = \sum_{k \le t} s_k$ for the cumulative repriced share, the
+average portfolio rate is
+
+\begin{equation}
+  \bar{r}_t = (1 - S_t)\, r_0 + \sum_{k \le t} s_k \, y_k ,
+  \label{eq:cohort}
+\end{equation}
+
+where $y_k$ is the new-issuance rate in year $k$. The shocked path uses
+$y_k + \Delta$ and the baseline path uses $y_k$; the reported quantity is the
+difference between the two.
+
+\input{../reports/tables/refinancing_assumptions.tex}
+
+\paragraph{Assumptions and their provenance.} Table
+\ref{tab:refinancing-assumptions} lists every input. One of them is sourced:
+the average maturity of the Portuguese debt stock was 7.2 years in 2024
+including official loans (IGCP, \emph{Annual Report 2024}, page 22). The
+central scenario converts that figure into a uniform annual repricing share of
+$1/7.2$. The uniform shape is an approximation applied here and is
+\emph{not} IGCP's redemption schedule, which is lumpy. The slow and fast
+scenarios carry no external source at all; they bracket the central case so the
+reader can see how much the result depends on the assumption rather than on the
+data. The debt ratio and nominal GDP are held fixed across the horizon, which
+isolates the repricing arithmetic. This is a stylised model and not a forecast.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{../reports/figures/09_refinancing_shock_paths.pdf}
-\caption{Gradual refinancing shock paths.}
-\label{fig:refinancing}
+\includegraphics[width=0.9\textwidth]{../reports/figures/14_refinancing_cumulative_repricing.pdf}
+\caption{Cumulative share of the original stock repriced, by scenario.}
+\label{fig:refinancing-repricing}
 \end{figure}
 
-The refinancing exercise has two fiscal implications. First, maturity
-structure is a form of risk management because it determines how quickly market
-conditions enter the budget. Second, favourable recent debt arithmetic should
-not be extrapolated mechanically. If higher market yields persist, the average
-rate can rise gradually even without an immediate fiscal shock.
+Figure \ref{fig:refinancing-incremental} reports the quantity that matters: the
+interest burden under each shock \emph{minus} the burden under a zero shock.
+Plotting total burden paths would confound the shock with the starting level.
+The zero-shock case is flat at zero by construction, and each shocked path
+converges on the static bound in Table \ref{tab:shock} once the
+whole stock has been repriced.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{../reports/figures/15_refinancing_incremental_burden.pdf}
+\caption{Additional interest relative to the zero-shock baseline, central scenario.}
+\label{fig:refinancing-incremental}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{../reports/figures/16_refinancing_cumulative_cost.pdf}
+\caption{Cumulative additional interest in euro relative to the zero-shock baseline.}
+\label{fig:refinancing-cost}
+\end{figure}
+
+The exercise has two fiscal implications. First, maturity structure is a form
+of risk management: it determines how quickly market conditions enter the
+budget, and a longer average maturity converts a rate shock into a slow,
+partial repricing. Second, favourable recent debt arithmetic should not be
+extrapolated mechanically. If higher market yields persist, the average rate
+rises gradually even without an immediate fiscal shock.
 
 \section{Discussion and Limitations}
 

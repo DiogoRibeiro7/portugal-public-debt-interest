@@ -129,6 +129,53 @@ def save_interest_counterfactuals(
     return outputs
 
 
+def save_refinancing_outputs(
+    assumptions: pd.DataFrame,
+    results: pd.DataFrame,
+    settings: Settings,
+    root: Path = Path("."),
+) -> dict[str, Path]:
+    """Save the stylised refinancing assumptions and simulation results.
+
+    The assumptions travel with the results deliberately: a pass-through number
+    is meaningless without the repricing profile that produced it.
+    """
+    processed_dir = root / settings.paths.processed
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    outputs: dict[str, Path] = {}
+
+    if settings.storage.backend in {"csv", "both"}:
+        assumptions_path = processed_dir / "refinancing_assumptions.csv"
+        results_path = processed_dir / "refinancing_results.csv"
+        assumptions.to_csv(assumptions_path, index=False)
+        results.to_csv(results_path, index=False)
+        outputs["assumptions_csv"] = assumptions_path
+        outputs["results_csv"] = results_path
+
+    if settings.storage.backend in {"sqlite", "both"}:
+        sqlite_path = processed_dir / settings.storage.sqlite_filename
+        with sqlite3.connect(sqlite_path) as connection:
+            assumptions.to_sql(
+                "refinancing_assumptions",
+                connection,
+                if_exists="replace",
+                index=False,
+            )
+            results.to_sql(
+                "refinancing_results",
+                connection,
+                if_exists="replace",
+                index=False,
+            )
+            connection.execute(
+                'CREATE UNIQUE INDEX IF NOT EXISTS idx_refinancing_results '
+                'ON "refinancing_results" (scenario, shock_bps, horizon_year)'
+            )
+        outputs["sqlite"] = sqlite_path
+
+    return outputs
+
+
 def load_processed(settings: Settings, root: Path = Path(".")) -> pd.DataFrame:
     """Load the processed analytical dataset, preferring CSV."""
     processed_dir = root / settings.paths.processed
