@@ -43,7 +43,9 @@ __all__ = [
     "finish",
     "headroom",
     "label_last_point",
+    "load_counterfactuals",
     "load_dataset",
+    "load_decomposition",
     "load_panel",
     "load_reproducibility",
     "load_settings",
@@ -167,6 +169,26 @@ def load_panel(root: Path | None = None) -> pd.DataFrame:
     )
     frame = pd.read_csv(path)
     return frame.sort_values(["geo", "year"]).reset_index(drop=True)
+
+
+def load_decomposition(root: Path | None = None) -> pd.DataFrame:
+    """Load the endpoint interest-burden decomposition."""
+    base = root or repo_root()
+    path = _require(
+        base / "data" / "processed" / "interest_burden_decomposition.csv",
+        "pt-debt all --config config/default.yaml",
+    )
+    return pd.read_csv(path)
+
+
+def load_counterfactuals(root: Path | None = None) -> pd.DataFrame:
+    """Load the cross-rate and cross-exposure burden counterfactuals."""
+    base = root or repo_root()
+    path = _require(
+        base / "data" / "processed" / "interest_burden_counterfactuals.csv",
+        "pt-debt all --config config/default.yaml",
+    )
+    return pd.read_csv(path)
 
 
 def load_validation(root: Path | None = None) -> dict[str, Any]:
