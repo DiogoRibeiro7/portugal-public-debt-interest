@@ -13,6 +13,10 @@ from .interest_decomposition import (
     build_interest_burden_decomposition,
 )
 from .panel import aggregate_flag_mask
+from .report_context import (
+    build_debt_dynamics_context,
+    write_debt_dynamics_context,
+)
 from .scenarios import static_rate_shock_table
 
 
@@ -531,6 +535,63 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
     return _write(output_dir / "annual_portugal_table.tex", "\n".join(lines) + "\n")
 
 
+_DEBT_DYNAMICS_YEAR_WORDS = {
+    "2020": "TwentyTwenty",
+    "2022": "TwentyTwentyTwo",
+    "2023": "TwentyTwentyThree",
+}
+
+
+def _scientific(value: float) -> str:
+    """Render a residual without implying false precision or a negative zero."""
+    magnitude = abs(float(value))
+    if magnitude == 0.0:
+        return "0"
+    if magnitude < 1e-9:
+        return "$< 10^{-9}$"
+    return f"{magnitude:.2e}"
+
+
+def _debt_dynamics_macros(frame: pd.DataFrame) -> list[str]:
+    """Build report macros from the canonical debt-dynamics context."""
+    context = build_debt_dynamics_context(frame)
+    macros: list[str] = []
+    for year, word in _DEBT_DYNAMICS_YEAR_WORDS.items():
+        values = context["focus_years"][year]
+        macros.append(
+            _macro(
+                f"DebtDynamicsInterestGrowth{word}Pp",
+                _fmt(values["interest_growth_contribution_pp"], 2),
+            )
+        )
+        macros.append(
+            _macro(
+                f"DebtStabilisingPb{word}PctGdp",
+                _fmt(
+                    values["debt_stabilising_primary_balance_before_sfa_pct_gdp"], 2
+                ),
+            )
+        )
+        macros.append(
+            _macro(
+                f"DebtDynamicsRate{word}Pct",
+                _fmt(values["debt_dynamics_interest_rate_pct"], 2),
+            )
+        )
+    stock_flow = context["stock_flow_adjustment"]
+    macros.append(_macro("StockFlowMinPp", _fmt(stock_flow["minimum_pp"], 2)))
+    macros.append(_macro("StockFlowMinYear", str(stock_flow["minimum_year"])))
+    macros.append(_macro("StockFlowMaxPp", _fmt(stock_flow["maximum_pp"], 2)))
+    macros.append(_macro("StockFlowMaxYear", str(stock_flow["maximum_year"])))
+    macros.append(
+        _macro(
+            "DebtDynamicsMaxReconciliationErrorPp",
+            _scientific(context["reconciliation"]["maximum_absolute_error_pp"]),
+        )
+    )
+    return macros
+
+
 def headline_macros(
     frame: pd.DataFrame,
     output_dir: Path,
@@ -716,6 +777,7 @@ def headline_macros(
             "DecompDominantNineteenNinetySixToLatest",
             _escape(interval_1996_2025.dominant_effect),
         ),
+        *_debt_dynamics_macros(frame),
         _macro("PortugalComparatorRankWord", panel_rank),
         _macro("ComparatorCountryCountWord", panel_count),
         _macro(
@@ -744,11 +806,14 @@ def generate_latex_tables(
     main_start_year: int,
     shocks_bps: list[int],
     panel_frame: pd.DataFrame | None = None,
+    context_dir: Path | None = None,
 ) -> list[Path]:
-    """Generate every LaTeX table fragment used by the paper."""
+    """Generate every LaTeX table fragment and numeric context used by the paper."""
     observed = _observed_portugal(frame, main_start_year)
     latest_year = int(observed["year"].max())
+    generated_dir = context_dir if context_dir is not None else output_dir.parent / "generated"
     paths = [
+        write_debt_dynamics_context(frame, generated_dir),
         headline_macros(frame, output_dir, main_start_year, shocks_bps, panel_frame),
         summary_statistics_table(frame, output_dir, main_start_year),
         regime_averages_table(frame, output_dir, main_start_year),

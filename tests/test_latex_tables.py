@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+from conftest import add_debt_dynamics_columns
 
 from pt_debt_interest.latex_tables import generate_latex_tables
 
@@ -43,7 +44,7 @@ def _annual_frame() -> pd.DataFrame:
     debt_mio_eur = [
         gdp * ratio / 100.0 for gdp, ratio in zip(nominal_gdp, debt_pct_gdp, strict=True)
     ]
-    return pd.DataFrame(
+    frame = pd.DataFrame(
         {
             "year": years,
             "interest_pct_gdp": interest_pct_gdp,
@@ -295,6 +296,7 @@ def _annual_frame() -> pd.DataFrame:
             "observation_status": ["observed"] * len(years),
         }
     )
+    return add_debt_dynamics_columns(frame)
 
 
 def _panel_frame() -> pd.DataFrame:

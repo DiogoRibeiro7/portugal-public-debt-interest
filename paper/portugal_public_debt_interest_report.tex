@@ -555,10 +555,14 @@ pressure because the denominator grew quickly.
 Figure \ref{fig:debt-dynamics} reports the accounting decomposition implied by
 Equation \ref{eq:debt-dynamics}. The pandemic year 2020 is the clearest example
 of adverse debt dynamics: nominal GDP contracted sharply, pushing the
-interest-growth term to 10.49 percentage points of GDP. By contrast, 2022 and
-2023 show strongly favourable interest-growth arithmetic. The debt-stabilising
-primary balance was -12.07 percent of GDP in 2022 and -8.77 percent in 2023,
-before stock-flow effects.
+interest-growth term to \DebtDynamicsInterestGrowthTwentyTwentyPp{} percentage
+points of GDP. By contrast, 2022 and 2023 show strongly favourable
+interest-growth arithmetic. The debt-stabilising primary balance was
+\DebtStabilisingPbTwentyTwentyTwoPctGdp{} percent of GDP in 2022 and
+\DebtStabilisingPbTwentyTwentyThreePctGdp{} percent in 2023, before stock-flow
+effects. Both quantities are evaluated on the debt-dynamics rate
+$r^{\mathrm{dd}}_t = I_t / D_{t-1}$ used in Equation \ref{eq:debt-dynamics},
+not on the average-debt descriptive rate of Equation \ref{eq:average-debt-rate}.
 
 \begin{figure}[H]
 \centering
@@ -572,9 +576,12 @@ before stock-flow effects.
 The stock-flow adjustment is a residual. It absorbs valuation effects,
 financial transactions, cash-debt timing differences, and any discrepancy
 between the simple debt-dynamics identity and the measured debt ratio. In this
-dataset, it ranges from -4.29 percentage points of GDP in 1997 to
-4.67 percentage points in 2011. It should not be interpreted as an estimated
-policy instrument. It is an accounting reconciliation term.
+dataset, it ranges from \StockFlowMinPp{} percentage points of GDP in
+\StockFlowMinYear{} to \StockFlowMaxPp{} percentage points in
+\StockFlowMaxYear{}. It should not be interpreted as an estimated policy
+instrument. It is an accounting reconciliation term. Across the sample the
+identity closes to within \DebtDynamicsMaxReconciliationErrorPp{} percentage
+points, so the residual carries no arithmetic error.
 
 Figure \ref{fig:interest-burden-decomposition} applies Equation
 \ref{eq:burden-decomposition} to selected endpoint intervals. The principal
