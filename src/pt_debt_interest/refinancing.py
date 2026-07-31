@@ -8,11 +8,13 @@ explicitly.
 Mechanics
 ---------
 At year zero the whole initial stock sits in a *legacy* cohort carrying the
-initial average portfolio rate. In year ``t`` a configured share of the
-**original** stock leaves the legacy cohort and enters a *refinanced* cohort at
-that year's new-issuance rate. Cohorts already refinanced keep the rate they
-were assigned, so no cohort is ever repriced twice. Shares are expressed
-against the original stock, so the cumulative share can never exceed one.
+initial average portfolio rate. In year ``t`` a configured annual hazard is
+applied to the remaining legacy stock. If ``p`` is the hazard and ``S`` is the
+cumulative share already repriced, the new cohort share is
+``p * (1 - S)``. Cohorts already refinanced keep the rate they were assigned,
+so no cohort is ever repriced twice. Shares are expressed against the original
+stock, and the cumulative share approaches one asymptotically unless the
+hazard is one.
 
 What the model is not
 ---------------------
@@ -62,8 +64,12 @@ class RefinancingScenario:
         description: str,
         implied_average_maturity_years: float,
         source: str,
+        base_year: int = 2025,
+        cumulative_euro_values: str = "undiscounted",
+        monetary_value_basis: str = "fixed 2025 nominal euros",
     ) -> None:
         self.name = name
+        self.annual_repricing_hazard = annual_refinancing_share
         self.annual_refinancing_share = annual_refinancing_share
         self.horizon_years = horizon_years
         self.initial_average_portfolio_rate_pct = initial_average_portfolio_rate_pct
@@ -74,12 +80,15 @@ class RefinancingScenario:
         self.description = description
         self.implied_average_maturity_years = implied_average_maturity_years
         self.source = source
+        self.base_year = base_year
+        self.cumulative_euro_values = cumulative_euro_values
+        self.monetary_value_basis = monetary_value_basis
         self._validate()
 
     def _validate(self) -> None:
-        share = self.annual_refinancing_share
-        if not math.isfinite(share) or share <= 0.0 or share > 1.0:
-            raise ValidationError(f"{self.name}: annual refinancing share must lie in (0, 1]")
+        hazard = self.annual_repricing_hazard
+        if not math.isfinite(hazard) or hazard <= 0.0 or hazard > 1.0:
+            raise ValidationError(f"{self.name}: annual repricing hazard must lie in (0, 1]")
         if self.horizon_years <= 0:
             raise ValidationError(f"{self.name}: horizon must be positive")
         for label, value in (
@@ -88,21 +97,27 @@ class RefinancingScenario:
         ):
             if not math.isfinite(value) or value <= 0.0:
                 raise ValidationError(f"{self.name}: {label} must be positive")
+        if self.base_year <= 0:
+            raise ValidationError(f"{self.name}: base year must be positive")
 
     def annual_shares(self) -> list[float]:
         """Share of the *original* stock repriced in each horizon year.
 
-        The final cohort is truncated so that the cumulative share never
-        exceeds the outstanding stock: once everything has been repriced, later
-        years reprice nothing.
+        The configured parameter is a constant annual hazard on the remaining
+        legacy stock, not a fixed share of the original stock. With hazard
+        ``p``, year ``t`` reprices ``p * (1 - S[t-1])``.
         """
         shares: list[float] = []
         remaining = 1.0
         for _ in range(self.horizon_years):
-            step = min(self.annual_refinancing_share, remaining)
+            step = self.annual_repricing_hazard * remaining
             shares.append(step)
             remaining -= step
         return shares
+
+    def expected_repricing_time_years(self) -> float:
+        """Expected repricing time implied by the constant hazard."""
+        return 1.0 / self.annual_repricing_hazard
 
 
 def load_refinancing_scenarios(path: Path) -> dict[str, RefinancingScenario]:
@@ -121,9 +136,13 @@ def load_refinancing_scenarios(path: Path) -> dict[str, RefinancingScenario]:
     for name, entry in scenarios_section.items():
         merged = {**defaults, **entry}
         try:
+            if "annual_repricing_hazard" in merged:
+                annual_hazard = float(merged["annual_repricing_hazard"])
+            else:
+                annual_hazard = float(merged["annual_refinancing_share"])
             scenarios[name] = RefinancingScenario(
                 name=name,
-                annual_refinancing_share=float(merged["annual_refinancing_share"]),
+                annual_refinancing_share=annual_hazard,
                 horizon_years=int(merged["horizon_years"]),
                 initial_average_portfolio_rate_pct=float(
                     merged["initial_average_portfolio_rate_pct"]
@@ -137,6 +156,11 @@ def load_refinancing_scenarios(path: Path) -> dict[str, RefinancingScenario]:
                     merged.get("implied_average_maturity_years", 0.0)
                 ),
                 source=str(merged.get("source", "")),
+                base_year=int(merged.get("base_year", 2025)),
+                cumulative_euro_values=str(merged.get("cumulative_euro_values", "undiscounted")),
+                monetary_value_basis=str(
+                    merged.get("monetary_value_basis", "fixed 2025 nominal euros")
+                ),
             )
         except KeyError as exc:
             raise ValidationError(f"refinancing scenario {name} is missing key {exc}") from exc
@@ -152,6 +176,7 @@ def build_refinancing_assumptions(
     for scenario in scenarios.values():
         shares = scenario.annual_shares()
         cumulative = 0.0
+        debt_stock_mio_eur = scenario.nominal_gdp_mio_eur * scenario.debt_pct_gdp / 100.0
         for horizon_year, share in enumerate(shares, start=1):
             cumulative += share
             for shock_bps in shocks_bps:
@@ -163,8 +188,10 @@ def build_refinancing_assumptions(
                         "horizon_year": horizon_year,
                         "horizon_years": scenario.horizon_years,
                         "shock_bps": shock_bps,
+                        "annual_repricing_hazard": scenario.annual_repricing_hazard,
                         "annual_refinancing_share": share,
                         "cumulative_refinancing_share": cumulative,
+                        "expected_repricing_time_years": scenario.expected_repricing_time_years(),
                         "implied_average_maturity_years": (scenario.implied_average_maturity_years),
                         "initial_average_portfolio_rate_pct": (
                             scenario.initial_average_portfolio_rate_pct
@@ -175,6 +202,13 @@ def build_refinancing_assumptions(
                         ),
                         "debt_pct_gdp": scenario.debt_pct_gdp,
                         "nominal_gdp_mio_eur": scenario.nominal_gdp_mio_eur,
+                        "nominal_gdp_base_mio_eur": scenario.nominal_gdp_mio_eur,
+                        "debt_stock_mio_eur": debt_stock_mio_eur,
+                        "nominal_debt_base_mio_eur": debt_stock_mio_eur,
+                        "base_year": scenario.base_year,
+                        "cumulative_euro_values": scenario.cumulative_euro_values,
+                        "monetary_value_basis": scenario.monetary_value_basis,
+                        "discounting": "none",
                         "paths_fixed": scenario.paths_fixed,
                         "debt_ratio_path": "fixed" if scenario.paths_fixed else "changing",
                         "nominal_gdp_path": "fixed" if scenario.paths_fixed else "changing",
@@ -201,6 +235,7 @@ def _simulate_one(
             "scenario": scenario.name,
             "shock_bps": shock_bps,
             "horizon_year": 0,
+            "annual_repricing_hazard": scenario.annual_repricing_hazard,
             "annual_refinancing_share": 0.0,
             "cumulative_refinancing_share": 0.0,
             "legacy_share": 1.0,
@@ -231,6 +266,7 @@ def _simulate_one(
                 "scenario": scenario.name,
                 "shock_bps": shock_bps,
                 "horizon_year": horizon_year,
+                "annual_repricing_hazard": scenario.annual_repricing_hazard,
                 "annual_refinancing_share": share,
                 "cumulative_refinancing_share": cumulative,
                 "legacy_share": legacy_share,
@@ -258,6 +294,10 @@ def _simulate_one(
     frame["debt_pct_gdp"] = scenario.debt_pct_gdp
     frame["nominal_gdp_mio_eur"] = scenario.nominal_gdp_mio_eur
     frame["debt_stock_mio_eur"] = debt_stock_mio_eur
+    frame["base_year"] = scenario.base_year
+    frame["cumulative_euro_values"] = scenario.cumulative_euro_values
+    frame["monetary_value_basis"] = scenario.monetary_value_basis
+    frame["discounting"] = "none"
     frame["interpretation"] = "stylised cohort model, not a forecast"
     return frame
 

@@ -491,7 +491,8 @@ def plot_refinancing_repricing(results: pd.DataFrame | None, output_dir: Path) -
     ax.text(
         0.0,
         -0.16,
-        SOURCE_NOTE + " Stylised cohort model; not a forecast.",
+        SOURCE_NOTE
+        + " Stylised constant-hazard cohort model on remaining legacy stock; not a forecast.",
         transform=ax.transAxes,
         fontsize=9,
         alpha=0.85,
@@ -534,7 +535,7 @@ def plot_refinancing_incremental_burden(
         -0.16,
         SOURCE_NOTE
         + f" Incremental over the zero-shock baseline; {main_scenario} scenario;"
-        + " stylised cohort model, not a forecast.",
+        + " stylised constant-hazard cohort model, not a forecast.",
         transform=ax.transAxes,
         fontsize=9,
         alpha=0.85,
@@ -565,7 +566,7 @@ def plot_refinancing_cumulative_cost(
         )
     ax.axhline(0.0, color="grey", linewidth=0.8)
     ax.set_xlabel("Years after the shock")
-    ax.set_ylabel("Cumulative additional interest, EUR billion")
+    ax.set_ylabel("Undiscounted cumulative additional interest, EUR billion")
     ax.grid(True, alpha=0.25)
     ax.legend(title="Shock")
     ax.text(
@@ -573,7 +574,7 @@ def plot_refinancing_cumulative_cost(
         -0.16,
         SOURCE_NOTE
         + f" Cumulative over the zero-shock baseline; {main_scenario} scenario;"
-        + " debt stock and GDP held fixed; not a forecast.",
+        + " fixed 2025 nominal GDP and debt; undiscounted; not a forecast.",
         transform=ax.transAxes,
         fontsize=9,
         alpha=0.85,

@@ -121,6 +121,6 @@ def test_report_context_uses_generated_decomposition_values(tmp_path) -> None:
     interval = build_interest_burden_decomposition(_frame(), intervals=((2014, 2025),)).iloc[0]
 
     assert (
-        rf"\newcommand{{\DecompTotalTwentyFourteenToLatestPp}}{{{interval.total_change_pp:.2f}}}"
+        rf"\newcommand{{\DecompTotalTwentyFourteenToLatestPp}}{{{interval.total_change_pp:.3f}}}"
         in content
     )

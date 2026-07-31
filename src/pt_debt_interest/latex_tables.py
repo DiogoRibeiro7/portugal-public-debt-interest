@@ -379,6 +379,16 @@ def debt_dynamics_diagnostic_table(
 
 
 def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year: int) -> Path:
+    eligibility = build_eligibility_table(panel_frame, year)
+    included = eligibility.loc[eligibility["included_in_rank"]]
+    eligible_codes = set(included["eurostat_code"].astype(str))
+    status_by_code = dict(
+        zip(
+            eligibility["eurostat_code"].astype(str),
+            eligibility["observation_status"].astype(str),
+            strict=False,
+        )
+    )
     panel = panel_frame.copy()
     panel["year"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.loc[
@@ -386,11 +396,14 @@ def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year:
         & panel["observation_status"].eq("observed")
         & ~aggregate_flag_mask(panel["is_aggregate"])
     ].copy()
+    if eligible_codes:
+        panel = panel.loc[panel["geo"].astype(str).isin(eligible_codes)].copy()
     panel = panel.sort_values(["interest_burden_rank", "geo_name"])
     rows = [
         [
             _int_text(row.interest_burden_rank),
             _escape(row.geo_name),
+            _escape(status_by_code.get(str(row.geo), str(row.observation_status))),
             _fmt(row.interest_pct_gdp, 1),
             _fmt(row.debt_pct_gdp, 1),
             _fmt(row.average_debt_interest_rate_pct, 2),
@@ -402,10 +415,11 @@ def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year:
     content = _table(
         caption=f"European comparator panel, {year}",
         label="tab:europe-2025",
-        columns="llrrrrr",
+        columns="lllrrrrr",
         header=[
             "Rank",
             "Country",
+            "Status",
             "Interest/GDP (\\%)",
             "Debt/GDP (\\%)",
             "Avg. debt rate (\\%)",
@@ -413,6 +427,12 @@ def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year:
             "Primary bal. (\\% GDP)",
         ],
         rows=rows,
+        notes=(
+            "Notes: Status is derived from Eurostat per-series flags for the "
+            "required comparison variables. Provisional observations are admitted "
+            "under the configured eligibility rule and disclosed in the table. "
+            + SOURCE_NOTE
+        ),
     )
     return _write(output_dir / "european_comparison_2025.tex", content)
 
@@ -563,23 +583,17 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
         r"\label{tab:annual-all}\\",
         r"\toprule",
         (
-            r"Year & Int./GDP & Interest & Debt/GDP & Avg. debt rate & "
-            r"Overall bal. & Primary bal. & Nom. growth \\"
-        ),
-        (
-            r" & (\\%) & (EUR m) & (\\%) & (\\%) & (\\% GDP) & "
-            r"(\\% GDP) & (\\%) \\"
+            r"Year & Int./GDP (\%) & Interest (EUR m) & Debt/GDP (\%) & "
+            r"Avg. debt rate (\%) & Overall bal. (\% GDP) & "
+            r"Primary bal. (\% GDP) & Nom. growth (\%) \\"
         ),
         r"\midrule",
         r"\endfirsthead",
         r"\toprule",
         (
-            r"Year & Int./GDP & Interest & Debt/GDP & Avg. debt rate & "
-            r"Overall bal. & Primary bal. & Nom. growth \\"
-        ),
-        (
-            r" & (\\%) & (EUR m) & (\\%) & (\\%) & (\\% GDP) & "
-            r"(\\% GDP) & (\\%) \\"
+            r"Year & Int./GDP (\%) & Interest (EUR m) & Debt/GDP (\%) & "
+            r"Avg. debt rate (\%) & Overall bal. (\% GDP) & "
+            r"Primary bal. (\% GDP) & Nom. growth (\%) \\"
         ),
         r"\midrule",
         r"\endhead",
@@ -798,15 +812,15 @@ def headline_macros(
         ),
         _macro(
             "DecompTotalTwentyFourteenToLatestPp",
-            _fmt(interval_2014_2025.total_change_pp, 2),
+            _fmt(interval_2014_2025.total_change_pp, 3),
         ),
         _macro(
             "DecompRateTwentyFourteenToLatestPp",
-            _fmt(interval_2014_2025.rate_effect_pp, 2),
+            _fmt(interval_2014_2025.rate_effect_pp, 3),
         ),
         _macro(
             "DecompExposureTwentyFourteenToLatestPp",
-            _fmt(interval_2014_2025.debt_exposure_effect_pp, 2),
+            _fmt(interval_2014_2025.debt_exposure_effect_pp, 3),
         ),
         _macro(
             "DecompErrorTwentyFourteenToLatestPp",
@@ -818,15 +832,15 @@ def headline_macros(
         ),
         _macro(
             "DecompTotalNineteenNinetySixToLatestPp",
-            _fmt(interval_1996_2025.total_change_pp, 2),
+            _fmt(interval_1996_2025.total_change_pp, 3),
         ),
         _macro(
             "DecompRateNineteenNinetySixToLatestPp",
-            _fmt(interval_1996_2025.rate_effect_pp, 2),
+            _fmt(interval_1996_2025.rate_effect_pp, 3),
         ),
         _macro(
             "DecompExposureNineteenNinetySixToLatestPp",
-            _fmt(interval_1996_2025.debt_exposure_effect_pp, 2),
+            _fmt(interval_1996_2025.debt_exposure_effect_pp, 3),
         ),
         _macro(
             "DecompErrorNineteenNinetySixToLatestPp",
@@ -1018,11 +1032,11 @@ def interest_share_of_budget_table(
         columns="rrrrrr",
         header=[
             "Year",
-            "Interest (\% of GDP)",
-            "Expenditure (\% of GDP)",
-            "Interest (\% of expenditure)",
-            "Revenue (\% of GDP)",
-            "Interest (\% of revenue)",
+            "Interest (\\% of GDP)",
+            "Expenditure (\\% of GDP)",
+            "Interest (\\% of expenditure)",
+            "Revenue (\\% of GDP)",
+            "Interest (\\% of revenue)",
         ],
         rows=rows,
         notes=(
@@ -1040,10 +1054,13 @@ def refinancing_assumptions_table(
     main_scenario: str,
 ) -> Path:
     """Write the refinancing assumptions so the reader can audit the model."""
+    base_shock = assumptions.loc[assumptions["shock_bps"].eq(0)].copy()
+    if base_shock.empty:
+        base_shock = assumptions.copy()
     per_scenario = (
-        assumptions.sort_values(["scenario", "horizon_year"])
+        base_shock.sort_values(["scenario", "horizon_year"])
         .groupby("scenario", as_index=False)
-        .first()
+        .tail(1)
     )
     rows = []
     for row in per_scenario.itertuples():
@@ -1051,39 +1068,43 @@ def refinancing_assumptions_table(
         rows.append(
             [
                 _escape(str(row.scenario).capitalize() + marker),
-                _fmt(_num(row.annual_refinancing_share) * 100.0, 2),
-                _fmt(row.implied_average_maturity_years, 1),
+                _fmt(_num(row.annual_repricing_hazard) * 100.0, 2),
+                _fmt(row.expected_repricing_time_years, 1),
                 _int_text(row.horizon_years),
-                _fmt(row.initial_average_portfolio_rate_pct, 2),
-                _fmt(row.baseline_new_issuance_rate_pct, 2),
-                _fmt(row.debt_pct_gdp, 2),
-                _escape(str(row.debt_ratio_path)),
+                _fmt(_num(row.cumulative_refinancing_share) * 100.0, 1),
+                _fmt(_num(row.nominal_gdp_base_mio_eur) / 1000.0, 2),
+                _fmt(_num(row.nominal_debt_base_mio_eur) / 1000.0, 2),
+                _escape(str(row.monetary_value_basis)),
+                _escape(str(row.discounting)),
             ]
         )
     content = _table(
         caption="Stylised refinancing scenario assumptions",
         label="tab:refinancing-assumptions",
-        columns="lrrrrrrl",
+        columns="lrrrrrrll",
         header=[
             "Scenario",
-            "Annual repricing (\\%)",
-            "Implied maturity (years)",
+            "Annual hazard (\\%)",
+            "Expected repricing time (years)",
             "Horizon (years)",
-            "Initial portfolio rate (\\%)",
-            "Baseline issuance rate (\\%)",
-            "Debt (\\% of GDP)",
-            "Debt and GDP paths",
+            "Repriced at horizon (\\%)",
+            "GDP base (EUR bn)",
+            "Debt base (EUR bn)",
+            "Amount basis",
+            "Discounting",
         ],
         rows=rows,
         notes=(
             "Notes: A stylised cohort model, not a forecast. The central "
-            "scenario applies a uniform annual repricing share consistent with "
+            "scenario applies a constant annual hazard to the remaining legacy "
+            "stock, with p = 1/7.2 so that the expected repricing time equals "
             "the published average maturity of the debt stock of 7.2 years in "
-            "2024 (IGCP, Annual Report 2024, page 22); the uniform shape is an "
+            "2024 (IGCP, Annual Report 2024, page 22); the hazard shape is an "
             "approximation applied here, not IGCP's redemption schedule. The "
             "slow and fast scenarios carry no external source and exist to "
             "bracket the assumption. The debt ratio and nominal GDP are held "
-            "fixed across the horizon. " + SOURCE_NOTE
+            "fixed at the base-year values across the horizon. Monetary values "
+            "are undiscounted. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "refinancing_assumptions.tex", content)

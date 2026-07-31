@@ -3,16 +3,16 @@
 \caption{Stylised refinancing scenario assumptions}
 \label{tab:refinancing-assumptions}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lrrrrrrl}
+\begin{tabular}{lrrrrrrll}
 \toprule
-Scenario & Annual repricing (\%) & Implied maturity (years) & Horizon (years) & Initial portfolio rate (\%) & Baseline issuance rate (\%) & Debt (\% of GDP) & Debt and GDP paths \\
+Scenario & Annual hazard (\%) & Expected repricing time (years) & Horizon (years) & Repriced at horizon (\%) & GDP base (EUR bn) & Debt base (EUR bn) & Amount basis & Discounting \\
 \midrule
-Central (main) & 13.89 & 7.2 & 10 & 2.18 & 3.08 & 89.70 & fixed \\
-Fast & 20.00 & 5.0 & 10 & 2.18 & 3.08 & 89.70 & fixed \\
-Slow & 10.00 & 10.0 & 10 & 2.18 & 3.08 & 89.70 & fixed \\
+Central (main) & 13.89 & 7.2 & 10 & 77.6 & 306.75 & 275.15 & fixed 2025 nominal GDP and debt & none \\
+Fast & 20.00 & 5.0 & 10 & 89.3 & 306.75 & 275.15 & fixed 2025 nominal GDP and debt & none \\
+Slow & 10.00 & 10.0 & 10 & 65.1 & 306.75 & 275.15 & fixed 2025 nominal GDP and debt & none \\
 \bottomrule
 \end{tabular}%
 }
 \smallskip
-\small Notes: A stylised cohort model, not a forecast. The central scenario applies a uniform annual repricing share consistent with the published average maturity of the debt stock of 7.2 years in 2024 (IGCP, Annual Report 2024, page 22); the uniform shape is an approximation applied here, not IGCP's redemption schedule. The slow and fast scenarios carry no external source and exist to bracket the assumption. The debt ratio and nominal GDP are held fixed across the horizon. Source: author calculations from Eurostat data.
+\small Notes: A stylised cohort model, not a forecast. The central scenario applies a constant annual hazard to the remaining legacy stock, with p = 1/7.2 so that the expected repricing time equals the published average maturity of the debt stock of 7.2 years in 2024 (IGCP, Annual Report 2024, page 22); the hazard shape is an approximation applied here, not IGCP's redemption schedule. The slow and fast scenarios carry no external source and exist to bracket the assumption. The debt ratio and nominal GDP are held fixed at the base-year values across the horizon. Monetary values are undiscounted. Source: author calculations from Eurostat data.
 \end{table}

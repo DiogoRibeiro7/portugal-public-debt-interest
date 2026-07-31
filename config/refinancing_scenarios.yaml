@@ -8,11 +8,11 @@
 # https://www.igcp.pt/sites/default/files/2025-11/RA2024_20251118.pdf
 #
 # Not sourced: the shape of the redemption profile. The central scenario
-# converts the published average maturity into a uniform annual repricing share
-# of 1 / 7.2. That is an approximation, not IGCP's redemption schedule, which is
-# lumpy. The slow and fast scenarios bracket it and carry no external source at
-# all; they exist to show how much the pass-through result depends on the
-# assumption rather than on the data.
+# converts the published average maturity into a constant annual hazard on the
+# remaining legacy stock, p = 1 / 7.2. That is an approximation, not IGCP's
+# redemption schedule, which is lumpy. The slow and fast scenarios bracket it
+# and carry no external source at all; they exist to show how much the
+# pass-through result depends on the assumption rather than on the data.
 #
 # The debt ratio and nominal GDP are held fixed across the horizon so that the
 # repricing arithmetic is visible on its own. These are not forecasts.
@@ -26,33 +26,38 @@ defaults:
   debt_pct_gdp: 89.70
   nominal_gdp_mio_eur: 306749.6
   paths_fixed: true
+  base_year: 2025
+  cumulative_euro_values: undiscounted
+  monetary_value_basis: fixed 2025 nominal GDP and debt
 
 scenarios:
   slow:
-    annual_refinancing_share: 0.10
+    annual_repricing_hazard: 0.10
     implied_average_maturity_years: 10.0
     description: >-
-      Slower repricing than the published average maturity implies. Illustrative
-      bracket, no external source.
+      Slower constant-hazard repricing than the published average maturity
+      implies. Illustrative bracket, no external source.
     source: "Stylised assumption; no external source."
 
   central:
-    annual_refinancing_share: 0.138889
+    annual_repricing_hazard: 0.138889
     implied_average_maturity_years: 7.2
     description: >-
-      Uniform repricing consistent with the published average maturity of the
-      debt stock. The uniform shape is an approximation, not the actual
-      redemption schedule.
+      Constant annual hazard on the remaining legacy stock, calibrated so the
+      expected repricing time equals the published average maturity of the debt
+      stock. The hazard shape is an approximation, not the actual redemption
+      schedule.
     source: >-
       Average maturity 7.2 years (2024) from IGCP Annual Report 2024, page 22.
-      Uniform annual share is an approximation applied here, not an IGCP figure.
+      Constant annual hazard is an approximation applied here, not an IGCP
+      figure.
 
   fast:
-    annual_refinancing_share: 0.20
+    annual_repricing_hazard: 0.20
     implied_average_maturity_years: 5.0
     description: >-
-      Faster repricing than the published average maturity implies. Illustrative
-      bracket, no external source.
+      Faster constant-hazard repricing than the published average maturity
+      implies. Illustrative bracket, no external source.
     source: "Stylised assumption; no external source."
 
 main_scenario: central

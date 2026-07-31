@@ -366,7 +366,7 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     assert "Interest/GDP" in summary
     assert "1.900" in summary
     assert "2025 & 1.9 & 5964.5 & 89.7" in recent
-    assert "1 & Italy & 3.9 & 137.1" in comparison
+    assert "1 & Italy & observed & 3.9 & 137.1" in comparison
     assert "89.70 & 100 & 0.010 & 0.897" in shock
     assert r"\newcommand{\LatestInterestPctGdp}{1.90}" in headlines
     assert r"\newcommand{\PortugalComparatorRankWord}{second}" in headlines

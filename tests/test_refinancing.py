@@ -108,6 +108,17 @@ def test_cumulative_refinancing_is_monotonic() -> None:
         assert cumulative.is_monotonic_increasing
 
 
+def test_central_average_maturity_uses_constant_hazard() -> None:
+    scenario = _configured()["central"]
+    expected_hazard = 1.0 / 7.2
+    assert scenario.annual_repricing_hazard == pytest.approx(expected_hazard, abs=5e-7)
+    assert scenario.expected_repricing_time_years() == pytest.approx(7.2, abs=5e-5)
+
+    cumulative_ten_year = sum(scenario.annual_shares())
+    assert cumulative_ten_year == pytest.approx(1.0 - (1.0 - expected_hazard) ** 10, abs=5e-6)
+    assert 0.77 < cumulative_ten_year < 0.78
+
+
 def test_slow_scenario_passes_through_slower_than_fast() -> None:
     scenarios = _configured()
     assert {"slow", "fast"}.issubset(scenarios.keys())
@@ -129,13 +140,10 @@ def test_no_cohort_refinanced_twice() -> None:
     for scenario in _configured().values():
         shares = scenario.annual_shares()
         assert sum(shares) <= 1.0 + 1e-12
-        # Once the stock is exhausted, later years reprice nothing.
-        exhausted = False
+        cumulative = 0.0
         for share in shares:
-            if exhausted:
-                assert share == 0.0
-            if sum(shares[: shares.index(share) + 1]) >= 1.0 - 1e-12:
-                exhausted = True
+            assert share <= 1.0 - cumulative + 1e-12
+            cumulative += share
 
 
 def test_refinancing_shares_non_negative() -> None:
@@ -178,13 +186,21 @@ def test_assumptions_record_every_configured_input() -> None:
         "horizon_year",
         "horizon_years",
         "shock_bps",
+        "annual_repricing_hazard",
         "annual_refinancing_share",
         "cumulative_refinancing_share",
+        "expected_repricing_time_years",
         "initial_average_portfolio_rate_pct",
         "baseline_new_issuance_rate_pct",
         "shocked_new_issuance_rate_pct",
         "debt_pct_gdp",
         "nominal_gdp_mio_eur",
+        "nominal_gdp_base_mio_eur",
+        "nominal_debt_base_mio_eur",
+        "base_year",
+        "cumulative_euro_values",
+        "monetary_value_basis",
+        "discounting",
         "debt_ratio_path",
         "nominal_gdp_path",
         "source",
