@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.2 - 2026-07-31
+
+- Cut a follow-up Zenodo-backed patch release.
+
 ## v0.1.1 - 2026-07-31
 
 - Added Zenodo metadata for GitHub release archiving.
