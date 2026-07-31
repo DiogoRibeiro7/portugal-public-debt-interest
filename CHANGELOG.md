@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.2 - 2026-07-31
+
+- Cut a follow-up Zenodo-backed patch release.
+
+## v0.1.1 - 2026-07-31
+
+- Added Zenodo metadata for GitHub release archiving.
+- Added ORCID and contact metadata to the citation file.
+- Updated the manuscript author block with affiliations, ORCID number, and corresponding-author email.
+
 ## v0.1.0 - 2026-07-28
 
 - Built the Portugal public-debt interest burden pipeline with Eurostat and AMECO ingestion.

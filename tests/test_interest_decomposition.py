@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from conftest import add_debt_dynamics_columns
 
 from pt_debt_interest.exceptions import ValidationError
 from pt_debt_interest.interest_decomposition import (
@@ -25,7 +26,7 @@ def _frame() -> pd.DataFrame:
         round(value / current_gdp * 100.0, 1)
         for value, current_gdp in zip(interest, gdp, strict=True)
     ]
-    return pd.DataFrame(
+    frame = pd.DataFrame(
         {
             "year": years,
             "interest_mio_eur": interest,
@@ -52,6 +53,7 @@ def _frame() -> pd.DataFrame:
             "average_debt_interest_rate_pct": [rate * 100.0 for rate in rates],
         }
     )
+    return add_debt_dynamics_columns(frame)
 
 
 def test_symmetric_decomposition_is_exact() -> None:

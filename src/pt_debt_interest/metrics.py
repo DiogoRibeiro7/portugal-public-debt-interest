@@ -47,7 +47,7 @@ def assign_regime(year: int, boundaries: list[dict[str, object]]) -> str | None:
 
 def _regime_boundary_year(value: object, label: str) -> int:
     """Parse a regime boundary year without truncating malformed values."""
-    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+    if isinstance(value, bool) or not isinstance(value, str | int | float):
         raise ValueError(f"regime boundary {label} year must be numeric")
     try:
         numeric = float(value)

@@ -22,7 +22,7 @@ def _validate_positive_debt(value: float, label: str) -> None:
 
 
 def _validate_shock_bps(value: object) -> int:
-    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+    if isinstance(value, bool) or not isinstance(value, str | int | float):
         raise ValueError("shock_bps must be numeric")
     try:
         numeric = float(value)

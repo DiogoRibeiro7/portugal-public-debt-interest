@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import typer
 
 from .config import Settings, load_settings
+from .eligibility import build_eligibility_table
 from .latex_tables import generate_latex_tables
 from .pipeline import (
     build_dataset,
@@ -19,9 +21,22 @@ from .pipeline import (
     fetch_eurostat_panel,
 )
 from .plotting import generate_all_plots
+from .refinancing import (
+    build_refinancing_assumptions,
+    build_refinancing_results,
+    load_refinancing_scenarios,
+)
 from .reporting import generate_report
+from .revisions import (
+    error_level_failures,
+    write_validation_and_revision_reports,
+)
 from .sources.ameco import AmecoArchiveClient
-from .storage import load_processed
+from .storage import (
+    load_processed,
+    save_euro_area_eligibility,
+    save_refinancing_outputs,
+)
 from .validation import validate_dataset
 
 app = typer.Typer(no_args_is_help=True, help="Portugal public-debt interest analysis")
@@ -39,6 +54,17 @@ def _load_optional_panel_metrics(settings: Settings) -> pd.DataFrame | None:
     if not panel_path.exists():
         return None
     return pd.read_csv(panel_path)
+
+
+def _validation_result(settings: Settings, frame: pd.DataFrame) -> dict[str, Any]:
+    """Run the configured validation checks for report/table context."""
+    return validate_dataset(
+        frame,
+        settings.project.main_start_year,
+        settings.project.end_year,
+        settings.analysis.ratio_tolerance_pp,
+        settings.analysis.identity_tolerance_pp,
+    )
 
 
 def _existing_figure_paths(settings: Settings) -> list[Path]:
@@ -115,6 +141,13 @@ def validate_command(config: Path = DEFAULT_CONFIG) -> None:
     destination = settings.paths.reports / "validation.json"
     destination.write_text(json.dumps(result, indent=2), encoding="utf-8")
     typer.echo(destination)
+    for path in write_validation_and_revision_reports(
+        frame,
+        settings.paths.reports,
+        settings.paths.processed,
+        settings.analysis.ratio_tolerance_pp,
+    ).values():
+        typer.echo(path)
     if not result["passed"]:
         raise typer.Exit(code=1)
 
@@ -124,12 +157,15 @@ def plot_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate all available charts."""
     settings = _settings(config)
     frame = load_processed(settings)
+    _, results, main_scenario = _refinancing()
     paths = generate_all_plots(
         frame,
         settings.paths.figures,
         panel_frame=_load_optional_panel_metrics(settings),
         shocks_bps=settings.analysis.static_rate_shocks_bps,
         refinancing_shares=settings.analysis.default_refinancing_shares,
+        refinancing_results=results,
+        refinancing_main_scenario=main_scenario,
     )
     for path in paths:
         typer.echo(path)
@@ -140,6 +176,16 @@ def report_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate the Markdown analytical summary."""
     settings = _settings(config)
     frame = load_processed(settings)
+    validation_path = settings.paths.reports / "validation.json"
+    if validation_path.is_file():
+        stored = json.loads(validation_path.read_text(encoding="utf-8"))
+        failures = error_level_failures(stored)
+        if failures:
+            typer.echo(
+                "error-level validation checks failed, refusing to build the "
+                f"report: {', '.join(failures)}"
+            )
+            raise typer.Exit(code=1)
     destination = generate_report(
         frame,
         settings.paths.reports / "summary.md",
@@ -151,17 +197,55 @@ def report_command(config: Path = DEFAULT_CONFIG) -> None:
     typer.echo(destination)
 
 
+
+REFINANCING_CONFIG = Path("config/refinancing_scenarios.yaml")
+
+
+def _refinancing(config_path: Path = REFINANCING_CONFIG) -> tuple[Any, Any, str]:
+    """Load the scenarios and run the stylised cohort simulation."""
+    import yaml
+
+    scenarios = load_refinancing_scenarios(config_path)
+    with config_path.open(encoding="utf-8") as handle:
+        raw = yaml.safe_load(handle) or {}
+    shocks = tuple(int(value) for value in raw.get("shocks_bps", [0, 50, 100, 200]))
+    main_scenario = str(raw.get("main_scenario", "central"))
+    return (
+        build_refinancing_assumptions(scenarios, shocks),
+        build_refinancing_results(scenarios, shocks),
+        main_scenario,
+    )
+
+
 @app.command("tables")
 def tables_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate LaTeX tables from processed analytical data."""
     settings = _settings(config)
     frame = load_processed(settings)
+    validation_result = _validation_result(settings, frame)
+    assumptions, results, main_scenario = _refinancing()
+    save_refinancing_outputs(assumptions, results, settings)
+    panel = _load_optional_panel_metrics(settings)
+    if panel is not None and not panel.empty:
+        latest = int(pd.to_numeric(panel["year"], errors="coerce").max())
+        save_euro_area_eligibility(
+            build_eligibility_table(
+                panel,
+                latest,
+                accepted_statuses=tuple(settings.analysis.accepted_observation_statuses),
+            ),
+            settings,
+        )
     paths = generate_latex_tables(
         frame,
         settings.paths.reports / "tables",
         settings.project.main_start_year,
         settings.analysis.static_rate_shocks_bps,
         panel_frame=_load_optional_panel_metrics(settings),
+        refinancing_assumptions=assumptions,
+        refinancing_main_scenario=main_scenario,
+        validation_result=validation_result,
+        accepted_statuses=tuple(settings.analysis.accepted_observation_statuses),
     )
     for path in paths:
         typer.echo(path)
@@ -181,15 +265,15 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
                 typer.echo(f"Removed stale AMECO interim data: {stale_path}", err=True)
             typer.echo(f"AMECO extension skipped: {exc}", err=True)
     frame = build_dataset(settings)
-    result = validate_dataset(
-        frame,
-        settings.project.main_start_year,
-        settings.project.end_year,
-        settings.analysis.ratio_tolerance_pp,
-        settings.analysis.identity_tolerance_pp,
-    )
+    result = _validation_result(settings, frame)
     (settings.paths.reports / "validation.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
+    )
+    write_validation_and_revision_reports(
+        frame,
+        settings.paths.reports,
+        settings.paths.processed,
+        settings.analysis.ratio_tolerance_pp,
     )
     figure_paths = generate_all_plots(
         frame,
@@ -212,6 +296,8 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
         settings.project.main_start_year,
         settings.analysis.static_rate_shocks_bps,
         panel_frame=_load_optional_panel_metrics(settings),
+        validation_result=result,
+        accepted_statuses=tuple(settings.analysis.accepted_observation_statuses),
     )
     if not result["passed"]:
         raise typer.Exit(code=1)

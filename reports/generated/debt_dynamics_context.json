@@ -1,0 +1,50 @@
+{
+  "focus_years": {
+    "2020": {
+      "average_debt_interest_rate_pct": 2.19701736122291,
+      "debt_dynamics_interest_rate_pct": 2.28759140969693,
+      "debt_stabilising_primary_balance_before_sfa_pct_gdp": 10.60545512442772,
+      "interest_growth_contribution_pp": 10.60545512442772,
+      "lagged_debt_pct_gdp": 116.1,
+      "nominal_gdp_growth_pct": -6.274048335143045,
+      "stock_flow_adjustment_pp": 4.394544875572273
+    },
+    "2022": {
+      "average_debt_interest_rate_pct": 1.70810242164663,
+      "debt_dynamics_interest_rate_pct": 1.71819447888332,
+      "debt_stabilising_primary_balance_before_sfa_pct_gdp": -12.058817599546408,
+      "interest_growth_contribution_pp": -12.058817599546408,
+      "lagged_debt_pct_gdp": 123.9,
+      "nominal_gdp_growth_pct": 12.685542350654998,
+      "stock_flow_adjustment_pp": 0.958817599546409
+    },
+    "2023": {
+      "average_debt_interest_rate_pct": 2.0828258290206,
+      "debt_dynamics_interest_rate_pct": 2.04648773426651,
+      "debt_stabilising_primary_balance_before_sfa_pct_gdp": -8.803347196679441,
+      "interest_growth_contribution_pp": -8.803347196679441,
+      "lagged_debt_pct_gdp": 111.2,
+      "nominal_gdp_growth_pct": 10.819730190267052,
+      "stock_flow_adjustment_pp": -2.2966528033205607
+    }
+  },
+  "rate_definitions": {
+    "average_debt_rate": "I_t / ((D_{t-1} + D_t) / 2)",
+    "debt_dynamics_rate": "I_t / D_{t-1}",
+    "identity_rate_used": "debt_dynamics_rate"
+  },
+  "reconciliation": {
+    "maximum_absolute_error_pp": 1.734723475976807e-16
+  },
+  "sample": {
+    "first_year": 1995,
+    "last_year": 2025,
+    "observations": 31
+  },
+  "stock_flow_adjustment": {
+    "maximum_pp": 4.426326978404969,
+    "maximum_year": 2011,
+    "minimum_pp": -4.241931041089148,
+    "minimum_year": 1997
+  }
+}

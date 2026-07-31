@@ -15,15 +15,27 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from .display import SOURCE_NOTE
+from .eligibility import EURO_AREA_MEMBERS, derive_observation_status
 from .interest_decomposition import build_interest_burden_decomposition
 from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
 
 
 def _source_note(frame: pd.DataFrame) -> str:
-    sources = _metadata_values(frame, "source", "processed data")
-    bases = _metadata_values(frame, "accounting_basis", "not applicable")
-    statuses = _metadata_values(frame, "observation_status", "not applicable")
+    """Build a human-readable source note.
+
+    Derived series carry no accounting basis or observation status of their
+    own. Rather than printing "not applicable" twice, the note falls back to a
+    plain attribution.
+    """
+    if "accounting_basis" not in frame.columns or "observation_status" not in frame.columns:
+        return SOURCE_NOTE
+    sources = _metadata_values(frame, "source", "Eurostat")
+    bases = _metadata_values(frame, "accounting_basis", "")
+    statuses = _metadata_values(frame, "observation_status", "")
+    if not bases or not statuses:
+        return SOURCE_NOTE
     return f"Source: {sources}; basis: {bases}; status: {statuses}"
 
 
@@ -53,8 +65,8 @@ def _annotate_source(ax: Axes, frame: pd.DataFrame) -> None:
         -0.16,
         _source_note(frame),
         transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
+        fontsize=9,
+        alpha=0.85,
     )
 
 
@@ -62,7 +74,6 @@ def plot_interest_burden(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
     """Plot interest expenditure as a percentage of GDP."""
     fig, ax = plt.subplots(figsize=(11, 6))
     ax.plot(frame["year"], frame["interest_pct_gdp"], marker="o", markersize=3)
-    ax.set_title("Portugal: general-government interest expenditure")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percentage of GDP")
     ax.grid(True, alpha=0.25)
@@ -74,7 +85,6 @@ def plot_interest_euros(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
     """Plot nominal annual interest expenditure."""
     fig, ax = plt.subplots(figsize=(11, 6))
     ax.plot(frame["year"], frame["interest_mio_eur"] / 1_000.0, marker="o", markersize=3)
-    ax.set_title("Portugal: annual general-government interest expenditure")
     ax.set_xlabel("Year")
     ax.set_ylabel("Billion euro")
     ax.grid(True, alpha=0.25)
@@ -122,7 +132,6 @@ def plot_balances(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
     ax.axhline(0.0, linewidth=1)
     ax.plot(frame["year"], frame["overall_balance_pct_gdp"], label="Overall balance")
     ax.plot(frame["year"], frame["primary_balance_pct_gdp"], label="Primary balance")
-    ax.set_title("Portugal: fiscal balance before and after interest")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percentage of GDP")
     ax.grid(True, alpha=0.25)
@@ -207,7 +216,6 @@ def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path]
         frame["average_debt_interest_rate_pct"],
         label="Average-debt rate",
     )
-    ax.set_title("Market yield versus effective cost of the debt stock")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percent")
     ax.grid(True, alpha=0.25)
@@ -226,7 +234,6 @@ def plot_growth_decomposition(frame: pd.DataFrame, output_dir: Path) -> list[Pat
     ax.plot(frame["year"], frame["nominal_gdp_growth_pct"], label="Nominal GDP")
     ax.plot(frame["year"], frame["real_gdp_growth_pct"], label="Real GDP")
     ax.plot(frame["year"], frame["gdp_deflator_growth_pct"], label="GDP deflator")
-    ax.set_title("Nominal growth, real growth, and GDP-deflator growth")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percent")
     ax.grid(True, alpha=0.25)
@@ -268,7 +275,6 @@ def plot_debt_dynamics(frame: pd.DataFrame, output_dir: Path) -> list[Path] | No
         linestyle="--",
         label="Observed debt-ratio change",
     )
-    ax.set_title("Debt-dynamics contribution terms")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percentage of GDP")
     ax.grid(True, alpha=0.25)
@@ -337,7 +343,6 @@ def plot_interest_burden_decomposition(
         zorder=3,
         label="Total reconstructed change",
     )
-    ax.set_title("Endpoint decomposition of the interest-burden change")
     ax.set_xlabel("Interval")
     ax.set_ylabel("Percentage points of GDP")
     ax.set_xticks(positions)
@@ -359,10 +364,11 @@ def plot_european_comparison(
     if not required.issubset(panel_frame.columns):
         return None
     panel = panel_frame.copy()
-    if "observation_status" in panel.columns:
-        panel = panel.loc[panel["observation_status"] == "observed"]
+    # Eligibility is decided by the eligibility layer, not by the panel's own
+    # observation_status column, which labels every row "observed".
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~aggregate_flag_mask(panel["is_aggregate"])]
+    panel = panel.loc[panel["geo"].astype(str).isin(EURO_AREA_MEMBERS)]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.loc[
         np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)
@@ -378,19 +384,42 @@ def plot_european_comparison(
     latest = panel.loc[panel["year_numeric"].eq(latest_year)].copy()
     if latest.empty:
         return None
+    latest["_derived_status"] = latest.apply(derive_observation_status, axis=1)
     latest["label"] = latest.get("geo_name", latest["geo"]).fillna(latest["geo"])
     latest = latest.sort_values("interest_pct_gdp", ascending=True)
     colors = ["#2563eb" if geo == "PT" else "#6b7280" for geo in latest["geo"].astype(str)]
 
-    fig, ax = plt.subplots(figsize=(11, 6))
+    median_value = float(latest["interest_pct_gdp"].median())
+
+    fig, ax = plt.subplots(figsize=(11, 7))
     ax.barh(latest["label"], latest["interest_pct_gdp"], color=colors)
-    ax.set_title(f"European comparison of interest burden, {latest_year}")
+    ax.axvline(
+        median_value,
+        color="#b91c1c",
+        linewidth=1.4,
+        label=f"Median {median_value:.2f}",
+    )
     ax.set_xlabel("Interest expenditure, percentage of GDP")
     ax.set_ylabel("")
     ax.grid(axis="x", alpha=0.25)
+    ax.legend(loc="lower right")
     for index, value in enumerate(latest["interest_pct_gdp"]):
         ax.text(float(value), index, f" {float(value):.2f}", va="center", fontsize=8)
-    _annotate_source(ax, latest)
+
+    provisional = 0
+    if "_derived_status" in latest.columns:
+        provisional = int((latest["_derived_status"] != "observed").sum())
+    ax.text(
+        0.0,
+        -0.12,
+        SOURCE_NOTE
+        + f" {len(latest)} eligible euro-area countries; aggregates excluded;"
+        + f" {provisional} carry provisional Eurostat flags."
+        + " Portugal highlighted.",
+        transform=ax.transAxes,
+        fontsize=9,
+        alpha=0.85,
+    )
     return _save(fig, output_dir / "08_european_comparison")
 
 
@@ -426,50 +455,6 @@ def refinancing_shock_paths(
     return pd.concat(pieces, ignore_index=True)
 
 
-def plot_refinancing_shock_paths(
-    scenario_frame: pd.DataFrame | None,
-    output_dir: Path,
-) -> list[Path] | None:
-    """Plot gradual interest-burden paths under configured refinancing shocks."""
-    if scenario_frame is None or scenario_frame.empty:
-        return None
-    required = {"horizon_year", "shock_bps", "interest_pct_gdp_scenario"}
-    if not required.issubset(scenario_frame.columns):
-        return None
-    fig, ax = plt.subplots(figsize=(11, 6))
-    for shock, group in scenario_frame.sort_values(["shock_bps", "horizon_year"]).groupby(
-        "shock_bps"
-    ):
-        shock_value = cast(float, shock)
-        ax.plot(
-            group["horizon_year"],
-            group["interest_pct_gdp_scenario"],
-            marker="o",
-            markersize=3,
-            label=f"+{shock_value:.0f} bps",
-        )
-    baseline_year: int | str = "latest"
-    if (
-        "baseline_year" in scenario_frame.columns
-        and not scenario_frame["baseline_year"].dropna().empty
-    ):
-        baseline_year = int(cast(float, scenario_frame["baseline_year"].dropna().iloc[0]))
-    ax.set_title(f"Refinancing shock paths from {baseline_year} baseline")
-    ax.set_xlabel("Years after shock")
-    ax.set_ylabel("Interest expenditure, percentage of GDP")
-    ax.grid(True, alpha=0.25)
-    ax.legend(title="Shock")
-    ax.text(
-        0.0,
-        -0.16,
-        "Source: deterministic arithmetic simulation from processed data",
-        transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
-    )
-    return _save(fig, output_dir / "09_refinancing_shock_paths")
-
-
 def write_refinancing_scenarios(
     scenario_frame: pd.DataFrame,
     output_dir: Path,
@@ -482,6 +467,118 @@ def write_refinancing_scenarios(
     destination = reports_dir / "refinancing_scenarios.csv"
     scenario_frame.to_csv(destination, index=False)
     return destination
+
+
+def plot_refinancing_repricing(results: pd.DataFrame | None, output_dir: Path) -> list[Path] | None:
+    """Plot the cumulative share of the original stock that has been repriced."""
+    if results is None or results.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for scenario, group in results.groupby("scenario"):
+        path = group.loc[group["shock_bps"].eq(0)].sort_values("horizon_year")
+        ax.plot(
+            path["horizon_year"],
+            path["cumulative_refinancing_share"] * 100.0,
+            marker="o",
+            markersize=3,
+            label=str(scenario),
+        )
+    ax.axhline(100.0, color="grey", linewidth=0.8)
+    ax.set_xlabel("Years after the shock")
+    ax.set_ylabel("Cumulative share of the original stock repriced, percent")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Scenario")
+    ax.text(
+        0.0,
+        -0.16,
+        SOURCE_NOTE + " Stylised cohort model; not a forecast.",
+        transform=ax.transAxes,
+        fontsize=9,
+        alpha=0.85,
+    )
+    return _save(fig, output_dir / "14_refinancing_cumulative_repricing")
+
+
+def plot_refinancing_incremental_burden(
+    results: pd.DataFrame | None,
+    output_dir: Path,
+    main_scenario: str,
+) -> list[Path] | None:
+    """Plot the incremental burden: shocked path minus the no-shock baseline.
+
+    Plotting total burden paths would hide the baseline, so the shock and the
+    starting level could not be told apart. Only the increment is shown.
+    """
+    if results is None or results.empty:
+        return None
+    data = results.loc[results["scenario"].eq(main_scenario)]
+    if data.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for shock, group in data.sort_values(["shock_bps", "horizon_year"]).groupby("shock_bps"):
+        path = group.sort_values("horizon_year")
+        ax.plot(
+            path["horizon_year"],
+            path["incremental_burden_pct_gdp"],
+            marker="o",
+            markersize=3,
+            label=f"+{int(cast(float, shock))} bps",
+        )
+    ax.axhline(0.0, color="grey", linewidth=0.8)
+    ax.set_xlabel("Years after the shock")
+    ax.set_ylabel("Additional interest, percentage points of GDP")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Shock")
+    ax.text(
+        0.0,
+        -0.16,
+        SOURCE_NOTE
+        + f" Incremental over the zero-shock baseline; {main_scenario} scenario;"
+        + " stylised cohort model, not a forecast.",
+        transform=ax.transAxes,
+        fontsize=9,
+        alpha=0.85,
+    )
+    return _save(fig, output_dir / "15_refinancing_incremental_burden")
+
+
+def plot_refinancing_cumulative_cost(
+    results: pd.DataFrame | None,
+    output_dir: Path,
+    main_scenario: str,
+) -> list[Path] | None:
+    """Plot the cumulative incremental interest bill in euro."""
+    if results is None or results.empty:
+        return None
+    data = results.loc[results["scenario"].eq(main_scenario)]
+    if data.empty:
+        return None
+    fig, ax = plt.subplots(figsize=(11, 6))
+    for shock, group in data.sort_values(["shock_bps", "horizon_year"]).groupby("shock_bps"):
+        path = group.sort_values("horizon_year")
+        ax.plot(
+            path["horizon_year"],
+            path["cumulative_incremental_interest_mio_eur"] / 1000.0,
+            marker="o",
+            markersize=3,
+            label=f"+{int(cast(float, shock))} bps",
+        )
+    ax.axhline(0.0, color="grey", linewidth=0.8)
+    ax.set_xlabel("Years after the shock")
+    ax.set_ylabel("Cumulative additional interest, EUR billion")
+    ax.grid(True, alpha=0.25)
+    ax.legend(title="Shock")
+    ax.text(
+        0.0,
+        -0.16,
+        SOURCE_NOTE
+        + f" Cumulative over the zero-shock baseline; {main_scenario} scenario;"
+        + " debt stock and GDP held fixed; not a forecast.",
+        transform=ax.transAxes,
+        fontsize=9,
+        alpha=0.85,
+    )
+    return _save(fig, output_dir / "16_refinancing_cumulative_cost")
 
 
 def _write_manifest(paths: list[Path], frame: pd.DataFrame, output_dir: Path) -> Path:
@@ -502,6 +599,8 @@ def generate_all_plots(
     panel_frame: pd.DataFrame | None = None,
     shocks_bps: list[int] | None = None,
     refinancing_shares: list[float] | None = None,
+    refinancing_results: pd.DataFrame | None = None,
+    refinancing_main_scenario: str = "central",
 ) -> list[Path]:
     """Generate all available charts."""
     scenario_frame = refinancing_shock_paths(
@@ -510,6 +609,13 @@ def generate_all_plots(
         refinancing_shares or [],
     )
     candidates = [
+        plot_refinancing_repricing(refinancing_results, output_dir),
+        plot_refinancing_incremental_burden(
+            refinancing_results, output_dir, refinancing_main_scenario
+        ),
+        plot_refinancing_cumulative_cost(
+            refinancing_results, output_dir, refinancing_main_scenario
+        ),
         plot_interest_burden(frame, output_dir),
         plot_interest_euros(frame, output_dir),
         plot_debt_and_rate(frame, output_dir),
@@ -518,7 +624,6 @@ def generate_all_plots(
         plot_growth_decomposition(frame, output_dir),
         plot_debt_dynamics(frame, output_dir),
         plot_european_comparison(panel_frame, output_dir),
-        plot_refinancing_shock_paths(scenario_frame, output_dir),
         plot_interest_burden_decomposition(frame, output_dir),
         plot_government_expenditure(frame, output_dir),
         plot_government_revenue(frame, output_dir),

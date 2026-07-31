@@ -46,7 +46,7 @@ The `build-panel` command calculates the same fiscal metrics by geography, write
 
 When panel metrics exist, the plotting and reporting stages add `08_european_comparison.{png,svg}`. The figure uses observed non-aggregate comparator rows for the latest available year and keeps euro-area aggregates out of the country ranking.
 
-The plotting stage also writes `09_refinancing_shock_paths.{png,svg}` and `reports/refinancing_scenarios.csv` from the configured refinancing shares and rate shocks. These paths are deterministic arithmetic simulations from the processed Portugal dataset, not source observations.
+The plotting stage also writes refinancing cohort figures and `reports/refinancing_scenarios.csv` from the explicit stylised scenario assumptions and rate shocks. These paths are deterministic arithmetic simulations from the processed Portugal dataset, not source observations.
 
 ## AMECO
 

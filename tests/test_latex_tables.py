@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+from conftest import add_debt_dynamics_columns
 
 from pt_debt_interest.latex_tables import generate_latex_tables
 
@@ -43,7 +44,7 @@ def _annual_frame() -> pd.DataFrame:
     debt_mio_eur = [
         gdp * ratio / 100.0 for gdp, ratio in zip(nominal_gdp, debt_pct_gdp, strict=True)
     ]
-    return pd.DataFrame(
+    frame = pd.DataFrame(
         {
             "year": years,
             "interest_pct_gdp": interest_pct_gdp,
@@ -295,6 +296,7 @@ def _annual_frame() -> pd.DataFrame:
             "observation_status": ["observed"] * len(years),
         }
     )
+    return add_debt_dynamics_columns(frame)
 
 
 def _panel_frame() -> pd.DataFrame:
@@ -373,3 +375,29 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     assert "2025 & 1.90" in diagnostic
     assert "Endpoint decomposition" in decomposition
     assert "Arithmetic interest-burden counterfactuals" in counterfactuals
+
+
+def test_headline_macros_count_failed_warning_validation_checks(tmp_path: Path) -> None:
+    frame = _annual_frame()
+    frame["debt_pct_gdp_official"] = frame["debt_pct_gdp"]
+    frame["debt_pct_gdp_calculated"] = frame["debt_pct_gdp"]
+    validation_result = {
+        "passed": True,
+        "checks": [
+            {"name": "core_columns_present", "passed": True, "severity": "error"},
+            {"name": "debt_ratio_reconciliation", "passed": False, "severity": "warning"},
+        ],
+    }
+
+    generate_latex_tables(
+        frame,
+        tmp_path,
+        main_start_year=2014,
+        shocks_bps=[50, 100, 200],
+        panel_frame=_panel_frame(),
+        validation_result=validation_result,
+    )
+
+    headlines = (tmp_path / "paper_headlines.tex").read_text(encoding="utf-8")
+    assert r"\newcommand{\ValidationErrorCount}{0}" in headlines
+    assert r"\newcommand{\ValidationWarningCount}{1}" in headlines

@@ -8,11 +8,28 @@ from typing import Any
 
 import pandas as pd
 
+from .display import (
+    SOURCE_NOTE,
+    format_residual,
+    publication_label,
+    round_components_to_total,
+)
+from .eligibility import (
+    build_comparison_summary,
+    build_eligibility_table,
+    latest_common_year,
+)
+from .exceptions import ValidationError
 from .interest_decomposition import (
     build_interest_burden_counterfactuals,
     build_interest_burden_decomposition,
 )
 from .panel import aggregate_flag_mask
+from .report_context import (
+    build_debt_dynamics_context,
+    write_debt_dynamics_context,
+)
+from .revisions import build_validation_detail
 from .scenarios import static_rate_shock_table
 
 
@@ -21,7 +38,7 @@ def _escape(value: object) -> str:
     replacements = {
         "\\": r"\textbackslash{}",
         "&": r"\&",
-        "%": r"\%",
+        "%": r"\\%",
         "$": r"\$",
         "#": r"\#",
         "_": r"\_",
@@ -144,6 +161,20 @@ def _observed_portugal(frame: pd.DataFrame, main_start_year: int) -> pd.DataFram
     ].sort_values("year")
 
 
+def _extreme_years(values: pd.Series, years: pd.Series, largest: bool) -> str:
+    """Return every year attaining an extreme, not just the first.
+
+    The minimum interest burden is reached in more than one year, so the year
+    column has to be built from the data rather than assumed unique.
+    """
+    numeric = pd.to_numeric(values, errors="coerce")
+    if numeric.dropna().empty:
+        return ""
+    target = numeric.max() if largest else numeric.min()
+    matches = years.loc[numeric.eq(target)]
+    return ", ".join(str(int(float(year))) for year in matches)
+
+
 def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_year: int) -> Path:
     data = _observed_portugal(frame, main_start_year)
     variables = [
@@ -165,28 +196,39 @@ def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_y
     rows: list[list[str]] = []
     for label, column in variables:
         series = pd.to_numeric(data[column], errors="coerce").dropna()
-        min_index = series.idxmin()
-        max_index = series.idxmax()
+        years = data.loc[series.index, "year"]
         rows.append(
             [
                 label,
+                str(len(series)),
                 _fmt(series.mean(), 3),
                 _fmt(series.std(), 3),
                 _fmt(series.min(), 3),
-                _int_text(data.loc[min_index, "year"]),
+                _escape(_extreme_years(series, years, largest=False)),
                 _fmt(series.max(), 3),
-                _int_text(data.loc[max_index, "year"]),
+                _escape(_extreme_years(series, years, largest=True)),
             ]
         )
     content = _table(
         caption="Summary statistics, Portugal ESA 2010 sample, 1995--2025",
         label="tab:summary-statistics",
-        columns="lrrrrrr",
-        header=["Variable", "Mean", "Std. dev.", "Min", "Min year", "Max", "Max year"],
+        columns="lrrrrrrr",
+        header=[
+            "Variable",
+            "N",
+            "Mean",
+            "Std. dev.",
+            "Min",
+            "Min year(s)",
+            "Max",
+            "Max year(s)",
+        ],
         rows=rows,
         notes=(
             "Notes: Observed Eurostat ESA 2010 Portugal rows only. The average-debt "
-            "rate uses average debt. Interest is general-government interest payable."
+            "rate uses average debt. Interest is general-government interest payable. "
+            "Where an extreme is attained in more than one year, every year is "
+            "listed."
         ),
     )
     return _write(output_dir / "summary_statistics.tex", content)
@@ -281,25 +323,28 @@ def debt_dynamics_diagnostic_table(
     source = frame.copy()
     source["year"] = pd.to_numeric(source["year"], errors="raise").astype(int)
     source = source.sort_values("year")
-    source["previous_debt_ratio"] = source["debt_pct_gdp"].shift(1) / 100.0
+    source["previous_debt_pct_gdp"] = source["debt_pct_gdp"].shift(1)
     data = source.loc[
         source["observation_status"].eq("observed") & source["year"].between(start_year, end_year)
     ].copy()
     data["year"] = pd.to_numeric(data["year"], errors="raise").astype(int)
+    # Every column below is already a percentage or a percentage point. The
+    # analytical decimals are never printed, so a reader cannot mistake 1.1610
+    # for a debt ratio of 1.16 percent.
     rows = [
         [
             _int_text(row.year),
             _fmt(row.interest_pct_gdp, 2),
-            _fmt(row.previous_debt_ratio, 4),
-            _fmt(_num(row.nominal_gdp_growth_pct) / 100.0, 4),
-            _fmt(row.average_debt_interest_rate, 4),
-            _fmt(row.debt_dynamics_interest_rate, 4),
-            _fmt(row.interest_growth_contribution, 4),
-            _fmt(row.primary_balance_contribution, 4),
-            _fmt(row.stock_flow_adjustment, 4),
-            _fmt(row.observed_debt_ratio_change, 4),
-            _fmt(row.reconstructed_debt_ratio_change, 4),
-            _fmt(row.debt_dynamics_reconciliation_error, 8),
+            _fmt(row.previous_debt_pct_gdp, 2),
+            _fmt(row.nominal_gdp_growth_pct, 2),
+            _fmt(row.average_debt_interest_rate_pct, 2),
+            _fmt(row.debt_dynamics_interest_rate_pct, 2),
+            _fmt(row.interest_growth_contribution_pp, 2),
+            _fmt(row.primary_balance_contribution_pp, 2),
+            _fmt(row.stock_flow_adjustment_pp, 2),
+            _fmt(row.observed_debt_ratio_change_pp, 2),
+            _fmt(row.reconstructed_debt_ratio_change_pp, 2),
+            format_residual(row.debt_dynamics_reconciliation_error_pp),
         ]
         for row in data.sort_values("year").itertuples()
     ]
@@ -309,23 +354,25 @@ def debt_dynamics_diagnostic_table(
         columns="rrrrrrrrrrrr",
         header=[
             "Year",
-            "Int./GDP",
-            "Lag debt/GDP",
-            "Nom. growth",
-            "$r^{AVG}$",
-            "$r^{DD}$",
-            "Int.-growth",
-            "Primary bal.",
-            "SFA",
-            "Observed $\\Delta d$",
-            "Rebuilt $\\Delta d$",
-            "Error",
+            "Interest/GDP (\\%)",
+            "Lagged debt/GDP (\\%)",
+            "Nominal growth (\\%)",
+            "$r^{AVG}$ (\\%)",
+            "$r^{DD}$ (\\%)",
+            "Interest-growth (pp)",
+            "Primary balance (pp)",
+            "Stock-flow (pp)",
+            "Observed $\\Delta d$ (pp)",
+            "Rebuilt $\\Delta d$ (pp)",
+            "Error (pp)",
         ],
         rows=rows,
         notes=(
-            "Notes: Rates and contribution terms are decimal ratios. The first row "
-            "uses the previous debt ratio available in the processed dataset; blank "
-            "entries indicate missing lagged inputs."
+            "Notes: Every column is a percentage (\\%) or a percentage point (pp), "
+            "as marked in the heading; no decimal ratios are displayed. "
+            "$r^{AVG}$ is the average-debt rate and $r^{DD}$ the debt-dynamics "
+            "rate. The first row uses the previous debt ratio available in the "
+            "processed dataset. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "debt_dynamics_diagnostic_2020_2025.tex", content)
@@ -405,6 +452,17 @@ def static_sensitivities_table(
     return _write(output_dir / "static_sensitivities.tex", content)
 
 
+def _decomposition_effects(row: Any) -> tuple[float, float, float]:
+    """Return the displayed total and its two effects, rounded to add up."""
+    total = _num(row.total_change_pp)
+    effects = round_components_to_total(
+        [_num(row.rate_effect_pp), _num(row.debt_exposure_effect_pp)],
+        total,
+        3,
+    )
+    return round(total, 3), effects[0], effects[1]
+
+
 def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -> Path:
     decomposition = build_interest_burden_decomposition(frame)
     rows = [
@@ -413,11 +471,11 @@ def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -
             _int_text(row.end_year),
             _fmt(row.start_reconstructed_burden_pct_gdp, 2),
             _fmt(row.end_reconstructed_burden_pct_gdp, 2),
-            _fmt(row.total_change_pp, 2),
-            _fmt(row.rate_effect_pp, 2),
-            _fmt(row.debt_exposure_effect_pp, 2),
-            _fmt(row.decomposition_reconciliation_error_pp, 8),
-            _escape(row.dominant_effect),
+            _fmt(_decomposition_effects(row)[0], 3),
+            _fmt(_decomposition_effects(row)[1], 3),
+            _fmt(_decomposition_effects(row)[2], 3),
+            format_residual(row.decomposition_reconciliation_error_pp),
+            _escape(publication_label(row.dominant_effect)),
             _fmt(row.official_start_burden_pct_gdp, 2),
             _fmt(row.official_end_burden_pct_gdp, 2),
         ]
@@ -432,18 +490,20 @@ def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -
             "End",
             "Start burden",
             "End burden",
-            "Total",
-            "Rate",
-            "Debt exposure",
-            "Error",
+            "Total (pp)",
+            "Financing cost (pp)",
+            "Debt exposure (pp)",
+            "Error (pp)",
             "Dominant",
             "Official start",
             "Official end",
         ],
         rows=rows,
         notes=(
-            "Notes: Burdens are percent of GDP. Effects and errors are percentage "
-            "points. The decomposition uses unrounded nominal interest, debt, and GDP."
+            "Notes: Burdens are percent of GDP; effects and errors are percentage "
+            "points. Effects are shown to three decimals so that the two "
+            "components add to the displayed total. The decomposition uses "
+            "unrounded nominal interest, debt, and GDP. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "interest_burden_decomposition_endpoints.tex", content)
@@ -454,7 +514,7 @@ def interest_burden_counterfactuals_table(frame: pd.DataFrame, output_dir: Path)
     rows = [
         [
             _int_text(row.year),
-            _escape(row.counterfactual),
+            _escape(publication_label(row.counterfactual)),
             _fmt(_num(row.average_debt_rate) * 100.0, 2),
             _fmt(_num(row.average_debt_exposure) * 100.0, 2),
             _fmt(row.interest_burden_pct_gdp, 2),
@@ -468,14 +528,14 @@ def interest_burden_counterfactuals_table(frame: pd.DataFrame, output_dir: Path)
         header=[
             "Year",
             "Scenario",
-            "Average-debt rate",
-            "Debt exposure",
-            "Burden",
+            "Average-debt rate (\\%)",
+            "Debt exposure (\\% of GDP)",
+            "Burden (\\% of GDP)",
         ],
         rows=rows,
         notes=(
             "Notes: These are arithmetic counterfactuals, not causal estimates. "
-            "Rates, debt exposure, and burden are reported in percent."
+            "Every column is a percentage, as marked in the heading. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "interest_burden_counterfactuals.tex", content)
@@ -507,8 +567,8 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
             r"Overall bal. & Primary bal. & Nom. growth \\"
         ),
         (
-            r" & (\%) & (EUR m) & (\%) & (\%) & (\% GDP) & "
-            r"(\% GDP) & (\%) \\"
+            r" & (\\%) & (EUR m) & (\\%) & (\\%) & (\\% GDP) & "
+            r"(\\% GDP) & (\\%) \\"
         ),
         r"\midrule",
         r"\endfirsthead",
@@ -518,8 +578,8 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
             r"Overall bal. & Primary bal. & Nom. growth \\"
         ),
         (
-            r" & (\%) & (EUR m) & (\%) & (\%) & (\% GDP) & "
-            r"(\% GDP) & (\%) \\"
+            r" & (\\%) & (EUR m) & (\\%) & (\\%) & (\\% GDP) & "
+            r"(\\% GDP) & (\\%) \\"
         ),
         r"\midrule",
         r"\endhead",
@@ -531,12 +591,72 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
     return _write(output_dir / "annual_portugal_table.tex", "\n".join(lines) + "\n")
 
 
+_DEBT_DYNAMICS_YEAR_WORDS = {
+    "2020": "TwentyTwenty",
+    "2022": "TwentyTwentyTwo",
+    "2023": "TwentyTwentyThree",
+}
+
+
+def _scientific(value: float) -> str:
+    """Render a residual without implying false precision or a negative zero."""
+    magnitude = abs(float(value))
+    if magnitude == 0.0:
+        return "0"
+    if magnitude < 1e-9:
+        return "$< 10^{-9}$"
+    return f"{magnitude:.2e}"
+
+
+def _debt_dynamics_macros(frame: pd.DataFrame) -> list[str]:
+    """Build report macros from the canonical debt-dynamics context."""
+    context = build_debt_dynamics_context(frame)
+    macros: list[str] = []
+    for year, word in _DEBT_DYNAMICS_YEAR_WORDS.items():
+        values = context["focus_years"][year]
+        macros.append(
+            _macro(
+                f"DebtDynamicsInterestGrowth{word}Pp",
+                _fmt(values["interest_growth_contribution_pp"], 2),
+            )
+        )
+        macros.append(
+            _macro(
+                f"DebtStabilisingPb{word}PctGdp",
+                _fmt(
+                    values["debt_stabilising_primary_balance_before_sfa_pct_gdp"], 2
+                ),
+            )
+        )
+        macros.append(
+            _macro(
+                f"DebtDynamicsRate{word}Pct",
+                _fmt(values["debt_dynamics_interest_rate_pct"], 2),
+            )
+        )
+    stock_flow = context["stock_flow_adjustment"]
+    macros.append(_macro("StockFlowMinPp", _fmt(stock_flow["minimum_pp"], 2)))
+    macros.append(_macro("StockFlowMinYear", str(stock_flow["minimum_year"])))
+    macros.append(_macro("StockFlowMaxPp", _fmt(stock_flow["maximum_pp"], 2)))
+    macros.append(_macro("StockFlowMaxYear", str(stock_flow["maximum_year"])))
+    macros.append(
+        _macro(
+            "DebtDynamicsMaxReconciliationErrorPp",
+            _scientific(context["reconciliation"]["maximum_absolute_error_pp"]),
+        )
+    )
+    return macros
+
+
 def headline_macros(
     frame: pd.DataFrame,
     output_dir: Path,
     main_start_year: int,
     shocks_bps: list[int],
     panel_frame: pd.DataFrame | None = None,
+    tolerance_pp: float = 0.15,
+    validation_result: dict[str, Any] | None = None,
+    accepted_statuses: tuple[str, ...] = ("observed", "provisional"),
 ) -> Path:
     """Write LaTeX macros for recurring paper headline values."""
     data = _observed_portugal(frame, main_start_year)
@@ -690,7 +810,7 @@ def headline_macros(
         ),
         _macro(
             "DecompErrorTwentyFourteenToLatestPp",
-            _fmt(interval_2014_2025.decomposition_reconciliation_error_pp, 8),
+            format_residual(interval_2014_2025.decomposition_reconciliation_error_pp),
         ),
         _macro(
             "DecompDominantTwentyFourteenToLatest",
@@ -710,11 +830,16 @@ def headline_macros(
         ),
         _macro(
             "DecompErrorNineteenNinetySixToLatestPp",
-            _fmt(interval_1996_2025.decomposition_reconciliation_error_pp, 8),
+            format_residual(interval_1996_2025.decomposition_reconciliation_error_pp),
         ),
         _macro(
             "DecompDominantNineteenNinetySixToLatest",
             _escape(interval_1996_2025.dominant_effect),
+        ),
+        *_debt_dynamics_macros(frame),
+        *_comparison_macros(panel_frame),
+        *_validation_macros(
+            frame, tolerance_pp, validation_result, accepted_statuses
         ),
         _macro("PortugalComparatorRankWord", panel_rank),
         _macro("ComparatorCountryCountWord", panel_count),
@@ -738,19 +863,263 @@ def headline_macros(
     return _write(output_dir / "paper_headlines.tex", "\n".join(macros) + "\n")
 
 
+def _validation_macros(
+    frame: pd.DataFrame,
+    tolerance_pp: float,
+    validation_result: dict[str, Any] | None,
+    accepted_statuses: tuple[str, ...],
+) -> list[str]:
+    """Emit the appendix macros for validation and data provenance."""
+    try:
+        detail = build_validation_detail(frame, tolerance_pp)
+    except ValidationError:
+        # A partial frame still produces every other macro; the validation
+        # artefacts and their tests carry the strict requirements.
+        return []
+    breaches = detail.loc[detail["exceeds_tolerance"]]
+
+    errors = warnings = 0
+    all_errors_passed = True
+    if validation_result:
+        for check in validation_result.get("checks", []):
+            if not isinstance(check, dict) or check.get("passed", True):
+                continue
+            if str(check.get("severity")) == "error":
+                errors += 1
+                all_errors_passed = False
+            else:
+                warnings += 1
+
+    timestamps = (
+        frame.get("retrieval_timestamp_utc", pd.Series(dtype="object"))
+        .dropna()
+        .astype(str)
+        .str.split(";")
+        .explode()
+        .str.strip()
+    )
+    macros = [
+        _macro("ValidationTolerancePp", _fmt(tolerance_pp, 2)),
+        _macro("ValidationErrorCount", str(errors)),
+        _macro("ValidationWarningCount", str(warnings)),
+        _macro("ValidationAllErrorsPassed", "yes" if all_errors_passed else "no"),
+        _macro(
+            "MaxRatioDiscrepancyPp",
+            _fmt(detail["absolute_difference_pp"].abs().max(), 4),
+        ),
+        _macro("RatioBreachCount", str(len(breaches))),
+        _macro(
+            "RatioBreachYears",
+            _escape(", ".join(str(int(year)) for year in breaches["year"])),
+        ),
+        _macro(
+            "EarliestRetrievalTimestamp",
+            _escape(str(timestamps.min()) if not timestamps.empty else "unknown"),
+        ),
+        _macro(
+            "LatestRetrievalTimestamp",
+            _escape(str(timestamps.max()) if not timestamps.empty else "unknown"),
+        ),
+        _macro("AcceptedObservationStatuses", _escape(", ".join(accepted_statuses))),
+    ]
+    for year in (1997, 1998):
+        rows = detail.loc[detail["year"].eq(year)]
+        if rows.empty:
+            continue
+        row = rows.iloc[0]
+        word = "NineteenNinetySeven" if year == 1997 else "NineteenNinetyEight"
+        macros.extend(
+            [
+                _macro(f"DebtRatioOfficial{word}", _fmt(row["official_pct_gdp"], 2)),
+                _macro(
+                    f"DebtRatioReconstructed{word}",
+                    _fmt(row["reconstructed_pct_gdp"], 4),
+                ),
+                _macro(
+                    f"DebtRatioDifference{word}Pp",
+                    _fmt(row["absolute_difference_pp"], 4),
+                ),
+                _macro(f"DebtRatioCause{word}", _escape(str(row["explanation_classification"]))),
+            ]
+        )
+    return macros
+
+
+def _comparison_macros(panel_frame: pd.DataFrame | None) -> list[str]:
+    """Emit the euro-area comparison macros with their denominator."""
+    if panel_frame is None or panel_frame.empty:
+        return []
+    year = int(pd.to_numeric(panel_frame["year"], errors="coerce").max())
+    try:
+        eligibility = build_eligibility_table(panel_frame, year)
+        summary = build_comparison_summary(panel_frame, eligibility, year)
+    except ValidationError:
+        # A partial panel still produces every other table; the eligibility
+        # record and its tests carry the strict requirements.
+        return []
+    try:
+        common_year = latest_common_year(panel_frame)
+    except Exception:
+        common_year = year
+    return [
+        _macro("ComparisonYear", str(summary["comparison_year"])),
+        _macro("ComparisonRankingMethod", _escape(str(summary["ranking_method"]))),
+        _macro("PortugalComparisonRank", str(summary["home_rank"])),
+        _macro("EligibleComparatorCount", str(summary["eligible_countries"])),
+        _macro("PortugalComparisonPercentile", _fmt(summary["percentile"], 1)),
+        _macro("ComparatorMedianPctGdp", _fmt(summary["median"], 2)),
+        _macro("ComparatorFirstQuartilePctGdp", _fmt(summary["first_quartile"], 2)),
+        _macro("ComparatorThirdQuartilePctGdp", _fmt(summary["third_quartile"], 2)),
+        _macro("PortugalMinusMedianPp", _fmt(summary["home_minus_median"], 2)),
+        _macro("ExcludedComparatorCount", str(summary["excluded_count"])),
+        _macro("ComparisonExclusionReasons", _escape(str(summary["exclusion_reasons"]))),
+        _macro(
+            "PortugalComparisonStatus",
+            _escape(str(summary["home_observation_status"])),
+        ),
+        _macro("ProvisionalComparatorCount", str(summary["provisional_countries"])),
+        _macro("LatestCommonYear", str(common_year)),
+    ]
+
+
+def interest_share_of_budget_table(
+    frame: pd.DataFrame,
+    output_dir: Path,
+    main_start_year: int,
+    years: tuple[int, ...] = (1995, 2012, 2020, 2025),
+) -> Path:
+    """Interest against the fiscal envelope, for selected years.
+
+    This replaces the separate expenditure and revenue figures: the envelope is
+    context for the interest bill, not a result in its own right.
+    """
+    data = _observed_portugal(frame, main_start_year).set_index("year")
+    rows = []
+    for year in years:
+        if year not in data.index:
+            continue
+        row = data.loc[year]
+        expenditure = _num(row["government_expenditure_pct_gdp"])
+        revenue = _num(row["government_revenue_pct_gdp"])
+        burden = _num(row["interest_pct_gdp"])
+        rows.append(
+            [
+                _int_text(year),
+                _fmt(burden, 2),
+                _fmt(expenditure, 2),
+                _fmt(burden / expenditure * 100.0, 2),
+                _fmt(revenue, 2),
+                _fmt(burden / revenue * 100.0, 2),
+            ]
+        )
+    content = _table(
+        caption="Interest against the fiscal envelope, selected years",
+        label="tab:interest-share",
+        columns="rrrrrr",
+        header=[
+            "Year",
+            "Interest (\% of GDP)",
+            "Expenditure (\% of GDP)",
+            "Interest (\% of expenditure)",
+            "Revenue (\% of GDP)",
+            "Interest (\% of revenue)",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: Percent of GDP is the right denominator for comparison across "
+            "countries and time; the share of total expenditure is the denominator "
+            "a budget works in. " + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "interest_share_of_budget.tex", content)
+
+
+def refinancing_assumptions_table(
+    assumptions: pd.DataFrame,
+    output_dir: Path,
+    main_scenario: str,
+) -> Path:
+    """Write the refinancing assumptions so the reader can audit the model."""
+    per_scenario = (
+        assumptions.sort_values(["scenario", "horizon_year"])
+        .groupby("scenario", as_index=False)
+        .first()
+    )
+    rows = []
+    for row in per_scenario.itertuples():
+        marker = " (main)" if str(row.scenario) == main_scenario else ""
+        rows.append(
+            [
+                _escape(str(row.scenario).capitalize() + marker),
+                _fmt(_num(row.annual_refinancing_share) * 100.0, 2),
+                _fmt(row.implied_average_maturity_years, 1),
+                _int_text(row.horizon_years),
+                _fmt(row.initial_average_portfolio_rate_pct, 2),
+                _fmt(row.baseline_new_issuance_rate_pct, 2),
+                _fmt(row.debt_pct_gdp, 2),
+                _escape(str(row.debt_ratio_path)),
+            ]
+        )
+    content = _table(
+        caption="Stylised refinancing scenario assumptions",
+        label="tab:refinancing-assumptions",
+        columns="lrrrrrrl",
+        header=[
+            "Scenario",
+            "Annual repricing (\\%)",
+            "Implied maturity (years)",
+            "Horizon (years)",
+            "Initial portfolio rate (\\%)",
+            "Baseline issuance rate (\\%)",
+            "Debt (\\% of GDP)",
+            "Debt and GDP paths",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: A stylised cohort model, not a forecast. The central "
+            "scenario applies a uniform annual repricing share consistent with "
+            "the published average maturity of the debt stock of 7.2 years in "
+            "2024 (IGCP, Annual Report 2024, page 22); the uniform shape is an "
+            "approximation applied here, not IGCP's redemption schedule. The "
+            "slow and fast scenarios carry no external source and exist to "
+            "bracket the assumption. The debt ratio and nominal GDP are held "
+            "fixed across the horizon. " + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "refinancing_assumptions.tex", content)
+
+
 def generate_latex_tables(
     frame: pd.DataFrame,
     output_dir: Path,
     main_start_year: int,
     shocks_bps: list[int],
     panel_frame: pd.DataFrame | None = None,
+    context_dir: Path | None = None,
+    refinancing_assumptions: pd.DataFrame | None = None,
+    refinancing_main_scenario: str = "central",
+    tolerance_pp: float = 0.15,
+    validation_result: dict[str, Any] | None = None,
+    accepted_statuses: tuple[str, ...] = ("observed", "provisional"),
 ) -> list[Path]:
-    """Generate every LaTeX table fragment used by the paper."""
+    """Generate every LaTeX table fragment and numeric context used by the paper."""
     observed = _observed_portugal(frame, main_start_year)
     latest_year = int(observed["year"].max())
+    generated_dir = context_dir if context_dir is not None else output_dir.parent / "generated"
     paths = [
-        headline_macros(frame, output_dir, main_start_year, shocks_bps, panel_frame),
+        write_debt_dynamics_context(frame, generated_dir),
+        headline_macros(
+            frame,
+            output_dir,
+            main_start_year,
+            shocks_bps,
+            panel_frame,
+            tolerance_pp=tolerance_pp,
+            validation_result=validation_result,
+            accepted_statuses=accepted_statuses,
+        ),
         summary_statistics_table(frame, output_dir, main_start_year),
+        interest_share_of_budget_table(frame, output_dir, main_start_year),
         regime_averages_table(frame, output_dir, main_start_year),
         recent_dynamics_table(frame, output_dir),
         debt_dynamics_diagnostic_table(frame, output_dir),
@@ -761,4 +1130,10 @@ def generate_latex_tables(
     ]
     if panel_frame is not None:
         paths.append(european_comparison_table(panel_frame, output_dir, latest_year))
+    if refinancing_assumptions is not None and not refinancing_assumptions.empty:
+        paths.append(
+            refinancing_assumptions_table(
+                refinancing_assumptions, output_dir, refinancing_main_scenario
+            )
+        )
     return paths

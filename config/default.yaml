@@ -130,11 +130,16 @@ analysis:
   static_rate_shocks_bps: [50, 100, 200]
   default_refinancing_shares: [0.12, 0.13, 0.14, 0.15, 0.16, 0.15, 0.15]
   observed_only_by_default: true
+  # Statuses accepted into the euro-area ranking. Derived from Eurostat's
+  # per-series flags, not asserted.
+  accepted_observation_statuses: [observed, provisional]
+  ranking_method: competition
+  three_year_minimum_observations: 2
   regime_boundaries:
     - {start: 1995, end: 1998, label: Euro convergence}
     - {start: 1999, end: 2007, label: Early euro period}
     - {start: 2008, end: 2010, label: Global financial crisis}
     - {start: 2011, end: 2014, label: Sovereign-debt crisis and adjustment}
-    - {start: 2015, end: 2019, label: ECB intervention and refinancing}
+    - {start: 2015, end: 2019, label: Low-rate and asset-purchase period}
     - {start: 2020, end: 2021, label: Pandemic}
     - {start: 2022, end: 2025, label: Inflation and monetary tightening}
