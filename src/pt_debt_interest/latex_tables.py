@@ -360,7 +360,7 @@ def debt_dynamics_diagnostic_table(
             "$r^{AVG}$ (\\%)",
             "$r^{DD}$ (\\%)",
             "Interest-growth (pp)",
-            "Primary balance (pp)",
+            "Primary-balance contribution (pp)",
             "Stock-flow (pp)",
             "Observed $\\Delta d$ (pp)",
             "Rebuilt $\\Delta d$ (pp)",
@@ -449,7 +449,7 @@ def static_sensitivities_table(
         [
             _fmt(row.baseline_debt_pct_gdp, 2),
             _int_text(row.shock_bps),
-            _fmt(row.shock_rate_decimal, 3),
+            _fmt(_num(row.shock_rate_decimal) * 100.0, 2),
             _fmt(row.additional_interest_pct_gdp_full_pass_through, 3),
         ]
         for row in shock_table.itertuples()
@@ -464,7 +464,7 @@ def static_sensitivities_table(
         header=[
             "Debt/GDP (\\%)",
             "Shock (bps)",
-            "Shock rate decimal",
+            "Shock rate (\\%)",
             "Additional interest/GDP (percentage points)",
         ],
         rows=rows,
@@ -1014,16 +1014,19 @@ def interest_share_of_budget_table(
             continue
         row = data.loc[year]
         expenditure = _num(row["government_expenditure_pct_gdp"])
+        expenditure_mio_eur = _num(row["government_expenditure_mio_eur"])
         revenue = _num(row["government_revenue_pct_gdp"])
+        revenue_mio_eur = _num(row["government_revenue_mio_eur"])
         burden = _num(row["interest_pct_gdp"])
+        interest_mio_eur = _num(row["interest_mio_eur"])
         rows.append(
             [
                 _int_text(year),
                 _fmt(burden, 2),
                 _fmt(expenditure, 2),
-                _fmt(burden / expenditure * 100.0, 2),
+                _fmt(interest_mio_eur / expenditure_mio_eur * 100.0, 2),
                 _fmt(revenue, 2),
-                _fmt(burden / revenue * 100.0, 2),
+                _fmt(interest_mio_eur / revenue_mio_eur * 100.0, 2),
             ]
         )
     content = _table(
@@ -1040,9 +1043,10 @@ def interest_share_of_budget_table(
         ],
         rows=rows,
         notes=(
-            "Notes: Percent of GDP is the right denominator for comparison across "
-            "countries and time; the share of total expenditure is the denominator "
-            "a budget works in. " + SOURCE_NOTE
+            "Notes: Percentage of GDP is the principal denominator for macro-fiscal "
+            "comparison across countries and time. The expenditure and revenue "
+            "shares are calculated from unrounded nominal million-euro levels, not "
+            "from rounded percentage-of-GDP ratios. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "interest_share_of_budget.tex", content)

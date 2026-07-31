@@ -352,6 +352,7 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     recent = (tmp_path / "recent_dynamics.tex").read_text(encoding="utf-8")
     comparison = (tmp_path / "european_comparison_2025.tex").read_text(encoding="utf-8")
     shock = (tmp_path / "static_sensitivities.tex").read_text(encoding="utf-8")
+    fiscal_envelope = (tmp_path / "interest_share_of_budget.tex").read_text(encoding="utf-8")
     headlines = (tmp_path / "paper_headlines.tex").read_text(encoding="utf-8")
     diagnostic = (tmp_path / "debt_dynamics_diagnostic_2020_2025.tex").read_text(
         encoding="utf-8"
@@ -367,7 +368,8 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     assert "1.900" in summary
     assert "2025 & 1.9 & 5964.5 & 89.7" in recent
     assert "1 & Italy & observed & 3.9 & 137.1" in comparison
-    assert "89.70 & 100 & 0.010 & 0.897" in shock
+    assert "89.70 & 100 & 1.00 & 0.897" in shock
+    assert "2025 & 1.90 & 42.70 & 4.56 & 43.40 & 4.48" in fiscal_envelope
     assert r"\newcommand{\LatestInterestPctGdp}{1.90}" in headlines
     assert r"\newcommand{\PortugalComparatorRankWord}{second}" in headlines
     assert r"\newcommand{\DecompTotalTwentyFourteenToLatestPp}" in headlines

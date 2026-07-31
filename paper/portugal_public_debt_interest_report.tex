@@ -1,6 +1,7 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
@@ -8,6 +9,7 @@
 \providecommand{\doi}[1]{DOI: \href{https://doi.org/#1}{#1}}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{xurl}
 \usepackage{hyperref}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -15,7 +17,7 @@
 \usepackage{setspace}
 \usepackage{enumitem}
 \usepackage{threeparttable}
-\usepackage{pdflscape}
+\usepackage{lscape}
 
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
@@ -87,7 +89,8 @@ that are frequently conflated in fiscal commentary: the national-accounts
 interest expense, the interest burden relative to GDP, and the market yield on
 new benchmark debt. It combines source-provenance review, national-accounts
 measurement, descriptive periodisation, discrete debt-dynamics accounting,
-cross-country Eurostat comparison, and deterministic refinancing simulations.
+cross-country Eurostat comparison, and stylised deterministic refinancing
+scenarios.
 The central empirical result is that Portugal's interest burden fell from
 \InitialInterestPctGdp{} percent of GDP in \MainStartYear{} to \LatestInterestPctGdp{} percent of GDP in \LatestYear{}, despite a higher
 debt ratio in \LatestYear{} than in the mid-1990s and despite a material nominal
@@ -104,6 +107,8 @@ that rate shocks pass through gradually to the average cost of the outstanding
 stock; the static full-pass-through effect of a 100 basis-point shock at the
 \LatestYear{} debt ratio is approximately \ShockHundredApproxPp{} percentage points of GDP, but this is an
 arithmetic long-run sensitivity rather than a one-year forecast.
+Eurostat flags Portugal's \LatestYear{} comparison observations as
+\PortugalComparisonStatus{}.
 \end{abstract}
 
 \noindent\textbf{Keywords:} Portugal; public debt; interest expenditure; fiscal
@@ -249,9 +254,11 @@ therefore does not mix central-government budget execution with ESA
 general-government interest payable.
 
 The main analytical sample is 1995--2025, the period in which the authoritative
-Portugal series is built from Eurostat ESA 2010 concepts. Every figure, table,
-decomposition, and conclusion in this paper uses that sample. The first ESA 2010 main-series
-year is marked as a basis break.
+Portugal series is built from Eurostat ESA 2010 concepts. All historical
+empirical figures, tables, and decompositions use the 1995--2025 Eurostat ESA
+2010 sample. The refinancing scenarios additionally use the external maturity
+assumption described in Section \ref{sec:refinancing}. The first ESA 2010
+main-series year is marked as a basis break.
 
 The core evidence is drawn from Eurostat government-finance statistics,
 government-debt statistics, national accounts, and the harmonised long-term
@@ -432,12 +439,12 @@ rapidly or when the debt ratio falls.
 \end{figure}
 
 Table \ref{tab:interest-share} places the interest bill inside the fiscal
-envelope for selected years. Percent of GDP is the right denominator for
-comparison across countries and over time, but it is not the denominator a
-budget works in. The share of expenditure devoted to interest shows how much of
-the current fiscal envelope is committed to servicing previously accumulated
-liabilities. Revenue is shown alongside so the envelope within which interest
-is financed is visible.
+envelope for selected years. Percentage of GDP is the principal denominator for
+macro-fiscal comparison across countries and time, but it is not the denominator
+a budget works in. The share of expenditure devoted to interest shows how much
+of the current fiscal envelope is committed to servicing previously accumulated
+liabilities. Revenue is shown alongside so the envelope within which interest is
+financed is visible.
 
 \input{../reports/tables/interest_share_of_budget.tex}
 
@@ -524,9 +531,7 @@ not on the average-debt descriptive rate of Equation \ref{eq:average-debt-rate}.
 \label{fig:debt-dynamics}
 \end{figure}
 
-\begin{landscape}
-\input{../reports/tables/debt_dynamics_diagnostic_2020_2025.tex}
-\end{landscape}
+The detailed 2020--2025 diagnostic table is reported in Appendix A.
 
 The stock-flow adjustment is a residual. It absorbs valuation effects,
 financial transactions, cash-debt timing differences, and any discrepancy
@@ -800,10 +805,10 @@ reasons to report the stock-flow adjustment as a residual to be investigated
 rather than a behavioural term to be interpreted.
 
 \paragraph{Portuguese debt management.} The Portuguese treasury and debt agency
-publishes the maturity profile and issuance record used to calibrate the
-refinancing scenarios \cite{igcp2024}. The average maturity of the debt stock,
-7.2 years in 2024 including official loans, is the single external assumption
-this paper takes from outside Eurostat.
+publishes the annual report that supplies the average-maturity statistic used to
+calibrate the central stylised scenario \cite{igcp2024}. The average maturity
+of the debt stock, 7.2 years in 2024 including official loans, is the single
+external assumption this paper takes from outside Eurostat.
 
 \paragraph{Contribution.} The paper's contribution is measurement discipline
 rather than a new estimate. Five things are done deliberately. First, every
@@ -909,20 +914,27 @@ In the 2025 comparator panel, Portugal occupied an intermediate position among
 euro-area countries. It had a lower interest burden than Italy, Greece, Spain,
 Belgium, and France, but a higher burden than most other euro-area members.
 That ranking should be read as a harmonised descriptive comparison,
-not as a full fiscal-sustainability judgement.
+not as a full fiscal-sustainability judgement. Eurostat flags Portugal's 2025
+comparison observations as provisional.
 
 \newpage
 \appendix
 
-\section{Appendix A: Annual ESA 2010 Portugal Table}
+\begin{landscape}
+\section{Appendix A: Debt-Dynamics Diagnostic Table}
+
+\input{../reports/tables/debt_dynamics_diagnostic_2020_2025.tex}
+\end{landscape}
 
 \begin{landscape}
+\section{Appendix B: Annual ESA 2010 Portugal Table}
+
 \input{../reports/tables/annual_portugal_table.tex}
 \end{landscape}
 
-\section{Appendix B: Variable Definitions}
-
 \begin{landscape}
+\section{Appendix C: Variable Definitions}
+
 \scriptsize
 % Identifiers must not hyphenate across lines or pages.
 \begingroup
@@ -955,8 +967,8 @@ Column & Unit & Definition \\
 \texttt{nominal\_gdp\_growth\_pct} & percent & Annual growth of current-price GDP. \\
 \texttt{real\_gdp\_growth\_pct} & percent & Chain-linked volume growth rate. \\
 \texttt{gdp\_deflator\_growth\_pct} & percent & Derived GDP deflator growth. \\
-\texttt{interest\_growth\_}\\\texttt{differential\_pct} & percentage points & Debt-dynamics interest rate minus nominal GDP growth. \\
-\texttt{debt\_stabilising\_primary\_}\\\texttt{balance\_before\_sfa\_pct\_gdp} & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
+\texttt{interest\_growth\_differential\_pct} & percentage points & Debt-dynamics interest rate minus nominal GDP growth. \\
+\texttt{debt\_stabilising\_primary\_balance\_before\_sfa\_pct\_gdp} & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
 \texttt{stock\_flow\_adjustment\_pp} & percentage points & Debt-dynamics residual. \\
 \texttt{ten\_year\_yield\_pct} & percent & Long-term government bond yield. \\
 \texttt{source} & category & Source family; Eurostat in this build. \\
@@ -970,7 +982,7 @@ Column & Unit & Definition \\
 \normalsize
 \end{landscape}
 
-\section{Appendix C: Source and Validation Notes}
+\section{Appendix D: Source and Validation Notes}
 
 Eurostat source tables are \texttt{gov\_10a\_main},
 \texttt{gov\_10dd\_edpt1}, \texttt{nama\_10\_gdp}, and
@@ -1039,7 +1051,7 @@ Mauro, P., \& Zhou, J. (2021). $r-g<0$: Can We Sleep More Soundly?
 
 \bibitem{bohn1998}
 Bohn, H. (1998). The Behavior of U.S. Public Debt and Deficits. \emph{Quarterly
-Journal of Economics}, 113(3), 949--963.
+Journal of Economics}, 113(3), 949--963. \doi{10.1162/003355398555793}
 
 \bibitem{degrauwe2013}
 De Grauwe, P., \& Ji, Y. (2013). Self-fulfilling crises in the Eurozone: An
@@ -1049,6 +1061,7 @@ empirical test. \emph{Journal of International Money and Finance}, 34, 15--36.
 \bibitem{missale1994}
 Missale, A., \& Blanchard, O. J. (1994). The Debt Burden and Debt Maturity.
 \emph{American Economic Review}, 84(1), 309--319.
+\url{https://www.jstor.org/stable/2117977}
 
 \bibitem{greenwood2015}
 Greenwood, R., Hanson, S. G., \& Stein, J. C. (2015). A Comparative-Advantage
@@ -1058,19 +1071,22 @@ Approach to Government Debt Maturity. \emph{The Journal of Finance}, 70(4),
 \bibitem{aizenman2011}
 Aizenman, J., \& Marion, N. (2011). Using inflation to erode the US public debt.
 \emph{Journal of Macroeconomics}, 33(4), 524--541.
+\doi{10.1016/j.jmacro.2011.09.004}
 
 \bibitem{weber2012}
 Weber, A. (2012). \emph{Stock-Flow Adjustments and Fiscal Transparency: A
 Cross-Country Comparison}. International Monetary Fund, Working Paper 12/39.
 Washington, DC: IMF.
+\url{https://www.imf.org/external/pubs/ft/wp/2012/wp1239.pdf}
 
 \bibitem{seiferling2013}
 Seiferling, M. (2013). \emph{Stock-Flow Adjustments, Government's Integrated
 Balance Sheet and Fiscal Transparency}. International Monetary Fund, Working
 Paper 13/63. Washington, DC: IMF.
+\url{https://www.imf.org/external/pubs/ft/wp/2013/wp1363.pdf}
 
 \bibitem{igcp2024}
-Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).
+Ag\^encia de Gest\~ao da Tesouraria e da D\'ivida P\'ublica (IGCP) (2025).
 \emph{Annual Report 2024}. Lisbon: IGCP.
 \url{https://www.igcp.pt/sites/default/files/2025-11/RA2024_20251118.pdf}
 
