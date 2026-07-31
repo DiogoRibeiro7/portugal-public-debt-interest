@@ -29,6 +29,7 @@ from .report_context import (
     build_debt_dynamics_context,
     write_debt_dynamics_context,
 )
+from .revisions import build_validation_detail
 from .scenarios import static_rate_shock_table
 
 
@@ -628,6 +629,9 @@ def headline_macros(
     main_start_year: int,
     shocks_bps: list[int],
     panel_frame: pd.DataFrame | None = None,
+    tolerance_pp: float = 0.15,
+    validation_result: dict[str, Any] | None = None,
+    accepted_statuses: tuple[str, ...] = ("observed", "provisional"),
 ) -> Path:
     """Write LaTeX macros for recurring paper headline values."""
     data = _observed_portugal(frame, main_start_year)
@@ -809,6 +813,9 @@ def headline_macros(
         ),
         *_debt_dynamics_macros(frame),
         *_comparison_macros(panel_frame),
+        *_validation_macros(
+            frame, tolerance_pp, validation_result, accepted_statuses
+        ),
         _macro("PortugalComparatorRankWord", panel_rank),
         _macro("ComparatorCountryCountWord", panel_count),
         _macro(
@@ -829,6 +836,88 @@ def headline_macros(
         ),
     ]
     return _write(output_dir / "paper_headlines.tex", "\n".join(macros) + "\n")
+
+
+def _validation_macros(
+    frame: pd.DataFrame,
+    tolerance_pp: float,
+    validation_result: dict[str, Any] | None,
+    accepted_statuses: tuple[str, ...],
+) -> list[str]:
+    """Emit the appendix macros for validation and data provenance."""
+    try:
+        detail = build_validation_detail(frame, tolerance_pp)
+    except ValidationError:
+        # A partial frame still produces every other macro; the validation
+        # artefacts and their tests carry the strict requirements.
+        return []
+    breaches = detail.loc[detail["exceeds_tolerance"]]
+
+    errors = warnings = 0
+    all_errors_passed = True
+    if validation_result:
+        for check in validation_result.get("checks", []):
+            if not isinstance(check, dict) or check.get("passed", True):
+                continue
+            if str(check.get("severity")) == "error":
+                errors += 1
+                all_errors_passed = False
+            else:
+                warnings += 1
+
+    timestamps = (
+        frame.get("retrieval_timestamp_utc", pd.Series(dtype="object"))
+        .dropna()
+        .astype(str)
+        .str.split(";")
+        .explode()
+        .str.strip()
+    )
+    macros = [
+        _macro("ValidationTolerancePp", _fmt(tolerance_pp, 2)),
+        _macro("ValidationErrorCount", str(errors)),
+        _macro("ValidationWarningCount", str(warnings)),
+        _macro("ValidationAllErrorsPassed", "yes" if all_errors_passed else "no"),
+        _macro(
+            "MaxRatioDiscrepancyPp",
+            _fmt(detail["absolute_difference_pp"].abs().max(), 4),
+        ),
+        _macro("RatioBreachCount", str(len(breaches))),
+        _macro(
+            "RatioBreachYears",
+            _escape(", ".join(str(int(year)) for year in breaches["year"])),
+        ),
+        _macro(
+            "EarliestRetrievalTimestamp",
+            _escape(str(timestamps.min()) if not timestamps.empty else "unknown"),
+        ),
+        _macro(
+            "LatestRetrievalTimestamp",
+            _escape(str(timestamps.max()) if not timestamps.empty else "unknown"),
+        ),
+        _macro("AcceptedObservationStatuses", _escape(", ".join(accepted_statuses))),
+    ]
+    for year in (1997, 1998):
+        rows = detail.loc[detail["year"].eq(year)]
+        if rows.empty:
+            continue
+        row = rows.iloc[0]
+        word = "NineteenNinetySeven" if year == 1997 else "NineteenNinetyEight"
+        macros.extend(
+            [
+                _macro(f"DebtRatioOfficial{word}", _fmt(row["official_pct_gdp"], 2)),
+                _macro(
+                    f"DebtRatioReconstructed{word}",
+                    _fmt(row["reconstructed_pct_gdp"], 4),
+                ),
+                _macro(
+                    f"DebtRatioDifference{word}Pp",
+                    _fmt(row["absolute_difference_pp"], 4),
+                ),
+                _macro(f"DebtRatioCause{word}", _escape(str(row["explanation_classification"]))),
+            ]
+        )
+    return macros
 
 
 def _comparison_macros(panel_frame: pd.DataFrame | None) -> list[str]:
@@ -932,6 +1021,9 @@ def generate_latex_tables(
     context_dir: Path | None = None,
     refinancing_assumptions: pd.DataFrame | None = None,
     refinancing_main_scenario: str = "central",
+    tolerance_pp: float = 0.15,
+    validation_result: dict[str, Any] | None = None,
+    accepted_statuses: tuple[str, ...] = ("observed", "provisional"),
 ) -> list[Path]:
     """Generate every LaTeX table fragment and numeric context used by the paper."""
     observed = _observed_portugal(frame, main_start_year)
@@ -939,7 +1031,16 @@ def generate_latex_tables(
     generated_dir = context_dir if context_dir is not None else output_dir.parent / "generated"
     paths = [
         write_debt_dynamics_context(frame, generated_dir),
-        headline_macros(frame, output_dir, main_start_year, shocks_bps, panel_frame),
+        headline_macros(
+            frame,
+            output_dir,
+            main_start_year,
+            shocks_bps,
+            panel_frame,
+            tolerance_pp=tolerance_pp,
+            validation_result=validation_result,
+            accepted_statuses=accepted_statuses,
+        ),
         summary_statistics_table(frame, output_dir, main_start_year),
         regime_averages_table(frame, output_dir, main_start_year),
         recent_dynamics_table(frame, output_dir),

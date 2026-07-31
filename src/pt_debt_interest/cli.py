@@ -27,6 +27,10 @@ from .refinancing import (
     load_refinancing_scenarios,
 )
 from .reporting import generate_report
+from .revisions import (
+    error_level_failures,
+    write_validation_and_revision_reports,
+)
 from .sources.ameco import AmecoArchiveClient
 from .storage import (
     load_processed,
@@ -126,6 +130,13 @@ def validate_command(config: Path = DEFAULT_CONFIG) -> None:
     destination = settings.paths.reports / "validation.json"
     destination.write_text(json.dumps(result, indent=2), encoding="utf-8")
     typer.echo(destination)
+    for path in write_validation_and_revision_reports(
+        frame,
+        settings.paths.reports,
+        settings.paths.processed,
+        settings.analysis.ratio_tolerance_pp,
+    ).values():
+        typer.echo(path)
     if not result["passed"]:
         raise typer.Exit(code=1)
 
@@ -154,6 +165,16 @@ def report_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate the Markdown analytical summary."""
     settings = _settings(config)
     frame = load_processed(settings)
+    validation_path = settings.paths.reports / "validation.json"
+    if validation_path.is_file():
+        stored = json.loads(validation_path.read_text(encoding="utf-8"))
+        failures = error_level_failures(stored)
+        if failures:
+            typer.echo(
+                "error-level validation checks failed, refusing to build the "
+                f"report: {', '.join(failures)}"
+            )
+            raise typer.Exit(code=1)
     destination = generate_report(
         frame,
         settings.paths.reports / "summary.md",

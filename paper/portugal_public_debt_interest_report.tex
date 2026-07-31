@@ -334,13 +334,29 @@ is refinanced in a typical year.
 
 \section{Data Quality and Validation}
 
-The empirical series passed the project's data-validation checks. One warning
-remains: the official and reconstructed debt ratios differ by more than the
-configured tolerance in 1997 and 1998. The warning is analytically plausible
-because early years around accounting-basis transitions and official ratio
-conventions can create small reconciliation differences. It is retained in the
-paper because a high-quality empirical study should report data warnings
-rather than hide them.
+The empirical series passed every error-severity data-validation check
+(\ValidationErrorCount{} failures). \ValidationWarningCount{} warning-severity
+check did not pass: the published debt ratio and the ratio reconstructed from
+levels differ by more than the configured tolerance of
+\ValidationTolerancePp{} percentage points in \RatioBreachYears{}.
+
+The exact figures are these. In 1997 the published ratio is
+\DebtRatioOfficialNineteenNinetySeven{} percent of GDP against a reconstructed
+\DebtRatioReconstructedNineteenNinetySeven{} percent, a difference of
+\DebtRatioDifferenceNineteenNinetySevenPp{} percentage points. In 1998 the
+published ratio is \DebtRatioOfficialNineteenNinetyEight{} percent against a
+reconstructed \DebtRatioReconstructedNineteenNinetyEight{} percent, a
+difference of \DebtRatioDifferenceNineteenNinetyEightPp{} percentage points.
+The largest absolute discrepancy anywhere in the sample is
+\MaxRatioDiscrepancyPp{} percentage points. Both breaches are warning-level,
+not error-level.
+
+The two figures are drawn from different Eurostat datasets: the published ratio
+from the excessive-deficit-procedure table and the reconstruction from the
+national-accounts GDP series. Nothing in the data identifies which side moved,
+so the cause is recorded as \DebtRatioCauseNineteenNinetySeven{} rather than
+guessed. Per-year detail is written to \texttt{reports/validation\_detail.csv}
+and \texttt{reports/validation\_detail.md}.
 
 The analysis depends on three forms of data integrity. First, every observation
 must represent one and only one calendar year. Second, denominators such as GDP
@@ -914,8 +930,18 @@ Column & Unit & Definition \\
 Eurostat source tables are \texttt{gov\_10a\_main},
 \texttt{gov\_10dd\_edpt1}, \texttt{nama\_10\_gdp}, and
 \texttt{irt\_lt\_mcby\_a}. AMECO is used for the linked historical extension.
-The latest validation result passed all error-severity checks and retained one
-warning for debt-ratio reconciliation in 1997 and 1998.
+The latest validation result passed all error-severity checks
+(\ValidationAllErrorsPassed{}), with \ValidationErrorCount{} error-level and
+\ValidationWarningCount{} warning-level failures. Source data were retrieved
+between \EarliestRetrievalTimestamp{} and \LatestRetrievalTimestamp{}. The
+observation statuses accepted into the euro-area comparison are
+\AcceptedObservationStatuses{}. The largest official-versus-reconstructed ratio
+discrepancy is \MaxRatioDiscrepancyPp{} percentage points, in
+\RatioBreachYears{}; the per-year rows for those years appear above. A
+data-revision log comparing the current processed vintage with the previous one
+is written to \texttt{reports/data\_revision\_log.csv} and
+\texttt{reports/data\_revision\_log.md}. An error-level validation failure stops
+the report build.
 
 \section{Appendix D: Replication Materials}
 
