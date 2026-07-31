@@ -161,6 +161,20 @@ def _observed_portugal(frame: pd.DataFrame, main_start_year: int) -> pd.DataFram
     ].sort_values("year")
 
 
+def _extreme_years(values: pd.Series, years: pd.Series, largest: bool) -> str:
+    """Return every year attaining an extreme, not just the first.
+
+    The minimum interest burden is reached in more than one year, so the year
+    column has to be built from the data rather than assumed unique.
+    """
+    numeric = pd.to_numeric(values, errors="coerce")
+    if numeric.dropna().empty:
+        return ""
+    target = numeric.max() if largest else numeric.min()
+    matches = years.loc[numeric.eq(target)]
+    return ", ".join(str(int(float(year))) for year in matches)
+
+
 def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_year: int) -> Path:
     data = _observed_portugal(frame, main_start_year)
     variables = [
@@ -182,28 +196,39 @@ def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_y
     rows: list[list[str]] = []
     for label, column in variables:
         series = pd.to_numeric(data[column], errors="coerce").dropna()
-        min_index = series.idxmin()
-        max_index = series.idxmax()
+        years = data.loc[series.index, "year"]
         rows.append(
             [
                 label,
+                str(len(series)),
                 _fmt(series.mean(), 3),
                 _fmt(series.std(), 3),
                 _fmt(series.min(), 3),
-                _int_text(data.loc[min_index, "year"]),
+                _escape(_extreme_years(series, years, largest=False)),
                 _fmt(series.max(), 3),
-                _int_text(data.loc[max_index, "year"]),
+                _escape(_extreme_years(series, years, largest=True)),
             ]
         )
     content = _table(
         caption="Summary statistics, Portugal ESA 2010 sample, 1995--2025",
         label="tab:summary-statistics",
-        columns="lrrrrrr",
-        header=["Variable", "Mean", "Std. dev.", "Min", "Min year", "Max", "Max year"],
+        columns="lrrrrrrr",
+        header=[
+            "Variable",
+            "N",
+            "Mean",
+            "Std. dev.",
+            "Min",
+            "Min year(s)",
+            "Max",
+            "Max year(s)",
+        ],
         rows=rows,
         notes=(
             "Notes: Observed Eurostat ESA 2010 Portugal rows only. The average-debt "
-            "rate uses average debt. Interest is general-government interest payable."
+            "rate uses average debt. Interest is general-government interest payable. "
+            "Where an extreme is attained in more than one year, every year is "
+            "listed."
         ),
     )
     return _write(output_dir / "summary_statistics.tex", content)
@@ -957,6 +982,58 @@ def _comparison_macros(panel_frame: pd.DataFrame | None) -> list[str]:
     ]
 
 
+def interest_share_of_budget_table(
+    frame: pd.DataFrame,
+    output_dir: Path,
+    main_start_year: int,
+    years: tuple[int, ...] = (1995, 2012, 2020, 2025),
+) -> Path:
+    """Interest against the fiscal envelope, for selected years.
+
+    This replaces the separate expenditure and revenue figures: the envelope is
+    context for the interest bill, not a result in its own right.
+    """
+    data = _observed_portugal(frame, main_start_year).set_index("year")
+    rows = []
+    for year in years:
+        if year not in data.index:
+            continue
+        row = data.loc[year]
+        expenditure = _num(row["government_expenditure_pct_gdp"])
+        revenue = _num(row["government_revenue_pct_gdp"])
+        burden = _num(row["interest_pct_gdp"])
+        rows.append(
+            [
+                _int_text(year),
+                _fmt(burden, 2),
+                _fmt(expenditure, 2),
+                _fmt(burden / expenditure * 100.0, 2),
+                _fmt(revenue, 2),
+                _fmt(burden / revenue * 100.0, 2),
+            ]
+        )
+    content = _table(
+        caption="Interest against the fiscal envelope, selected years",
+        label="tab:interest-share",
+        columns="rrrrrr",
+        header=[
+            "Year",
+            "Interest (\% of GDP)",
+            "Expenditure (\% of GDP)",
+            "Interest (\% of expenditure)",
+            "Revenue (\% of GDP)",
+            "Interest (\% of revenue)",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: Percent of GDP is the right denominator for comparison across "
+            "countries and time; the share of total expenditure is the denominator "
+            "a budget works in. " + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "interest_share_of_budget.tex", content)
+
+
 def refinancing_assumptions_table(
     assumptions: pd.DataFrame,
     output_dir: Path,
@@ -1042,6 +1119,7 @@ def generate_latex_tables(
             accepted_statuses=accepted_statuses,
         ),
         summary_statistics_table(frame, output_dir, main_start_year),
+        interest_share_of_budget_table(frame, output_dir, main_start_year),
         regime_averages_table(frame, output_dir, main_start_year),
         recent_dynamics_table(frame, output_dir),
         debt_dynamics_diagnostic_table(frame, output_dir),

@@ -65,8 +65,8 @@ def _annotate_source(ax: Axes, frame: pd.DataFrame) -> None:
         -0.16,
         _source_note(frame),
         transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
+        fontsize=9,
+        alpha=0.85,
     )
 
 
@@ -74,7 +74,6 @@ def plot_interest_burden(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
     """Plot interest expenditure as a percentage of GDP."""
     fig, ax = plt.subplots(figsize=(11, 6))
     ax.plot(frame["year"], frame["interest_pct_gdp"], marker="o", markersize=3)
-    ax.set_title("Portugal: general-government interest expenditure")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percentage of GDP")
     ax.grid(True, alpha=0.25)
@@ -86,7 +85,6 @@ def plot_interest_euros(frame: pd.DataFrame, output_dir: Path) -> list[Path]:
     """Plot nominal annual interest expenditure."""
     fig, ax = plt.subplots(figsize=(11, 6))
     ax.plot(frame["year"], frame["interest_mio_eur"] / 1_000.0, marker="o", markersize=3)
-    ax.set_title("Portugal: annual general-government interest expenditure")
     ax.set_xlabel("Year")
     ax.set_ylabel("Billion euro")
     ax.grid(True, alpha=0.25)
@@ -134,7 +132,6 @@ def plot_balances(frame: pd.DataFrame, output_dir: Path) -> list[Path] | None:
     ax.axhline(0.0, linewidth=1)
     ax.plot(frame["year"], frame["overall_balance_pct_gdp"], label="Overall balance")
     ax.plot(frame["year"], frame["primary_balance_pct_gdp"], label="Primary balance")
-    ax.set_title("Portugal: fiscal balance before and after interest")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percentage of GDP")
     ax.grid(True, alpha=0.25)
@@ -219,7 +216,6 @@ def plot_yield_pass_through(frame: pd.DataFrame, output_dir: Path) -> list[Path]
         frame["average_debt_interest_rate_pct"],
         label="Average-debt rate",
     )
-    ax.set_title("Market yield versus effective cost of the debt stock")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percent")
     ax.grid(True, alpha=0.25)
@@ -238,7 +234,6 @@ def plot_growth_decomposition(frame: pd.DataFrame, output_dir: Path) -> list[Pat
     ax.plot(frame["year"], frame["nominal_gdp_growth_pct"], label="Nominal GDP")
     ax.plot(frame["year"], frame["real_gdp_growth_pct"], label="Real GDP")
     ax.plot(frame["year"], frame["gdp_deflator_growth_pct"], label="GDP deflator")
-    ax.set_title("Nominal growth, real growth, and GDP-deflator growth")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percent")
     ax.grid(True, alpha=0.25)
@@ -280,7 +275,6 @@ def plot_debt_dynamics(frame: pd.DataFrame, output_dir: Path) -> list[Path] | No
         linestyle="--",
         label="Observed debt-ratio change",
     )
-    ax.set_title("Debt-dynamics contribution terms")
     ax.set_xlabel("Year")
     ax.set_ylabel("Percentage of GDP")
     ax.grid(True, alpha=0.25)
@@ -349,7 +343,6 @@ def plot_interest_burden_decomposition(
         zorder=3,
         label="Total reconstructed change",
     )
-    ax.set_title("Endpoint decomposition of the interest-burden change")
     ax.set_xlabel("Interval")
     ax.set_ylabel("Percentage points of GDP")
     ax.set_xticks(positions)
@@ -424,8 +417,8 @@ def plot_european_comparison(
         + f" {provisional} carry provisional Eurostat flags."
         + " Portugal highlighted.",
         transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.8,
+        fontsize=9,
+        alpha=0.85,
     )
     return _save(fig, output_dir / "08_european_comparison")
 
@@ -460,50 +453,6 @@ def refinancing_shock_paths(
         for shock in shocks_bps
     ]
     return pd.concat(pieces, ignore_index=True)
-
-
-def plot_refinancing_shock_paths(
-    scenario_frame: pd.DataFrame | None,
-    output_dir: Path,
-) -> list[Path] | None:
-    """Plot gradual interest-burden paths under configured refinancing shocks."""
-    if scenario_frame is None or scenario_frame.empty:
-        return None
-    required = {"horizon_year", "shock_bps", "interest_pct_gdp_scenario"}
-    if not required.issubset(scenario_frame.columns):
-        return None
-    fig, ax = plt.subplots(figsize=(11, 6))
-    for shock, group in scenario_frame.sort_values(["shock_bps", "horizon_year"]).groupby(
-        "shock_bps"
-    ):
-        shock_value = cast(float, shock)
-        ax.plot(
-            group["horizon_year"],
-            group["interest_pct_gdp_scenario"],
-            marker="o",
-            markersize=3,
-            label=f"+{shock_value:.0f} bps",
-        )
-    baseline_year: int | str = "latest"
-    if (
-        "baseline_year" in scenario_frame.columns
-        and not scenario_frame["baseline_year"].dropna().empty
-    ):
-        baseline_year = int(cast(float, scenario_frame["baseline_year"].dropna().iloc[0]))
-    ax.set_title(f"Refinancing shock paths from {baseline_year} baseline")
-    ax.set_xlabel("Years after shock")
-    ax.set_ylabel("Interest expenditure, percentage of GDP")
-    ax.grid(True, alpha=0.25)
-    ax.legend(title="Shock")
-    ax.text(
-        0.0,
-        -0.16,
-        "Source: deterministic arithmetic simulation from processed data",
-        transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
-    )
-    return _save(fig, output_dir / "09_refinancing_shock_paths")
 
 
 def write_refinancing_scenarios(
@@ -544,8 +493,8 @@ def plot_refinancing_repricing(results: pd.DataFrame | None, output_dir: Path) -
         -0.16,
         SOURCE_NOTE + " Stylised cohort model; not a forecast.",
         transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
+        fontsize=9,
+        alpha=0.85,
     )
     return _save(fig, output_dir / "14_refinancing_cumulative_repricing")
 
@@ -587,8 +536,8 @@ def plot_refinancing_incremental_burden(
         + f" Incremental over the zero-shock baseline; {main_scenario} scenario;"
         + " stylised cohort model, not a forecast.",
         transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
+        fontsize=9,
+        alpha=0.85,
     )
     return _save(fig, output_dir / "15_refinancing_incremental_burden")
 
@@ -626,8 +575,8 @@ def plot_refinancing_cumulative_cost(
         + f" Cumulative over the zero-shock baseline; {main_scenario} scenario;"
         + " debt stock and GDP held fixed; not a forecast.",
         transform=ax.transAxes,
-        fontsize=8,
-        alpha=0.75,
+        fontsize=9,
+        alpha=0.85,
     )
     return _save(fig, output_dir / "16_refinancing_cumulative_cost")
 
@@ -675,7 +624,6 @@ def generate_all_plots(
         plot_growth_decomposition(frame, output_dir),
         plot_debt_dynamics(frame, output_dir),
         plot_european_comparison(panel_frame, output_dir),
-        plot_refinancing_shock_paths(scenario_frame, output_dir),
         plot_interest_burden_decomposition(frame, output_dir),
         plot_government_expenditure(frame, output_dir),
         plot_government_revenue(frame, output_dir),

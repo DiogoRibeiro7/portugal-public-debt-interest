@@ -140,6 +140,6 @@ analysis:
     - {start: 1999, end: 2007, label: Early euro period}
     - {start: 2008, end: 2010, label: Global financial crisis}
     - {start: 2011, end: 2014, label: Sovereign-debt crisis and adjustment}
-    - {start: 2015, end: 2019, label: ECB intervention and refinancing}
+    - {start: 2015, end: 2019, label: Low-rate and asset-purchase period}
     - {start: 2020, end: 2021, label: Pandemic}
     - {start: 2022, end: 2025, label: Inflation and monetary tightening}

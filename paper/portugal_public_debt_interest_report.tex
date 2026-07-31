@@ -37,7 +37,7 @@
 \newcommand{\pt}{\mathrm{PT}}
 \input{../reports/tables/paper_headlines.tex}
 
-\title{\textbf{Portugal's Public-Debt Interest Burden: An Empirical Assessment of Measurement, Debt Dynamics, and Euro-Area Comparison}}
+\title{\textbf{Portugal's Public-Debt Interest Burden and Debt Dynamics in the Euro Area}}
 \author{Diogo Ribeiro}
 \date{July 2026}
 
@@ -47,7 +47,7 @@
 \begin{abstract}
 This paper provides a reproducible empirical assessment of Portugal's
 general government interest burden from \MainStartYear{} to \LatestYear{}, the harmonised Eurostat
-ESA 2010 period used for the main empirical sample. The dependent variable is
+ESA 2010 period used for the main analytical sample. The principal measure is
 interest payable by the general government
 sector as a percentage of nominal GDP. The analysis separates three quantities
 that are frequently conflated in fiscal commentary: the national-accounts
@@ -58,13 +58,7 @@ cross-country Eurostat comparison, and deterministic refinancing simulations.
 The central empirical result is that Portugal's interest burden fell from
 \InitialInterestPctGdp{} percent of GDP in \MainStartYear{} to \LatestInterestPctGdp{} percent of GDP in \LatestYear{}, despite a higher
 debt ratio in \LatestYear{} than in the mid-1990s and despite a material nominal
-interest bill of EUR \LatestInterestEurBn{} billion. Total general-government expenditure was
-EUR \LatestGovernmentExpenditureEurBn{} billion, or \LatestGovernmentExpenditurePctGdp{} percent of GDP, while total revenue was
-EUR \LatestGovernmentRevenueEurBn{} billion, or \LatestGovernmentRevenuePctGdp{} percent of GDP, in \LatestYear{}. The sovereign-debt crisis and adjustment
-period, 2011--2014, remains the highest-burden regime in the harmonised sample,
-with mean interest expenditure of \CrisisMeanInterestPctGdp{} percent of GDP. The post-2015 decline is
-best understood as the joint result of lower effective interest rates, debt
-refinancing, nominal GDP growth, and later debt-ratio reduction. In the exact
+interest bill of EUR \LatestInterestEurBn{} billion. In the exact
 2014--\LatestYear{} decomposition, the reconstructed burden changed by
 \DecompTotalTwentyFourteenToLatestPp{} percentage points, with
 \DecompRateTwentyFourteenToLatestPp{} percentage points from the average
@@ -118,19 +112,17 @@ strategy is therefore accounting-based and transparent. It treats national
 accounts as the measurement system, then uses deterministic identities and
 carefully labelled comparisons to organise the evidence.
 
-The paper answers seven research questions:
+The paper answers four research questions:
 \begin{enumerate}
-  \item What is the annual level of Portugal's general-government interest
-        payable, and how large is it relative to GDP?
-  \item How different are the euro amount of interest and the GDP-normalised
-        burden as empirical objects?
-  \item What roles do the debt ratio, the effective interest rate, nominal GDP
-        growth, and the primary balance play in the observed dynamics?
-  \item How did the burden vary across macro-fiscal regimes from \MainStartYear{} to \LatestYear{}?
-  \item How does Portugal compare with euro-area peers under harmonised
-        Eurostat definitions?
-  \item What is the arithmetic exposure of the burden to benchmark rate shocks?
-  \item What are the principal measurement and interpretation limits?
+  \item How have the euro amount of Portugal's general-government interest and
+        the GDP-normalised burden evolved since \MainStartYear{}, and why do
+        the two move differently?
+  \item How much of the change in the burden is attributable to the average
+        financing cost and how much to debt exposure?
+  \item Where does Portugal sit in the euro-area distribution of interest
+        burdens under harmonised definitions?
+  \item Under explicit assumptions, how quickly does a benchmark rate shock
+        reach the interest bill through refinancing?
 \end{enumerate}
 
 The central finding is that Portugal's public-debt interest burden declined
@@ -153,7 +145,7 @@ budget line. This is the numerator used in the headline outcome and follows
 the ESA national-accounts measurement framework \cite{esa2010,eurostatgov}.
 
 Second, the \emph{interest burden} is interest payable divided by nominal GDP.
-This is the main dependent variable because it expresses the fiscal flow in
+This is the main principal measure because it expresses the fiscal flow in
 relation to the annual income base. The ratio is appropriate for fiscal-space
 questions because the same nominal payment can be more or less burdensome
 depending on nominal GDP.
@@ -222,12 +214,9 @@ differ from general-government accrual-based national accounts. The paper
 therefore does not mix central-government budget execution with ESA
 general-government interest payable.
 
-The main empirical sample is 1995--2025, the period in which the authoritative
-Portugal series is built from Eurostat ESA 2010 concepts. A linked AMECO
-extension may be retained before 1995 only when the required core fiscal
-quantities are complete. In the generated dataset used for this paper, no
-complete pre-1995 linked observations are included, so all main empirical
-claims refer to the Eurostat ESA 2010 sample. The first ESA 2010 main-series
+The main analytical sample is 1995--2025, the period in which the authoritative
+Portugal series is built from Eurostat ESA 2010 concepts. Every figure, table,
+decomposition, and conclusion in this paper uses that sample. The first ESA 2010 main-series
 year is marked as a basis break.
 
 The core evidence is drawn from Eurostat government-finance statistics,
@@ -247,10 +236,7 @@ retained as contextual information where available but excluded from country
 ranks. This design prevents the country comparison from being driven by
 inconsistent accounting definitions.
 
-AMECO is used for a linked pre-1995 extension \cite{ameco}. The extension is
-kept separate from the Eurostat main sample and is explicitly labelled as a
-linked historical series across accounting regimes. It cannot overwrite
-Eurostat observations. Forecast observations are excluded from historical
+Forecast observations are excluded from historical
 descriptive statements unless explicitly stated.
 
 This conservative treatment is appropriate because a long time series can
@@ -389,7 +375,7 @@ interpretation.
 Figure \ref{fig:interest-gdp} shows the long decline, the crisis-period
 reversal, and the renewed compression after 2014. The burden fell sharply from
 the mid-1990s into the early euro period, then rose during the sovereign-debt
-crisis. It declined again during the ECB intervention and refinancing period
+crisis. It declined again during the low-rate and asset-purchase period
 and remained near 2 percent of GDP in the inflation and monetary-tightening
 period.
 
@@ -414,95 +400,14 @@ rapidly or when the debt ratio falls.
 \label{fig:interest-eur}
 \end{figure}
 
-Figure \ref{fig:government-expenditure} reports total general-government
-expenditure both in nominal euros and relative to GDP. In \LatestYear{}, total
-expenditure was EUR \LatestGovernmentExpenditureEurBn{} billion, equivalent to \LatestGovernmentExpenditurePctGdp{} percent of GDP. This
-scale comparison clarifies that the interest bill is one component of a much
-larger expenditure envelope, not a proxy for total spending.
+Table \ref{tab:interest-share} places the interest bill inside the fiscal
+envelope for selected years. Percent of GDP is the right denominator for
+comparison across countries and over time, but it is not the denominator a
+budget works in: the share of total expenditure answers the more concrete
+question of how much of what the state spends buys nothing current. Revenue is
+shown alongside so the envelope within which interest is financed is visible.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{../reports/figures/11_government_expenditure.pdf}
-\caption{Portugal: total general-government expenditure.}
-\label{fig:government-expenditure}
-\end{figure}
-
-Figure \ref{fig:government-revenue} reports the matching total-revenue series.
-In \LatestYear{}, general-government revenue was EUR \LatestGovernmentRevenueEurBn{} billion, equivalent to
-\LatestGovernmentRevenuePctGdp{} percent of GDP. Reading revenue and expenditure together gives the
-fiscal envelope within which interest costs are financed and primary balances
-are formed.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{../reports/figures/12_government_revenue.pdf}
-\caption{Portugal: total general-government revenue.}
-\label{fig:government-revenue}
-\end{figure}
-
-Figure \ref{fig:debt-rate} shows the debt ratio and average-debt interest rate.
-The debt ratio fell to \DebtMinPctGdp{} percent of GDP in \DebtMinYear{}, rose to \DebtPctGdpTwentyFourteen{} percent by
-2014, peaked at \DebtMaxPctGdp{} percent in \DebtMaxYear{}, and then declined to \LatestDebtPctGdp{} percent in
-\LatestYear{}. The average-debt rate moved in the opposite direction over much of
-the sample: it was very high in the 1990s, declined during monetary union,
-continued falling after the crisis, reached \AverageDebtRatePctTwentyTwentyTwo{} percent in 2022, and was
-\LatestAverageDebtRatePct{} percent in \LatestYear{}.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{../reports/figures/03_debt_and_average_debt_rate.pdf}
-\caption{Portugal: debt ratio and average-debt interest rate.}
-\label{fig:debt-rate}
-\end{figure}
-
-The paper does not use a level-correlation matrix as evidence about the
-drivers of the interest burden. In this setting the main variables are
-mechanically linked, persistent, and share GDP denominators, so pairwise
-correlations would mix accounting identities with common trends. The empirical
-interpretation therefore relies on explicit accounting decompositions:
-interest expenditure is read as the product of an average-debt financing cost
-and an average-debt ratio, while debt-ratio changes are decomposed into the
-interest-growth term, primary balance contribution, and stock-flow residual.
-
-Figure \ref{fig:balances} shows the overall balance and the primary balance.
-Portugal recorded large overall deficits during the global financial crisis,
-the sovereign-debt crisis, and the pandemic. The primary balance is less
-negative because it adds back interest expenditure. The difference between the
-two lines is precisely the interest burden. In \LatestYear{} the overall balance was
-\LatestOverallBalancePctGdp{} percent of GDP and the primary balance was \LatestPrimaryBalancePctGdp{} percent of GDP.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{../reports/figures/04_overall_and_primary_balance.pdf}
-\caption{Portugal: overall and primary balances.}
-\label{fig:balances}
-\end{figure}
-
-Figure \ref{fig:yield-pass-through} compares Portugal's ten-year benchmark
-yield with the average-debt interest rate. The two series are related but not
-identical. Benchmark yields moved sharply during market-stress episodes, while
-the average-debt rate changed more gradually because it reflects the average cost
-of the outstanding stock.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{../reports/figures/05_market_yield_vs_average_debt_rate.pdf}
-\caption{Portugal: benchmark market yield versus average-debt interest rate.}
-\label{fig:yield-pass-through}
-\end{figure}
-
-This distinction is especially important after the monetary-policy tightening
-episode. Portugal's ten-year yield rose from exceptionally low levels in
-2020--2021 to \LatestTenYearYieldPct{} percent in \LatestYear{}, but the average-debt rate in 2025 was
-\LatestAverageDebtRatePct{} percent. The budgetary effect of higher yields depends on refinancing,
-not on instant repricing of the entire stock.
-
-\section{Regimes and Debt Dynamics}
-
-The paper uses descriptive historical regimes rather than formal structural
-break estimation. The regimes are not causal claims; they are a disciplined
-way to organise the time series around well-known macro-fiscal episodes.
-Table \ref{tab:regimes} reports regime averages.
+\input{../reports/tables/interest_share_of_budget.tex}
 
 \input{../reports/tables/regime_averages.tex}
 
@@ -820,11 +725,7 @@ fiscal interpretation is only as strong as the measurement layer underneath it.
 
 Five limitations are material.
 
-First, the pre-1995 AMECO extension is not accounting-equivalent to the
-Eurostat ESA 2010 main sample. It is labelled and preserved, but the core
-claims are based on 1995--2025.
-
-Second, ESA interest payable is not the same as central-government cash
+First, ESA interest payable is not the same as central-government cash
 interest. Users interested in budget execution, Treasury cash management, or
 debt-office operations would need a separate reconciliation layer.
 
@@ -885,6 +786,10 @@ not as a full fiscal-sustainability judgement.
 \section{Appendix B: Variable Definitions}
 
 \scriptsize
+% Identifiers must not hyphenate across lines or pages.
+\begingroup
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
 \begin{longtable}{L{0.40\textwidth}L{0.13\textwidth}L{0.37\textwidth}}
 \caption{Core analytical variables}\\
 \toprule
@@ -916,20 +821,21 @@ Column & Unit & Definition \\
 \texttt{debt\_stabilising\_primary\_}\\\texttt{balance\_before\_sfa\_pct\_gdp} & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
 \texttt{stock\_flow\_adjustment\_pp} & percentage points & Debt-dynamics residual. \\
 \texttt{ten\_year\_yield\_pct} & percent & Long-term government bond yield. \\
-\texttt{source} & category & Source family, Eurostat or AMECO. \\
+\texttt{source} & category & Source family; Eurostat in this build. \\
 \texttt{accounting\_basis} & category & Accounting framework label. \\
 \texttt{observation\_status} & category & Observed or forecast status. \\
 \texttt{retrieval\_timestamp\_utc} & timestamp & Joined UTC source retrieval timestamp where available. \\
 \texttt{source\_checksum\_sha256} & hash & Joined source checksum metadata. \\
 \bottomrule
 \end{longtable}
+\endgroup
 \normalsize
 
 \section{Appendix C: Source and Validation Notes}
 
 Eurostat source tables are \texttt{gov\_10a\_main},
 \texttt{gov\_10dd\_edpt1}, \texttt{nama\_10\_gdp}, and
-\texttt{irt\_lt\_mcby\_a}. AMECO is used for the linked historical extension.
+\texttt{irt\_lt\_mcby\_a}.
 The latest validation result passed all error-severity checks
 (\ValidationAllErrorsPassed{}), with \ValidationErrorCount{} error-level and
 \ValidationWarningCount{} warning-level failures. Source data were retrieved
@@ -959,17 +865,12 @@ Raw source downloads include retrieval timestamps, request metadata, payload
 sizes, and checksums. Processed rows preserve source-vintage and checksum
 metadata so revisions can be audited.
 
-\section{Appendix E: Reproducibility Commands}
+\section{Appendix E: Reproducibility}
 
-\begin{verbatim}
-python -m pt_debt_interest.cli all --config config/default.yaml
-pt-debt tables --config config/default.yaml
-pytest
-ruff check .
-mypy src
-latexmk -pdf -interaction=nonstopmode -halt-on-error \
-  portugal_public_debt_interest_report.tex
-\end{verbatim}
+The full command sequence is documented in the repository README. The pipeline
+is reproduced with \texttt{pt-debt all --config config/default.yaml}, which
+performs acquisition, the analytical build, validation, figure and table
+generation, and the Markdown summary.
 
 \newpage
 \begin{thebibliography}{9}
