@@ -12,7 +12,7 @@ from .exceptions import SourceError
 
 def _integer_index(value: object, label: str) -> int:
     """Parse a JSON-stat index value without truncating non-integer numbers."""
-    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+    if isinstance(value, bool) or not isinstance(value, str | int | float):
         raise SourceError(f"JSON-stat {label} contains a non-integer index")
     try:
         numeric = float(value)

@@ -47,7 +47,7 @@ def _category_values(payload: dict[str, Any], dimension: str) -> set[str]:
 
 
 def _dimension_size(value: object, dataset: str, dimension: str) -> int:
-    if isinstance(value, bool) or not isinstance(value, (str, int, float)):
+    if isinstance(value, bool) or not isinstance(value, str | int | float):
         raise SourceError(f"Eurostat {dataset} returned invalid size for {dimension}")
     try:
         numeric = float(value)

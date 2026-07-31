@@ -91,7 +91,7 @@ def aggregate_flag_mask(values: pd.Series) -> pd.Series:
             return False
         if isinstance(value, bool):
             return value
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
+        if isinstance(value, int | float) and not isinstance(value, bool):
             numeric = float(value)
             if np.isfinite(numeric) and numeric in {0.0, 1.0}:
                 return bool(numeric)

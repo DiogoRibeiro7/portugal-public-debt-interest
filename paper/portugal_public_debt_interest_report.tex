@@ -38,8 +38,40 @@
 \newcommand{\pt}{\mathrm{PT}}
 \input{../reports/tables/paper_headlines.tex}
 
+\makeatletter
+\providecommand{\inst}[1]{\textsuperscript{#1}}
+\providecommand{\orcidID}[1]{\href{https://orcid.org/#1}{\textsuperscript{ORCID}}}
+\providecommand{\authorrunning}[1]{\gdef\@authorrunning{#1}}
+\providecommand{\institute}[1]{\gdef\@institute{#1}}
+\providecommand{\@institute}{}
+\renewcommand{\@maketitle}{%
+  \newpage
+  \null
+  \vskip 2em%
+  \begin{center}%
+    {\LARGE \@title \par}%
+    \vskip 1.5em%
+    {\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\small \let\and\par \@institute \par}%
+    \vskip 1em%
+    {\large \@date \par}%
+  \end{center}%
+  \par
+  \vskip 1.5em}
+\makeatother
+
 \title{\textbf{Portugal's Public-Debt Interest Burden and Debt Dynamics in the Euro Area}}
-\author{Diogo Ribeiro}
+\author{Diogo Ribeiro\inst{1,2,*}\orcidID{0009-0001-2022-7072}}
+\authorrunning{D. Ribeiro}
+\institute{Department of Data Science and Research, MySense, London, \MakeUppercase{United Kingdom}. \and
+School of Media Arts and Design, Polytechnic of Porto \\
+PORTUGAL.\\
+$^{*}$\textit{Corresponding Author: dfr@esmad.ipp.pt}}
 \date{July 2026}
 
 \begin{document}
@@ -1030,7 +1062,5 @@ Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).
 \end{thebibliography}
 
 \end{document}
-
-
 
 

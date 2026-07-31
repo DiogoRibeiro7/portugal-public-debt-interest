@@ -25,6 +25,10 @@ PREVIOUS_VINTAGE_FILENAME: Final[str] = "previous_portugal_debt_interest.csv"
 
 #: Reason classifications permitted in the revision log. No other value may be
 #: written, and nothing may be inferred beyond what the data supports.
+#: Differences at or below this relative size are CSV round-trip noise, not
+#: revisions. Reporting them would bury a real revision in last-bit churn.
+REVISION_NOISE_RELATIVE: Final[float] = 1e-12
+
 REVISION_REASONS: Final[tuple[str, ...]] = (
     "source revision",
     "parser change",
@@ -215,13 +219,13 @@ def build_revision_log(
             both_missing = bool(pd.isna(current_value)) and bool(pd.isna(previous_value))
             if both_missing:
                 continue
-            unchanged = (
-                bool(pd.notna(current_value))
-                and bool(pd.notna(previous_value))
-                and float(current_value) == float(previous_value)
-            )
-            if unchanged:
-                continue
+            both_present = bool(pd.notna(current_value)) and bool(pd.notna(previous_value))
+            if both_present:
+                current_float = float(current_value)
+                previous_float = float(previous_value)
+                scale = max(abs(current_float), abs(previous_float), 1.0)
+                if abs(current_float - previous_float) <= REVISION_NOISE_RELATIVE * scale:
+                    continue
             previous_checksum = _checksum_for(previous, year, variable)
             current_checksum = _checksum_for(current, year, variable)
             absolute = (
