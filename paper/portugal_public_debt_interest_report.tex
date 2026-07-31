@@ -5,6 +5,7 @@
 \usepackage{amssymb}
 \usepackage{booktabs}
 \usepackage{longtable}
+\providecommand{\doi}[1]{DOI: \href{https://doi.org/#1}{#1}}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{hyperref}
@@ -134,6 +135,7 @@ the result means that the economy's nominal scale and the effective cost of
 the outstanding debt stock changed enough to reduce the interest-to-GDP ratio.
 
 \section{Conceptual Framework and Measurement}
+\label{sec:framework}
 
 Public discussion often uses the word ``interest'' to refer to several
 different objects. This paper distinguishes them explicitly.
@@ -548,6 +550,7 @@ ratio fell by \RecentDebtDeclinePp{} percentage points, while the average-debt i
 \input{../reports/tables/recent_dynamics.tex}
 
 \section{European Comparison and Rate-Shock Exposure}
+\label{sec:comparison}
 
 The comparator panel includes the complete euro-area country universe at the
 configured endpoint year, with euro-area and EU aggregates retained only as
@@ -624,6 +627,7 @@ Only the part of the portfolio that matures is rolled over at the new rate, so
 the arithmetic effect of a shock arrives gradually. To make that explicit the
 paper uses a stylised cohort model.
 
+\label{sec:refinancing}
 \paragraph{The cohort recurrence.} At the horizon origin the entire initial
 stock sits in a legacy cohort carrying the initial average portfolio rate
 $r_0$. In year $t$ a configured share $s_t$ of the \emph{original} stock leaves
@@ -689,6 +693,94 @@ budget, and a longer average maturity converts a rate shock into a slow,
 partial repricing. Second, favourable recent debt arithmetic should not be
 extrapolated mechanically. If higher market yields persist, the average rate
 rises gradually even without an immediate fiscal shock.
+
+\section{Related Literature and Contribution}
+
+This paper is a measurement exercise, and it sits inside an accounting and
+empirical literature that it does not attempt to extend theoretically. The
+review below is organised by the questions the paper actually asks.
+
+\paragraph{Debt-dynamics accounting.} The arithmetic used in Section
+\ref{sec:framework} is standard. Escolano \cite{escolano2010} sets out the
+identity linking the change in the debt ratio to the interest-growth
+differential, the primary balance, and the residual stock-flow adjustment, and
+is explicit that the effective interest rate entering the identity is interest
+accrued over the \emph{inherited} stock. That distinction is the reason this
+paper carries two effective-rate concepts rather than one.
+
+\paragraph{The interest-growth differential.} Whether a negative differential
+makes debt comfortable is contested. Blanchard \cite{blanchard2019} argues that
+when safe rates are persistently below growth, debt rollovers may carry no
+fiscal cost, and that this configuration is closer to the historical norm than
+to an exception. Mauro and Zhou \cite{mauro2021} examine effective borrowing
+costs for 55 countries over up to two centuries and are more cautious: negative
+differentials have historically offered limited protection, because the marginal
+cost of borrowing can move sharply even when the average cost is low. Portugal's
+record over 2015--2025, where a favourable differential coexisted with a
+sizeable stock-flow adjustment, illustrates why the average and the margin have
+to be reported separately.
+
+\paragraph{Fiscal sustainability.} Bohn \cite{bohn1998} proposes a
+sustainability test that does not require an assumption about the interest rate,
+asking instead whether the primary balance responds systematically to the debt
+ratio. This paper does not estimate such a response. It reports the
+debt-stabilising primary balance implied by the identity, which is a weaker and
+purely arithmetic object, and says so.
+
+\paragraph{Euro-area sovereign borrowing costs.} De Grauwe and Ji
+\cite{degrauwe2013} test whether euro-area sovereign spreads moved beyond what
+fundamentals justified, and find evidence consistent with self-fulfilling
+liquidity dynamics for members of a monetary union that issue in a currency they
+do not control. This matters for the comparison in Section
+\ref{sec:comparison}: the effective rate on an existing stock is a slow-moving
+average and does not carry the information that a marginal spread carries.
+
+\paragraph{Debt maturity and refinancing pass-through.} Missale and Blanchard
+\cite{missale1994} formalise how maturity structure governs the sensitivity of
+the real debt burden to shocks, introducing an effective-maturity notion.
+Greenwood, Hanson and Stein \cite{greenwood2015} treat maturity choice as a
+trade-off faced by the sovereign rather than a technical detail. The cohort
+model in Section \ref{sec:refinancing} is a stylised version of the mechanism
+those papers describe, calibrated to the published average maturity of the
+Portuguese stock rather than estimated.
+
+\paragraph{Inflation and nominal growth.} Aizenman and Marion \cite{aizenman2011}
+assess how much of a debt ratio inflation can plausibly erode, and stress that
+the answer depends on maturity and on whether the inflation is anticipated.
+Portugal's 2022--2023 episode, where nominal growth of roughly twelve and eleven
+percent coincided with a sharp fall in the debt ratio, is a case where the
+denominator did most of the work.
+
+\paragraph{Stock-flow adjustments.} Weber \cite{weber2012} documents that the
+discrepancy between the change in debt and the deficit is large, persistent, and
+only partly explained by balance-sheet effects, and that it is smaller in more
+fiscally transparent countries. Seiferling \cite{seiferling2013} re-examines the
+same discrepancy against the government's integrated balance sheet. Both are
+reasons to report the stock-flow adjustment as a residual to be investigated
+rather than a behavioural term to be interpreted.
+
+\paragraph{Portuguese debt management.} The Portuguese treasury and debt agency
+publishes the maturity profile and issuance record used to calibrate the
+refinancing scenarios \cite{igcp2024}. The average maturity of the debt stock,
+7.2 years in 2024 including official loans, is the single external assumption
+this paper takes from outside Eurostat.
+
+\paragraph{Contribution.} The paper's contribution is measurement discipline
+rather than a new estimate. Five things are done deliberately. First, every
+reported quantity is generated from an auditable ESA-consistent pipeline, with
+provenance, observation status, and source checksums travelling with each value.
+Second, the marginal yield and the realised average financing cost are kept
+apart, and the debt-dynamics rate is distinguished from the descriptive
+average-debt rate, because feeding the wrong one into an identity breaks it
+silently. Third, the change in the burden is decomposed exactly into a financing
+cost effect and a debt exposure effect, with the identity checked numerically
+before it is interpreted. Fourth, the euro-area comparison states its
+eligibility rule, its denominator, its ranking convention, and the observation
+status of every geography, so a rank cannot be quoted without its base. Fifth,
+the refinancing pass-through is presented as an explicitly stylised cohort model
+whose assumptions are tabulated and whose only externally sourced input is
+named. None of this is novel economics. It is the part that is usually left
+implicit.
 
 \section{Discussion and Limitations}
 
@@ -875,10 +967,6 @@ generation, and the Markdown summary.
 \newpage
 \begin{thebibliography}{9}
 
-\bibitem{ameco}
-European Commission. \emph{AMECO macro-economic database}. Directorate-General
-for Economic and Financial Affairs.
-
 \bibitem{esa2010}
 Eurostat. \emph{European System of Accounts: ESA 2010}. Publications Office of
 the European Union.
@@ -888,13 +976,56 @@ Eurostat. \emph{Government finance statistics: revenue, expenditure, deficit,
 debt, GDP, and long-term interest rate datasets}. Eurostat database.
 
 \bibitem{escolano2010}
-Escolano, J. \emph{A Practical Guide to Public Debt Dynamics, Fiscal
+Escolano, J. (2010). \emph{A Practical Guide to Public Debt Dynamics, Fiscal
 Sustainability, and Cyclical Adjustment of Budgetary Aggregates}. International
-Monetary Fund Technical Notes and Manuals.
+Monetary Fund, Technical Notes and Manuals 10/02. Washington, DC: IMF.
+\url{https://www.imf.org/external/pubs/ft/tnm/2010/tnm1002.pdf}
 
 \bibitem{blanchard2019}
-Blanchard, O. \emph{Public Debt and Low Interest Rates}. American Economic
-Review.
+Blanchard, O. (2019). Public Debt and Low Interest Rates. \emph{American
+Economic Review}, 109(4), 1197--1229. \doi{10.1257/aer.109.4.1197}
+
+\bibitem{mauro2021}
+Mauro, P., \& Zhou, J. (2021). $r-g<0$: Can We Sleep More Soundly?
+\emph{IMF Economic Review}, 69(1), 197--229.
+\doi{10.1057/s41308-020-00128-y}
+
+\bibitem{bohn1998}
+Bohn, H. (1998). The Behavior of U.S. Public Debt and Deficits. \emph{Quarterly
+Journal of Economics}, 113(3), 949--963.
+
+\bibitem{degrauwe2013}
+De Grauwe, P., \& Ji, Y. (2013). Self-fulfilling crises in the Eurozone: An
+empirical test. \emph{Journal of International Money and Finance}, 34, 15--36.
+\doi{10.1016/j.jimonfin.2012.11.003}
+
+\bibitem{missale1994}
+Missale, A., \& Blanchard, O. J. (1994). The Debt Burden and Debt Maturity.
+\emph{American Economic Review}, 84(1), 309--319.
+
+\bibitem{greenwood2015}
+Greenwood, R., Hanson, S. G., \& Stein, J. C. (2015). A Comparative-Advantage
+Approach to Government Debt Maturity. \emph{The Journal of Finance}, 70(4),
+1683--1722. \doi{10.1111/jofi.12253}
+
+\bibitem{aizenman2011}
+Aizenman, J., \& Marion, N. (2011). Using inflation to erode the US public debt.
+\emph{Journal of Macroeconomics}, 33(4), 524--541.
+
+\bibitem{weber2012}
+Weber, A. (2012). \emph{Stock-Flow Adjustments and Fiscal Transparency: A
+Cross-Country Comparison}. International Monetary Fund, Working Paper 12/39.
+Washington, DC: IMF.
+
+\bibitem{seiferling2013}
+Seiferling, M. (2013). \emph{Stock-Flow Adjustments, Government's Integrated
+Balance Sheet and Fiscal Transparency}. International Monetary Fund, Working
+Paper 13/63. Washington, DC: IMF.
+
+\bibitem{igcp2024}
+Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).
+\emph{Annual Report 2024}. Lisbon: IGCP.
+\url{https://www.igcp.pt/sites/default/files/2025-11/RA2024_20251118.pdf}
 
 \end{thebibliography}
 
