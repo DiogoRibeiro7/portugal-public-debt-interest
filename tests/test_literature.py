@@ -132,8 +132,8 @@ def test_literature_section_covers_the_required_topics() -> None:
 
 def test_contribution_statement_is_explicit() -> None:
     section = _literature_section(_paper())
-    assert r"\paragraph{Contribution.}" in section
-    contribution = section.split(r"\paragraph{Contribution.}")[1]
+    assert "The contribution is measurement discipline" in section
+    contribution = section.split("The contribution is measurement discipline")[1]
     for claim in (
         "auditable",
         "average financing cost",

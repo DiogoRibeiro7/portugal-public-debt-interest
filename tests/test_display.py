@@ -79,19 +79,20 @@ def test_no_decimal_ratio_displayed_as_percent_without_conversion() -> None:
 
     for cells in rows:
         year = cells[0]
-        # The lagged debt ratio is the clearest tell: a decimal ratio would
-        # print as 1.16 rather than 116.10.
-        lagged_debt = float(cells[2])
-        assert lagged_debt > 10.0, (
-            f"{year}: lagged debt/GDP {lagged_debt} looks like a decimal ratio"
-        )
+        if len(cells) == 6:
+            # The lagged debt ratio is the clearest tell: a decimal ratio would
+            # print as 1.16 rather than 116.10.
+            lagged_debt = float(cells[2])
+            assert lagged_debt > 10.0, (
+                f"{year}: lagged debt/GDP {lagged_debt} looks like a decimal ratio"
+            )
 
-        # Contribution terms are percentage points, so the pandemic year has to
-        # be an order of magnitude above a decimal ratio.
-        if year == "2020":
-            assert float(cells[6]) > 1.0, "interest-growth contribution is not in pp"
-            assert float(cells[8]) > 1.0, "stock-flow adjustment is not in pp"
-            assert abs(float(cells[9])) > 1.0, "observed change is not in pp"
+        if len(cells) == 7 and year == "2020":
+            # Contribution terms are percentage points, so the pandemic year has
+            # to be an order of magnitude above a decimal ratio.
+            assert float(cells[1]) > 1.0, "interest-growth contribution is not in pp"
+            assert float(cells[3]) > 1.0, "stock-flow adjustment is not in pp"
+            assert abs(float(cells[4])) > 1.0, "observed change is not in pp"
 
 
 def test_decomposition_display_components_sum_to_total() -> None:

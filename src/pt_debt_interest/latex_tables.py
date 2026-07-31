@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -226,7 +227,8 @@ def summary_statistics_table(frame: pd.DataFrame, output_dir: Path, main_start_y
         rows=rows,
         notes=(
             "Notes: Observed Eurostat ESA 2010 Portugal rows only. The average-debt "
-            "rate uses average debt. Interest is general-government interest payable. "
+            "rate uses average debt and has N=30 because the first ESA 2010 year "
+            "has no lagged debt observation. Interest is general-government interest payable. "
             "Where an extreme is attained in more than one year, every year is "
             "listed."
         ),
@@ -268,8 +270,11 @@ def regime_averages_table(frame: pd.DataFrame, output_dir: Path, main_start_year
         rows=rows,
         notes=(
             "Notes: All entries are regime means. Interest in euros is reported in "
-            "million euros. The ten-year yield is excluded from the printed table to "
-            "keep the regime table readable; its regime means are discussed in text."
+            "million euros. Displayed values use Python's round-half-to-even "
+            "convention; the equal Euro-convergence means for the average-debt "
+            "rate and nominal growth are a rounding coincidence. The ten-year "
+            "yield is excluded from the printed table to keep the regime table "
+            "readable."
         ),
     )
     return _write(output_dir / "regime_averages.tex", content)
@@ -331,7 +336,7 @@ def debt_dynamics_diagnostic_table(
     # Every column below is already a percentage or a percentage point. The
     # analytical decimals are never printed, so a reader cannot mistake 1.1610
     # for a debt ratio of 1.16 percent.
-    rows = [
+    input_rows = [
         [
             _int_text(row.year),
             _fmt(row.interest_pct_gdp, 2),
@@ -339,6 +344,12 @@ def debt_dynamics_diagnostic_table(
             _fmt(row.nominal_gdp_growth_pct, 2),
             _fmt(row.average_debt_interest_rate_pct, 2),
             _fmt(row.debt_dynamics_interest_rate_pct, 2),
+        ]
+        for row in data.sort_values("year").itertuples()
+    ]
+    contribution_rows = [
+        [
+            _int_text(row.year),
             _fmt(row.interest_growth_contribution_pp, 2),
             _fmt(row.primary_balance_contribution_pp, 2),
             _fmt(row.stock_flow_adjustment_pp, 2),
@@ -348,10 +359,10 @@ def debt_dynamics_diagnostic_table(
         ]
         for row in data.sort_values("year").itertuples()
     ]
-    content = _table(
-        caption="Debt-dynamics diagnostic table, Portugal, 2020--2025",
-        label="tab:debt-dynamics-diagnostic",
-        columns="rrrrrrrrrrrr",
+    input_table = _table(
+        caption="Debt-dynamics diagnostic table inputs, Portugal, 2020--2025",
+        label="tab:debt-dynamics-diagnostic-inputs",
+        columns="rrrrrr",
         header=[
             "Year",
             "Interest/GDP (\\%)",
@@ -359,6 +370,20 @@ def debt_dynamics_diagnostic_table(
             "Nominal growth (\\%)",
             "$r^{AVG}$ (\\%)",
             "$r^{DD}$ (\\%)",
+        ],
+        rows=input_rows,
+        notes=(
+            "Notes: $r^{AVG}$ is the average-debt rate and $r^{DD}$ the "
+            "debt-dynamics rate. The first row uses the previous debt ratio "
+            "available in the processed dataset. " + SOURCE_NOTE
+        ),
+    )
+    contribution_table = _table(
+        caption="Debt-dynamics diagnostic table contributions, Portugal, 2020--2025",
+        label="tab:debt-dynamics-diagnostic",
+        columns="rrrrrrr",
+        header=[
+            "Year",
             "Interest-growth (pp)",
             "Primary-balance contribution (pp)",
             "Stock-flow (pp)",
@@ -366,16 +391,17 @@ def debt_dynamics_diagnostic_table(
             "Rebuilt $\\Delta d$ (pp)",
             "Error (pp)",
         ],
-        rows=rows,
+        rows=contribution_rows,
         notes=(
             "Notes: Every column is a percentage (\\%) or a percentage point (pp), "
             "as marked in the heading; no decimal ratios are displayed. "
-            "$r^{AVG}$ is the average-debt rate and $r^{DD}$ the debt-dynamics "
-            "rate. The first row uses the previous debt ratio available in the "
-            "processed dataset. " + SOURCE_NOTE
+            + SOURCE_NOTE
         ),
     )
-    return _write(output_dir / "debt_dynamics_diagnostic_2020_2025.tex", content)
+    return _write(
+        output_dir / "debt_dynamics_diagnostic_2020_2025.tex",
+        input_table + "\n" + contribution_table,
+    )
 
 
 def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year: int) -> Path:
@@ -435,6 +461,110 @@ def european_comparison_table(panel_frame: pd.DataFrame, output_dir: Path, year:
         ),
     )
     return _write(output_dir / "european_comparison_2025.tex", content)
+
+
+def european_rank_change_table(
+    panel_frame: pd.DataFrame,
+    output_dir: Path,
+    years: tuple[int, ...],
+) -> Path:
+    """Write Portugal's rank over selected cross-sections."""
+    rows: list[list[str]] = []
+    for year in years:
+        try:
+            eligibility = build_eligibility_table(panel_frame, year)
+            summary = build_comparison_summary(panel_frame, eligibility, year)
+        except ValidationError:
+            continue
+        rows.append(
+            [
+                _int_text(year),
+                str(summary["home_rank"]),
+                str(summary["eligible_countries"]),
+                _fmt(summary["home_value"], 2),
+                _fmt(summary["median"], 2),
+                _fmt(summary["home_minus_median"], 2),
+                _escape(str(summary["home_observation_status"])),
+            ]
+        )
+    content = _table(
+        caption="Portugal's euro-area burden rank in selected cross-sections",
+        label="tab:europe-rank-change",
+        columns="rrrrrrl",
+        header=[
+            "Year",
+            "Portugal rank",
+            "Eligible countries",
+            "Portugal burden (\\%)",
+            "Median burden (\\%)",
+            "Portugal minus median (pp)",
+            "Status",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: Ranks are descending by interest expenditure as a percentage "
+            "of GDP, using the same eligibility rule as Table \\ref{tab:europe-2025}. "
+            + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "european_rank_change.tex", content)
+
+
+def european_rank_sensitivity_table(
+    panel_frame: pd.DataFrame,
+    output_dir: Path,
+    year: int,
+    shocks_pp: tuple[float, ...] = (-0.30, 0.00, 0.30),
+) -> Path:
+    """Write Portugal's rank under small burden perturbations."""
+    eligibility = build_eligibility_table(panel_frame, year)
+    included = set(eligibility.loc[eligibility["included_in_rank"], "eurostat_code"])
+    panel = panel_frame.copy()
+    panel["year"] = pd.to_numeric(panel["year"], errors="coerce")
+    snapshot = panel.loc[
+        panel["year"].eq(year) & panel["geo"].astype(str).isin(included)
+    ].copy()
+    if snapshot.empty or snapshot.loc[snapshot["geo"].eq("PT")].empty:
+        raise ValidationError(f"PT is not eligible in {year}")
+
+    base = float(snapshot.loc[snapshot["geo"].eq("PT"), "interest_pct_gdp"].iloc[0])
+    rows = []
+    for shock in shocks_pp:
+        shocked = snapshot.copy()
+        shocked.loc[shocked["geo"].eq("PT"), "interest_pct_gdp"] = base + shock
+        shocked["rank"] = (
+            pd.to_numeric(shocked["interest_pct_gdp"], errors="coerce")
+            .rank(ascending=False, method="min")
+            .astype("Int64")
+        )
+        pt = shocked.loc[shocked["geo"].eq("PT")].iloc[0]
+        rows.append(
+            [
+                _fmt(shock, 2),
+                _fmt(base + shock, 2),
+                _int_text(pt["rank"]),
+                _int_text(len(shocked)),
+            ]
+        )
+
+    content = _table(
+        caption=f"Portugal rank sensitivity to small burden changes, {year}",
+        label="tab:europe-rank-sensitivity",
+        columns="rrrr",
+        header=[
+            "Portugal burden change (pp)",
+            "Adjusted Portugal burden (\\%)",
+            "Portugal rank",
+            "Eligible countries",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: Only Portugal's interest-burden value is perturbed; all other "
+            "eligible country values are held fixed. This is a rank-fragility "
+            "diagnostic, not a forecast. " + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "european_rank_sensitivity_2025.tex", content)
 
 
 def static_sensitivities_table(
@@ -523,7 +653,9 @@ def interest_burden_decomposition_table(frame: pd.DataFrame, output_dir: Path) -
             "Notes: Burdens are percent of GDP; effects and errors are percentage "
             "points. Effects are shown to three decimals so that the two "
             "components add to the displayed total. The decomposition uses "
-            "unrounded nominal interest, debt, and GDP. " + SOURCE_NOTE
+            "unrounded nominal interest, debt, and GDP. The symmetric two-factor "
+            "allocation is basis-dependent; alternative exact decompositions "
+            "would allocate the small interaction term differently. " + SOURCE_NOTE
         ),
     )
     return _write(output_dir / "interest_burden_decomposition_endpoints.tex", content)
@@ -1155,6 +1287,13 @@ def generate_latex_tables(
     ]
     if panel_frame is not None:
         paths.append(european_comparison_table(panel_frame, output_dir, latest_year))
+        paths.append(
+            european_rank_change_table(panel_frame, output_dir, (2014, latest_year))
+        )
+        with suppress(ValidationError):
+            paths.append(
+                european_rank_sensitivity_table(panel_frame, output_dir, latest_year)
+            )
     if refinancing_assumptions is not None and not refinancing_assumptions.empty:
         paths.append(
             refinancing_assumptions_table(

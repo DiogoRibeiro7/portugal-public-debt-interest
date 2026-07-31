@@ -2,6 +2,7 @@
 
 \usepackage[a4paper,margin=1in]{geometry}
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
@@ -17,7 +18,7 @@
 \usepackage{setspace}
 \usepackage{enumitem}
 \usepackage{threeparttable}
-\usepackage{lscape}
+\usepackage{pdflscape}
 
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
@@ -26,7 +27,7 @@
   linkcolor=blue,
   urlcolor=blue,
   citecolor=blue,
-  pdftitle={Portugal's Public-Debt Interest Burden},
+  pdftitle={Portugal's Public-Debt Interest Burden in a Reproducible ESA 2010 Assessment},
   pdfauthor={Diogo Ribeiro}
 }
 
@@ -68,7 +69,7 @@
   \vskip 1.5em}
 \makeatother
 
-\title{\textbf{Portugal's Public-Debt Interest Burden and Debt Dynamics in the Euro Area}}
+\title{\textbf{Portugal's Public-Debt Interest Burden in a Reproducible ESA 2010 Assessment}}
 \author{Diogo Ribeiro\inst{1,*}\orcidID{0009-0001-2022-7072}}
 \authorrunning{D. Ribeiro}
 \institute{ESMAD, Instituto Polit\'ecnico do Porto, \\
@@ -80,35 +81,31 @@ $^{*}$\textit{Corresponding Author: dfr@esmad.ipp.pt}}
 \maketitle
 
 \begin{abstract}
-This paper provides a reproducible empirical assessment of Portugal's
-general government interest burden from \MainStartYear{} to \LatestYear{}, the harmonised Eurostat
-ESA 2010 period used for the main analytical sample. The principal measure is
-interest payable by the general government
-sector as a percentage of nominal GDP. The analysis separates three quantities
-that are frequently conflated in fiscal commentary: the national-accounts
-interest expense, the interest burden relative to GDP, and the market yield on
-new benchmark debt. It combines source-provenance review, national-accounts
-measurement, descriptive periodisation, discrete debt-dynamics accounting,
-cross-country Eurostat comparison, and stylised deterministic refinancing
-scenarios.
-The central empirical result is that Portugal's interest burden fell from
-\InitialInterestPctGdp{} percent of GDP in \MainStartYear{} to \LatestInterestPctGdp{} percent of GDP in \LatestYear{}, despite a higher
-debt ratio in \LatestYear{} than in the mid-1990s and despite a material nominal
-interest bill of EUR \LatestInterestEurBn{} billion. In the exact
-2014--\LatestYear{} decomposition, the reconstructed burden changed by
+Portugal's general-government interest burden is assessed from
+\MainStartYear{} to \LatestYear{} using the harmonised Eurostat ESA 2010
+record. The official burden fell from \InitialInterestPctGdp{} percent of GDP
+in \MainStartYear{} to \LatestInterestPctGdp{} percent in \LatestYear{}; that
+published decline is the starting point. The contribution is the reconstruction
+around it: national-accounts interest expense, the GDP-normalised burden, the
+average financing cost of the outstanding stock, the debt-dynamics rate, and
+the benchmark yield on new debt are kept separate in an auditable pipeline. In
+the exact 2014--\LatestYear{} decomposition, the reconstructed burden changed by
 \DecompTotalTwentyFourteenToLatestPp{} percentage points, with
 \DecompRateTwentyFourteenToLatestPp{} percentage points from the average
 financing-cost effect and \DecompExposureTwentyFourteenToLatestPp{} percentage
-points from the debt-exposure effect. By \LatestYear{},
-Portugal ranked \PortugalComparatorRankWord{} among the \ComparatorCountryCountWord{} euro-area country comparators by
-interest expenditure as a percentage of GDP, below Italy, Greece, Spain,
-Belgium, and France. The paper emphasises
-that rate shocks pass through gradually to the average cost of the outstanding
-stock; the static full-pass-through effect of a 100 basis-point shock at the
-\LatestYear{} debt ratio is approximately \ShockHundredApproxPp{} percentage points of GDP, but this is an
-arithmetic long-run sensitivity rather than a one-year forecast.
-Eurostat flags Portugal's \LatestYear{} comparison observations as
-\PortugalComparisonStatus{}.
+points from the debt-exposure effect. Over 1996--\LatestYear{}, the financing
+cost effect was \DecompRateNineteenNinetySixToLatestPp{} percentage points,
+while debt exposure contributed
+\DecompExposureNineteenNinetySixToLatestPp{} percentage points. Official
+headline ratios and reconstructed decomposition values use different bases, so
+small endpoint differences are disclosed. In \LatestYear{}, Portugal ranked
+\PortugalComparatorRankWord{} among the \ComparatorCountryCountWord{} euro-area
+country comparators by interest expenditure as a percentage of GDP. Rate shocks
+reach the average cost of the outstanding stock gradually: a 100 basis-point
+full-stock shock at the \LatestYear{} debt ratio is approximately
+\ShockHundredApproxPp{} percentage points of GDP, but that number is an
+arithmetic long-run sensitivity rather than a one-year forecast. Eurostat flags
+Portugal's \LatestYear{} comparison observations as \PortugalComparisonStatus{}.
 \end{abstract}
 
 \noindent\textbf{Keywords:} Portugal; public debt; interest expenditure; fiscal
@@ -141,14 +138,24 @@ dataset: euro convergence, early monetary union, crisis, adjustment, the ECB
 era of low sovereign yields, the pandemic, and the recent inflation and
 monetary-tightening regime.
 
-The purpose of this paper is not to estimate a structural fiscal reaction
-function or to forecast Portugal's debt path. Its purpose is narrower and more
-foundational: to measure the interest burden correctly, document its evolution,
-and show how the burden should be interpreted in the presence of changing GDP,
-debt ratios, effective interest rates, and refinancing lags. The empirical
-framework is therefore accounting-based and transparent. It treats national
-accounts as the measurement system, then uses deterministic identities and
-carefully labelled comparisons to organise the evidence.
+The aim is not to estimate a structural fiscal reaction function or to forecast
+Portugal's debt path. The task is more basic: measure the interest burden,
+document its evolution, and make clear how the burden should be read when GDP,
+debt ratios, effective interest rates, and refinancing lags all move at once.
+The empirical framework is therefore accounting-based. National accounts supply
+the measurement system; deterministic identities and explicitly labelled
+comparisons organise the evidence.
+
+That scope also defines the relationship with institutional surveillance work.
+The European Commission's Debt Sustainability Monitor and the Portuguese Public
+Finance Council provide broader fiscal-risk assessments and forward-looking
+surveillance frameworks \cite{ec_dsm2025,cfp2025}. The narrower contribution
+here is reproducibility: Section \ref{sec:burden-decomposition} publishes the
+exact two-factor interest-burden decomposition, distinguishes the average
+portfolio rate \(r^{AVG}\) from the debt-dynamics rate \(r^{DD}\), and carries
+per-value provenance, observation-status, and checksum metadata through the
+pipeline. Those institutions assess sustainability; the added value here is the
+auditable measurement layer beneath a specific burden calculation.
 
 The paper answers four research questions:
 \begin{enumerate}
@@ -163,43 +170,47 @@ The paper answers four research questions:
         reach the interest bill through refinancing?
 \end{enumerate}
 
-The central finding is that Portugal's public-debt interest burden declined
-substantially over the harmonised Eurostat period. The burden was \InitialInterestPctGdp{} percent
-of GDP in \MainStartYear{}, \InterestPctGdpTwentyFourteen{} percent in 2014, \InterestPctGdpTwentyNineteen{} percent in 2019, and \LatestInterestPctGdp{} percent in
-\LatestYear{}. This does not mean that interest payments became fiscally irrelevant. In
-\LatestYear{} the general government still paid EUR \LatestInterestEurBn{} billion in interest. Rather,
-the result means that the economy's nominal scale and the effective cost of
-the outstanding debt stock changed enough to reduce the interest-to-GDP ratio.
+Portugal's public-debt interest burden declined substantially over the
+harmonised Eurostat period: \InitialInterestPctGdp{} percent of GDP in
+\MainStartYear{}, \InterestPctGdpTwentyFourteen{} percent in 2014,
+\InterestPctGdpTwentyNineteen{} percent in 2019, and
+\LatestInterestPctGdp{} percent in \LatestYear{}. The decline does not make
+interest fiscally irrelevant; in \LatestYear{} the general government still
+paid EUR \LatestInterestEurBn{} billion. It means that nominal scale and the
+effective cost of the outstanding stock changed enough to lower the
+interest-to-GDP ratio. The long-run decomposition is the sharper result: from
+1996 to \LatestYear{}, the reconstructed burden fell by
+\DecompTotalNineteenNinetySixToLatestPp{} percentage points, as a
+\DecompRateNineteenNinetySixToLatestPp{} percentage point financing-cost effect
+more than offset a \DecompExposureNineteenNinetySixToLatestPp{} percentage point
+debt-exposure effect.
 
 \section{Conceptual Framework and Measurement}
 \label{sec:framework}
 
 Public discussion often uses the word ``interest'' to refer to several
-different objects. This paper distinguishes them explicitly.
-
-First, \emph{interest payable} is a national-accounts flow. In the Eurostat
+different objects, so the definitions matter. \emph{Interest payable} is a
+national-accounts flow. In the Eurostat
 ESA framework it is the interest expense recorded for the general-government
 sector, not only the central government and not only cash paid in a particular
 budget line. This is the numerator used in the headline outcome and follows
 the ESA national-accounts measurement framework \cite{esa2010,eurostatgov}.
 
-Second, the \emph{interest burden} is interest payable divided by nominal GDP.
-This is the principal measure because it expresses the fiscal flow in
-relation to the annual income base. The ratio is appropriate for fiscal-space
-questions because the same nominal payment can be more or less burdensome
-depending on nominal GDP.
+\emph{Interest burden} is interest payable divided by nominal GDP. It is the
+principal measure here because it expresses the fiscal flow in relation to the
+annual income base. The same nominal payment can be more or less burdensome
+depending on the size of nominal GDP.
 
-Third, the \emph{market yield} is a price on new or benchmark borrowing. It is
+\emph{Market yield} is a price on new or benchmark borrowing. It is
 not the average cost of the outstanding debt portfolio. Because governments
 roll over debt gradually, benchmark yields affect the interest bill with a lag
 whose length depends on maturity, issuance strategy, cash buffers, and the
 composition of fixed-rate and variable-rate liabilities.
 
-The empirical design of the paper follows from this distinction. The baseline
-outcome is not the bond yield, and the yield is not treated as if it repriced
-the entire stock immediately. Instead, the paper measures the national-accounts
-interest burden and separately analyses the gap between the benchmark yield and
-the average-debt rate.
+These distinctions drive the empirical design. The baseline outcome is not the
+bond yield, and the yield is not treated as if it repriced the entire stock
+immediately. The national-accounts interest burden is measured first; the gap
+between the benchmark yield and the average-debt rate is analysed separately.
 
 Let \(D_t\) denote the nominal stock of general-government gross debt at the
 end of year \(t\), \(Y_t\) nominal GDP, \(I_t\) interest payable, and \(PB_t\)
@@ -217,13 +228,12 @@ captures the automatic debt dynamics generated by the difference between the
 debt-dynamics rate and nominal growth. A positive primary balance reduces the
 debt ratio, while a positive stock-flow adjustment increases it.
 
-Equation \ref{eq:debt-dynamics} is not a behavioural model. It is an accounting
-identity once \(sfa_t\) is defined as the reconciliation residual. Its value in
-this paper is diagnostic: it separates periods in which debt pressure comes
-from the interest-growth differential from periods in which the primary
-balance or residual stock-flow movements dominate the observed debt change.
-This accounting tradition is standard in fiscal-sustainability analysis
-\cite{escolano2010,blanchard2019}.
+Equation \ref{eq:debt-dynamics} is an accounting identity rather than a
+behavioural model once \(sfa_t\) is defined as the reconciliation residual. Its
+diagnostic value is to separate periods in which debt pressure comes from the
+interest-growth differential from periods dominated by the primary balance or
+by residual stock-flow movements. This accounting tradition is standard in
+fiscal-sustainability analysis \cite{escolano2010,blanchard2019}.
 
 Ignoring stock-flow adjustments, the primary balance that stabilises the debt
 ratio is approximately:
@@ -238,20 +248,19 @@ deficit is not too large and residual stock-flow movements do not offset the
 effect. When the debt-dynamics interest rate exceeds nominal growth, a primary
 surplus is required to stabilise the debt ratio absent stock-flow adjustments.
 
-This stabilisation condition is crucial for interpreting Portugal after 2021.
-High nominal growth pushed the interest-growth differential into strongly
-negative territory in 2022 and 2023, lowering the debt-stabilising primary
-balance. That favourable arithmetic did not eliminate fiscal risk, but it did
-reduce the near-term debt-ratio pressure from the existing stock.
+For Portugal after 2021, the stabilisation condition is central. High nominal
+growth pushed the interest-growth differential deeply negative in 2022 and
+2023, lowering the debt-stabilising primary balance. That arithmetic did not
+eliminate fiscal risk, but it reduced the near-term debt-ratio pressure coming
+from the existing stock.
 
 \section{Data and Research Design}
 
-The unit of observation is the calendar year. The institutional sector is
-general government as defined in the European national-accounts framework.
-This sector choice is important because central-government cash measures can
-differ from general-government accrual-based national accounts. The paper
-therefore does not mix central-government budget execution with ESA
-general-government interest payable.
+The unit of observation is the calendar year and the institutional sector is
+general government as defined in European national accounts. That sector choice
+matters because central-government cash measures can differ from
+general-government accrual-based accounts. Central-government budget execution
+is therefore not mixed with ESA general-government interest payable.
 
 The main analytical sample is 1995--2025, the period in which the authoritative
 Portugal series is built from Eurostat ESA 2010 concepts. All historical
@@ -260,22 +269,21 @@ empirical figures, tables, and decompositions use the 1995--2025 Eurostat ESA
 assumption described in Section \ref{sec:refinancing}. The first ESA 2010
 main-series year is marked as a basis break.
 
-The core evidence is drawn from Eurostat government-finance statistics,
-government-debt statistics, national accounts, and the harmonised long-term
-government bond yield series \cite{eurostatgov}. These sources provide the
-main empirical objects required by the paper: interest payable, total
-government expenditure, gross public debt, nominal and real GDP, and a
-market-yield benchmark. The analysis uses million-euro values when the level
-of the interest bill or total expenditure is the object of interest and
-percentage-of-GDP measures when the fiscal burden or fiscal scale is the object
-of interest.
+Eurostat government-finance statistics, government-debt statistics, national
+accounts, and the harmonised long-term government bond yield series provide the
+core evidence \cite{eurostatgov}. They supply the empirical objects needed
+here: interest payable, total government expenditure, gross public debt,
+nominal and real GDP, and a market-yield benchmark. Million-euro values are
+used when the level of the interest bill or total expenditure is the object of
+interest; percentage-of-GDP measures are used when the fiscal burden or fiscal
+scale is the object of interest.
 
-The European comparison is constructed under the same conceptual definitions:
-general government, annual frequency, harmonised national-accounts concepts,
-and comparable units. Aggregate geographies, such as the euro area, are
-retained as contextual information where available but excluded from country
-ranks. This design prevents the country comparison from being driven by
-inconsistent accounting definitions.
+The European comparison follows the same conceptual definitions: general
+government, annual frequency, harmonised national-accounts concepts, and
+comparable units. Euro-area membership is evaluated at the comparison year.
+Aggregate geographies, such as the euro area, are retained as contextual
+information where available but excluded from country ranks, so the comparison
+is not driven by inconsistent accounting definitions.
 
 Forecast observations are excluded from historical descriptive statements
 unless explicitly stated. The Eurostat ESA 2010 sample is the primary evidence
@@ -299,10 +307,10 @@ The average-debt interest rate used for descriptive average-cost analysis is:
   \frac{I_t}{(D_{t-1}+D_t)/2}\times 100.
   \label{eq:average-debt-rate}
 \end{equation}
-The denominator is the average of prior-year and current-year debt. This
-choice reduces mechanical distortion when year-end debt moves sharply. It also
-matches the paper's emphasis on the average cost of the outstanding stock
-rather than the marginal cost of new borrowing.
+The denominator is the average of prior-year and current-year debt, which
+reduces distortion when year-end debt moves sharply and matches the focus on
+the average cost of the outstanding stock rather than the marginal cost of new
+borrowing.
 
 The interest-burden decomposition uses the exact factorisation
 \(b_t^{R}=r_t^{AVG}d_t^{AVG}\), where
@@ -322,7 +330,9 @@ burden from unrounded nominal interest and GDP. Between endpoint years 0 and
 The first component is the average financing-cost effect. The second is the
 debt-exposure effect. No separate interaction term is used in the principal
 decomposition because the symmetric formula allocates the full endpoint change
-exactly to the two reported components.
+exactly to the two reported components. The allocation is basis-dependent:
+alternative exact decompositions would split the small interaction term
+differently, even when they recover the same endpoint change.
 
 Interest expenditure is recorded as a positive expense. Therefore:
 \begin{equation}
@@ -379,43 +389,45 @@ The two figures are drawn from different Eurostat datasets: the published ratio
 from the excessive-deficit-procedure table and the reconstruction from the
 national-accounts GDP series. Nothing in the data identifies which side moved,
 so the cause is recorded as \DebtRatioCauseNineteenNinetySeven{} rather than
-guessed. Per-year detail is written to \texttt{reports/validation\_detail.csv}
+guessed. A GDP-vintage mismatch is a plausible mechanism for this type of
+warning, but this build does not verify it against contemporaneous notification
+vintages. Per-year detail is written to \texttt{reports/validation\_detail.csv}
 and \texttt{reports/validation\_detail.md}.
 
-The analysis depends on three forms of data integrity. First, every observation
-must represent one and only one calendar year. Second, denominators such as GDP
-and debt must be positive, finite, and economically interpretable. Third,
-cross-country comparisons must use the same institutional sector, transaction
-concept, and unit. The validation layer checks these conditions before the
-figures and tables in the paper are produced. Technical replication details
-are reported in the appendices rather than in the main argument.
+Data integrity is checked before any figure or table is produced. Every
+observation must represent one calendar year; denominators such as GDP and debt
+must be positive, finite, and economically interpretable; and cross-country
+comparisons must use the same institutional sector, transaction concept, and
+unit. Technical replication details are kept in the appendices rather than
+interrupting the main argument.
 
 \section{Portuguese Interest Burden, 1995--2025}
 
-The harmonised ESA 2010 sample contains \MainSampleObservations{} annual observations from \MainStartYear{} to
-\LatestYear{}. Table \ref{tab:summary-statistics} summarises the main variables. Over
-this period, interest expenditure averaged \InterestMeanPctGdp{} percent of GDP, with a minimum
-of \InterestMinPctGdp{} percent and a maximum of \InterestMaxPctGdp{} percent. The nominal interest bill
-averaged EUR \InterestBillMeanEurBn{} billion, with a maximum of EUR \InterestBillMaxEurBn{} billion in \InterestBillMaxYear{}. The
-debt ratio averaged \DebtMeanPctGdp{} percent of GDP, with a minimum of \DebtMinPctGdp{} percent in
-\DebtMinYear{} and a maximum of \DebtMaxPctGdp{} percent in \DebtMaxYear{}.
+The harmonised ESA 2010 sample contains \MainSampleObservations{} annual
+observations from \MainStartYear{} to \LatestYear{}. Over this period, interest
+expenditure averaged \InterestMeanPctGdp{} percent of GDP, with a minimum of
+\InterestMinPctGdp{} percent and a maximum of \InterestMaxPctGdp{} percent. The
+nominal interest bill averaged EUR \InterestBillMeanEurBn{} billion and peaked
+at EUR \InterestBillMaxEurBn{} billion in \InterestBillMaxYear{}. The debt ratio
+averaged \DebtMeanPctGdp{} percent of GDP, ranging from \DebtMinPctGdp{} percent
+in \DebtMinYear{} to \DebtMaxPctGdp{} percent in \DebtMaxYear{}. Table
+\ref{tab:summary-statistics} gives the full summary.
 
 \input{../reports/tables/summary_statistics.tex}
 
-The most important descriptive fact is the decline in the interest burden. In
-\MainStartYear{}, Portugal's general government paid interest equal to \InitialInterestPctGdp{} percent of GDP.
-In \LatestYear{} the burden was \LatestInterestPctGdp{} percent of GDP. The change is a reduction of
-\InterestBurdenDeclinePp{} percentage points of GDP. In nominal terms, however, the interest bill
-increased from EUR \InitialInterestEurBn{} billion to EUR \LatestInterestEurBn{} billion. This divergence is not a
-contradiction. It shows why the GDP denominator is essential for fiscal
-interpretation.
+The central descriptive fact is the decline in the interest burden. Portugal's
+general government paid interest equal to \InitialInterestPctGdp{} percent of
+GDP in \MainStartYear{} and \LatestInterestPctGdp{} percent in \LatestYear{}, a
+reduction of \InterestBurdenDeclinePp{} percentage points. In nominal terms,
+however, the bill increased from EUR \InitialInterestEurBn{} billion to EUR
+\LatestInterestEurBn{} billion. The divergence is not a contradiction; it is
+the reason the GDP denominator is needed for fiscal interpretation.
 
-Figure \ref{fig:interest-gdp} shows the long decline, the crisis-period
-reversal, and the renewed compression after 2014. The burden fell sharply from
-the mid-1990s into the early euro period, then rose during the sovereign-debt
-crisis. It declined again during the low-rate and asset-purchase period
-and remained near 2 percent of GDP in the inflation and monetary-tightening
-period.
+The long decline, the crisis-period reversal, and the renewed compression after
+2014 are visible in Figure \ref{fig:interest-gdp}. The burden fell sharply from
+the mid-1990s into the early euro period, rose during the sovereign-debt crisis,
+then declined again during the low-rate and asset-purchase period. In the
+inflation and monetary-tightening period it remained near 2 percent of GDP.
 
 \begin{figure}[H]
 \centering
@@ -424,12 +436,12 @@ period.
 \label{fig:interest-gdp}
 \end{figure}
 
-Figure \ref{fig:interest-eur} displays the same interest flow in nominal euros.
-The euro amount peaked in 2014 at EUR 8.33 billion and then declined through
-2022 before increasing again in 2023--2025. The contrast between Figures
+In nominal euros, shown in Figure \ref{fig:interest-eur}, the same flow tells a
+different story. The amount peaked in 2014 at EUR 8.33 billion, declined
+through 2022, and increased again in 2023--2025. The contrast between Figures
 \ref{fig:interest-gdp} and \ref{fig:interest-eur} is central: a rising nominal
 bill can coexist with a stable or falling GDP burden when nominal GDP rises
-rapidly or when the debt ratio falls.
+rapidly or the debt ratio falls.
 
 \begin{figure}[H]
 \centering
@@ -438,72 +450,61 @@ rapidly or when the debt ratio falls.
 \label{fig:interest-eur}
 \end{figure}
 
-Table \ref{tab:interest-share} places the interest bill inside the fiscal
-envelope for selected years. Percentage of GDP is the principal denominator for
-macro-fiscal comparison across countries and time, but it is not the denominator
-a budget works in. The share of expenditure devoted to interest shows how much
-of the current fiscal envelope is committed to servicing previously accumulated
-liabilities. Revenue is shown alongside so the envelope within which interest is
-financed is visible.
+The fiscal-envelope view in Table \ref{tab:interest-share} adds a budgetary
+denominator to the GDP ratio. Percentage of GDP remains the principal basis for
+macro-fiscal comparison across countries and time, but budgets are also
+constrained by expenditure and revenue. The expenditure share shows how much of
+the current fiscal envelope is committed to servicing previously accumulated
+liabilities, while the revenue share shows the income base from which that
+interest is financed.
 
 \input{../reports/tables/interest_share_of_budget.tex}
 
 \input{../reports/tables/regime_averages.tex}
 
-The convergence period combines a high interest burden with a declining
-effective rate. The mean interest burden was 4.30 percent of GDP, and the mean
-average-debt interest rate was 6.74 percent. The ten-year yield averaged
-7.82 percent. The debt ratio was relatively modest by later Portuguese
-standards, averaging 59.95 percent of GDP, but the high effective rate made
-interest expenditure large relative to GDP.
+The regime averages show why a simple debt-ratio story is misleading. During
+euro convergence, the debt ratio was modest by later Portuguese standards,
+averaging 59.95 percent of GDP, but the mean average-debt interest rate was
+6.74 percent and the mean interest burden was 4.30 percent of GDP. In the early
+euro period the average-debt rate fell to 4.64 percent and nominal growth
+averaged 5.27 percent. Although the debt ratio increased from its 2000 low to
+72.70 percent by 2007, the burden remained near 3 percent of GDP. The global
+financial crisis then brought weaker nominal growth and a mean primary balance
+of -5.37 percent of GDP, while the full interest effect of later sovereign
+stress had not yet arrived.
 
-The early euro period had a lower interest burden, averaging 2.82 percent of
-GDP. The average-debt rate fell to a mean of 4.64 percent, while nominal growth
-averaged 5.27 percent. The debt ratio increased from the low point of 2000 to
-72.70 percent by 2007, but the interest burden remained near 3 percent of GDP.
-This is the first major example in the sample of debt and interest burden
-moving differently.
+The sovereign-debt crisis and adjustment period is the highest-burden regime in
+the harmonised sample. Interest expenditure averaged
+\CrisisMeanInterestPctGdp{} percent of GDP and EUR
+\CrisisMeanInterestEurBn{} billion, while the debt ratio averaged
+\CrisisMeanDebtPctGdp{} percent of GDP and nominal growth was negative on
+average. After 2014 the pattern reversed: between 2015 and 2019, the burden
+declined from 4.50 percent to 2.90 percent of GDP, the average-debt rate fell
+from 3.50 percent to 2.50 percent, and primary balances became positive on
+average. The pandemic then illustrated the interaction of denominator and stock
+effects. Real GDP fell 8.20 percent in 2020, nominal GDP fell 6.27 percent, and
+the debt ratio jumped to 134.10 percent of GDP, yet the interest burden did not
+rise because the average-debt interest rate continued to decline, reaching
+\AverageDebtRatePctTwentyTwentyOne{} percent in 2021.
 
-During 2008--2010, nominal growth slowed sharply and the primary balance
-deteriorated. The mean primary balance was -5.37 percent of GDP. The debt ratio
-rose rapidly, and the overall balance reached its sample minimum of
--11.40 percent of GDP in 2010. The interest burden had not yet fully adjusted
-to later sovereign stress, remaining around 3 percent of GDP on average.
+The recent period is different again: higher benchmark yields, strong nominal
+growth, and a falling debt ratio coexist. The interest burden averaged
+\RecentMeanInterestPctGdp{} percent of GDP, the average-debt rate averaged
+\RecentMeanAverageDebtRatePct{} percent, and nominal GDP growth averaged
+\RecentMeanNominalGrowthPct{} percent. From 2022 to \LatestYear{}, the debt
+ratio fell from \DebtPctGdpTwentyTwentyTwo{} percent to \LatestDebtPctGdp{}
+percent. This does not remove risk, since nominal interest payments rose by EUR
+\RecentInterestBillIncreaseEurBn{} billion over the same interval. It explains
+why the interest-to-GDP ratio nevertheless stayed near 2 percent.
 
-The sovereign-debt crisis and adjustment period is the highest-burden regime
-in the harmonised sample. Interest expenditure averaged \CrisisMeanInterestPctGdp{} percent of GDP
-and EUR \CrisisMeanInterestEurBn{} billion. The debt ratio averaged \CrisisMeanDebtPctGdp{} percent of GDP. Nominal
-growth was negative on average, and the interest-growth differential was
-therefore unfavourable. The maximum nominal interest bill, EUR 8.33 billion,
-occurred in 2014.
-
-Between 2015 and 2019, the interest burden declined from 4.50 percent to
-2.90 percent of GDP. The average-debt interest rate declined from 3.50 percent to
-2.50 percent. Primary balances became positive on average. Debt remained high,
-but the refinancing environment and effective-rate compression reduced the
-budgetary burden.
-
-The pandemic period illustrates denominator and stock effects. Real GDP fell
-8.20 percent in 2020, nominal GDP fell 6.27 percent, and the debt ratio jumped
-to 134.10 percent of GDP. Yet the interest burden did not rise; it was
-2.80 percent in 2020 and 2.40 percent in 2021. The reason is that the average-debt
-interest rate continued to decline, reaching \AverageDebtRatePctTwentyTwentyOne{} percent in 2021.
-
-The recent period combines higher benchmark yields with strong nominal growth
-and a declining debt ratio. The interest burden averaged \RecentMeanInterestPctGdp{} percent of GDP.
-The average-debt rate averaged \RecentMeanAverageDebtRatePct{} percent, while nominal GDP growth averaged
-\RecentMeanNominalGrowthPct{} percent. The debt ratio fell from \DebtPctGdpTwentyTwentyTwo{} percent in 2022 to \LatestDebtPctGdp{} percent
-in \LatestYear{}. This period is not risk-free: nominal interest payments rose by
-EUR \RecentInterestBillIncreaseEurBn{} billion from 2022 to \LatestYear{}. But the interest-to-GDP ratio stayed at
-approximately 2 percent because nominal GDP and the debt ratio moved
-favourably.
-
-Figure \ref{fig:growth} decomposes nominal GDP growth into real growth and GDP
-deflator growth. The recent period is dominated by strong nominal growth. In
-2022 nominal GDP grew \NominalGdpGrowthTwentyTwentyTwo{} percent, real GDP grew \RealGdpGrowthTwentyTwentyTwo{} percent, and GDP
-deflator growth was \GdpDeflatorGrowthTwentyTwentyTwo{} percent. In 2023 nominal GDP grew \NominalGdpGrowthTwentyTwentyThree{} percent and
-deflator growth was \GdpDeflatorGrowthTwentyTwentyThree{} percent. These values materially reduced debt-ratio
-pressure because the denominator grew quickly.
+Figure \ref{fig:growth} separates nominal GDP growth into real growth and the
+GDP deflator. The recent period is dominated by the nominal denominator: in
+2022 nominal GDP grew \NominalGdpGrowthTwentyTwentyTwo{} percent, real GDP grew
+\RealGdpGrowthTwentyTwentyTwo{} percent, and GDP deflator growth was
+\GdpDeflatorGrowthTwentyTwentyTwo{} percent. In 2023 nominal GDP grew
+\NominalGdpGrowthTwentyTwentyThree{} percent and deflator growth was
+\GdpDeflatorGrowthTwentyTwentyThree{} percent. Those values materially reduced
+debt-ratio pressure because the denominator grew quickly.
 
 \begin{figure}[H]
 \centering
@@ -512,12 +513,11 @@ pressure because the denominator grew quickly.
 \label{fig:growth}
 \end{figure}
 
-Figure \ref{fig:debt-dynamics} reports the accounting decomposition implied by
-Equation \ref{eq:debt-dynamics}. The pandemic year 2020 is the clearest example
-of adverse debt dynamics: nominal GDP contracted sharply, pushing the
+The debt-dynamics decomposition in Figure \ref{fig:debt-dynamics} makes the
+pandemic shock stand out. In 2020 nominal GDP contracted sharply, pushing the
 interest-growth term to \DebtDynamicsInterestGrowthTwentyTwentyPp{} percentage
 points of GDP. By contrast, 2022 and 2023 show strongly favourable
-interest-growth arithmetic. The debt-stabilising primary balance was
+interest-growth arithmetic: the debt-stabilising primary balance was
 \DebtStabilisingPbTwentyTwentyTwoPctGdp{} percent of GDP in 2022 and
 \DebtStabilisingPbTwentyTwentyThreePctGdp{} percent in 2023, before stock-flow
 effects. Both quantities are evaluated on the debt-dynamics rate
@@ -533,35 +533,41 @@ not on the average-debt descriptive rate of Equation \ref{eq:average-debt-rate}.
 
 The detailed 2020--2025 diagnostic table is reported in Appendix A.
 
-The stock-flow adjustment is a residual. It absorbs valuation effects,
-financial transactions, cash-debt timing differences, and any discrepancy
-between the simple debt-dynamics identity and the measured debt ratio. In this
-dataset, it ranges from \StockFlowMinPp{} percentage points of GDP in
-\StockFlowMinYear{} to \StockFlowMaxPp{} percentage points in
-\StockFlowMaxYear{}. It should not be interpreted as an estimated policy
-instrument. It is an accounting reconciliation term. Across the sample the
-identity closes to within \DebtDynamicsMaxReconciliationErrorPp{} percentage
-points, so the residual carries no arithmetic error. This numerical closure
-verifies implementation consistency; it does not independently validate the
-economic content of the residual.
+The stock-flow adjustment is a residual absorbing valuation effects, financial
+transactions, cash-debt timing differences, and any discrepancy between the
+simple debt-dynamics identity and the measured debt ratio. In this dataset it
+ranges from \StockFlowMinPp{} percentage points of GDP in \StockFlowMinYear{} to
+\StockFlowMaxPp{} percentage points in \StockFlowMaxYear{}. It is therefore an
+accounting reconciliation term, not an estimated policy instrument. Across the
+sample the identity closes to within \DebtDynamicsMaxReconciliationErrorPp{}
+percentage points, so the residual carries no arithmetic error; that closure
+verifies implementation consistency, not the economic content of the residual.
+Cash-buffer movements, financial-asset transactions, valuation effects, and
+other known stock-flow components are not decomposed here. Assigning
+institutional meaning to a large annual residual would require that separate
+fiscal-accounts exercise \cite{cfp_sfa}.
 
-Figure \ref{fig:interest-burden-decomposition} applies Equation
-\ref{eq:burden-decomposition} to selected endpoint intervals. The principal
-decomposition has two components: the average financing-cost effect and the
-debt-exposure effect. For 2014--\LatestYear{}, the reconstructed interest
-burden changed by \DecompTotalTwentyFourteenToLatestPp{} percentage points of
-GDP. The average financing-cost effect contributed
-\DecompRateTwentyFourteenToLatestPp{} percentage points, while the debt-exposure
-effect contributed \DecompExposureTwentyFourteenToLatestPp{} percentage points.
-The dominant component was \DecompDominantTwentyFourteenToLatest{}, and the
-reconciliation error was \DecompErrorTwentyFourteenToLatestPp{} percentage
-points. For 1996--\LatestYear{}, the reconstructed burden changed by
-\DecompTotalNineteenNinetySixToLatestPp{} percentage points. The average
-financing-cost effect contributed \DecompRateNineteenNinetySixToLatestPp{}
-percentage points, while the debt-exposure effect contributed
-\DecompExposureNineteenNinetySixToLatestPp{} percentage points. The dominant
-component was \DecompDominantNineteenNinetySixToLatest{}, and the reconciliation
-error was \DecompErrorNineteenNinetySixToLatestPp{} percentage points.
+The denominator is Maastricht consolidated gross debt. That choice matters for
+both the debt-dynamics rate \(r^{DD}=I_t/D_{t-1}\) and the average-debt rate,
+because gross debt includes financing that may be mirrored by liquid assets or
+cash buffers. The harmonised Eurostat basis used here is therefore not the same
+object as net debt, and countries with different cash-buffer policies can have
+different gross-net gaps even when their interest flows look similar.
+
+\label{sec:burden-decomposition}
+Applying Equation \ref{eq:burden-decomposition} to selected endpoint intervals
+produces the decomposition in Figure \ref{fig:interest-burden-decomposition}.
+For 2014--\LatestYear{}, the reconstructed burden changed by
+\DecompTotalTwentyFourteenToLatestPp{} percentage points of GDP:
+\DecompRateTwentyFourteenToLatestPp{} percentage points from the average
+financing-cost effect and \DecompExposureTwentyFourteenToLatestPp{} percentage
+points from debt exposure. For 1996--\LatestYear{}, the total change was
+\DecompTotalNineteenNinetySixToLatestPp{} percentage points, combining a
+\DecompRateNineteenNinetySixToLatestPp{} percentage point financing-cost effect
+with a \DecompExposureNineteenNinetySixToLatestPp{} percentage point
+debt-exposure effect. In both intervals the reconciliation error is
+negligible: \DecompErrorTwentyFourteenToLatestPp{} and
+\DecompErrorNineteenNinetySixToLatestPp{} percentage points, respectively.
 
 \begin{figure}[H]
 \centering
@@ -572,35 +578,38 @@ error was \DecompErrorNineteenNinetySixToLatestPp{} percentage points.
 
 \input{../reports/tables/interest_burden_decomposition_endpoints.tex}
 
-Table \ref{tab:interest-burden-counterfactuals} reports arithmetic
-counterfactuals for 2014 and \LatestYear{}. These calculations hold one factor
-fixed while replacing the other with the endpoint value. They are accounting
-comparisons, not causal estimates.
+The arithmetic counterfactuals in Table \ref{tab:interest-burden-counterfactuals}
+hold one factor fixed while replacing the other with the endpoint value. They
+are accounting comparisons, not causal estimates.
 
 \input{../reports/tables/interest_burden_counterfactuals.tex}
 
-Table \ref{tab:recent} provides recent annual observations. The key pattern is
-visible in the last four rows. From 2022 to \LatestYear{} the nominal interest bill rose
-from EUR 4.61 billion to EUR \LatestInterestEurBn{} billion, but interest as a share of GDP
-remained at \LatestInterestPctGdp{} percent in both endpoint years. Over the same period the debt
-ratio fell by \RecentDebtDeclinePp{} percentage points, while the average-debt interest rate rose by
-\RecentAverageDebtRateIncreasePp{} percentage points.
+Recent annual observations, shown in Table \ref{tab:recent}, sharpen the same
+point. From 2022 to \LatestYear{} the nominal interest bill rose from EUR
+4.61 billion to EUR \LatestInterestEurBn{} billion, but the official Eurostat
+interest-to-GDP ratio was \LatestInterestPctGdp{} percent in both endpoint
+years. The reconstruction caveat is visible in Table
+\ref{tab:interest-burden-endpoints}: using unrounded nominal interest and GDP,
+the ratio rises by 0.056 percentage points over the interval. The debt ratio
+fell by \RecentDebtDeclinePp{} percentage points at the same time, while the
+average-debt interest rate rose by \RecentAverageDebtRateIncreasePp{} percentage
+points.
 
 \input{../reports/tables/recent_dynamics.tex}
 
 \section{European Comparison and Rate-Shock Exposure}
 \label{sec:comparison}
 
-The comparator panel includes the complete euro-area country universe at the
-comparison year, with euro-area and EU aggregates retained only as
-context. The country ranking excludes aggregate geographies. Each country-year
-observation uses the same Eurostat concepts for interest, GDP, debt, balance,
-and real growth. This prevents a common error in fiscal comparison: mixing
-country-specific cash or budgetary definitions with national-accounts
-definitions.
+The comparator panel covers the euro-area country universe in the comparison
+year. Euro-area and EU aggregates are retained only as context and excluded
+from country ranks. Each country-year observation uses the same Eurostat
+concepts for interest, GDP, debt, balance, and real growth, with euro-area
+membership evaluated at the comparison year. This avoids a common problem in
+fiscal comparison: mixing country-specific cash or budgetary definitions with
+national-accounts definitions.
 
-\paragraph{Eligibility and ranking method.} A rank without a denominator is not
-a finding, so both are stated. A geography enters the ranking only if it is a
+The eligibility and ranking method is stated because a rank without a denominator
+is not a finding. A geography enters the ranking only if it is a
 euro-area member, is not an aggregate, and carries every required series:
 interest in euro and as a share of GDP, the debt ratio, nominal GDP, and the
 average-debt rate. Eligibility, availability, observation status, and the
@@ -608,19 +617,20 @@ reason for every exclusion are written to
 \texttt{data/processed/euro\_area\_eligibility.csv}.
 
 Observation status is derived from Eurostat's per-series flags rather than
-asserted. This matters: the panel's own status column labels every row as
-observed, while Eurostat flags \ProvisionalComparatorCount{} of the geographies
-as provisional in \ComparisonYear{}, Portugal among them. The accepted statuses
-are configured, and provisional values are admitted but disclosed.
+asserted. The distinction matters because the panel's own status column labels
+every row as observed, while Eurostat flags \ProvisionalComparatorCount{} of the
+geographies as provisional in \ComparisonYear{}, Portugal among them. The
+accepted statuses are configured, and provisional values are admitted but
+disclosed.
 
 Ranking uses the \ComparisonRankingMethod{} convention, so tied values share
 the better rank and the next rank is skipped: 1, 2, 2, 4. The latest year in
 which every eligible country carries every required series is
 \LatestCommonYear{}.
 
-\paragraph{Portugal's position.} Table \ref{tab:europe-2025} reports the
-\ComparisonYear{} ranking by interest expenditure as a percentage of GDP.
-Portugal ranked \PortugalComparisonRank{} of \EligibleComparatorCount{}
+Portugal's \ComparisonYear{} position in the interest-burden ranking is shown
+in Table \ref{tab:europe-2025}. It ranked \PortugalComparisonRank{} of
+\EligibleComparatorCount{}
 eligible euro-area countries, at the \PortugalComparisonPercentile{}th
 percentile of the eligible distribution, meaning that Portugal's burden was
 equal to or higher than that of \PortugalComparisonPercentile{} percent of
@@ -632,11 +642,24 @@ Portugal sat \PortugalMinusMedianPp{} percentage points above the median.
 (\ComparisonExclusionReasons{}). Portugal's own \ComparisonYear{} observation
 status is \PortugalComparisonStatus{}.
 
-This is a comparison of the current interest burden. It is not a ranking of
-fiscal sustainability, which would require assumptions about growth, primary
-balances, and maturity structure that this table does not make.
+The ranking is a comparison of the current interest burden, not a fiscal
+sustainability ranking. Such a ranking would require assumptions about growth,
+primary balances, and maturity structure that this table does not make.
 
 \input{../reports/tables/european_comparison_2025.tex}
+
+The cross-section also needs a time anchor. Portugal was first among eligible
+euro-area countries by interest burden in 2014 and sixth in \ComparisonYear{},
+as Table \ref{tab:europe-rank-change} shows. The current rank is also locally
+fragile. With the other comparator values unchanged, a 0.30 percentage-point
+lower Portuguese burden would move the country to eighth, while a 0.30
+percentage-point higher burden would leave it sixth. Table
+\ref{tab:europe-rank-sensitivity} should therefore be read as a rank-fragility
+diagnostic rather than a statistical confidence interval.
+
+\input{../reports/tables/european_rank_change.tex}
+
+\input{../reports/tables/european_rank_sensitivity_2025.tex}
 
 \begin{figure}[H]
 \centering
@@ -645,32 +668,33 @@ balances, and maturity structure that this table does not make.
 \label{fig:europe}
 \end{figure}
 
-Portugal's intermediate position is consistent with three facts. First,
-Portugal's debt ratio remained high by northern euro-area standards but was
-below Italy, Greece, and Spain in 2025. Second, Portugal's average-debt
-interest rate was moderate relative to Spain and Italy. Third, Portugal ran a sizeable
-primary surplus in 2025, which supported debt reduction. The comparison
-therefore does not show that Portugal is low-risk in an absolute sense; it
-shows that its interest burden was below the highest-burden euro-area countries
-under harmonised definitions.
+Portugal's intermediate position reflects a combination of debt, rate, and
+balance conditions. Its debt ratio remained high by northern euro-area
+standards but below Italy, Greece, and Spain in 2025; its average-debt interest
+rate was moderate relative to Spain and Italy; and its primary surplus supported
+debt reduction. The comparison therefore does not show that Portugal is
+low-risk in an absolute sense. It shows that, under harmonised definitions, its
+interest burden was below the highest-burden euro-area countries.
 
-Table \ref{tab:shock} reports static sensitivities at the \LatestYear{} debt ratio. A
-50 basis-point full-stock shock implies \ShockFiftyAdditionalPp{} percentage points of GDP in
-additional annual interest. A 100 basis-point shock implies \ShockHundredAdditionalPp{} percentage
-points. A 200 basis-point shock implies \ShockTwoHundredAdditionalPp{} percentage points. These numbers
-are useful for scale, but they deliberately overstate first-year budgetary
-effects when most debt is fixed-rate and matures gradually.
+At the \LatestYear{} debt ratio, the static sensitivities in Table
+\ref{tab:shock} give the scale of full pass-through: a 50 basis-point shock
+implies \ShockFiftyAdditionalPp{} percentage points of GDP in additional annual
+interest, a 100 basis-point shock implies \ShockHundredAdditionalPp{} percentage
+points, and a 200 basis-point shock implies \ShockTwoHundredAdditionalPp{}
+percentage points. These figures are useful bounds, but they deliberately
+overstate first-year budgetary effects when most debt is fixed-rate and matures
+gradually.
 
 \input{../reports/tables/static_sensitivities.tex}
 
-The static bound above assumes the whole stock reprices at once. It does not.
-Only the part of the portfolio that matures is rolled over at the new rate, so
-the arithmetic effect of a shock arrives gradually. To make that explicit the
-paper uses a stylised cohort model.
+The static bound assumes the whole stock reprices at once, whereas only the
+maturing part of the portfolio is rolled over at the new rate. The arithmetic
+effect of a shock therefore arrives gradually. A stylised cohort model makes
+that lag explicit.
 
 \label{sec:refinancing}
-\paragraph{The cohort recurrence.} At the horizon origin the entire initial
-stock sits in a legacy cohort carrying the initial average portfolio rate
+The cohort recurrence starts with the entire initial stock in a legacy cohort
+carrying the initial average portfolio rate
 $r_0$. In year $t$ a constant annual hazard $p$ is applied to the remaining
 legacy stock. The share of the original stock repriced in that year is
 $s_t=p(1-S_{t-1})$, where $S_{t-1}$ is the cumulative share already repriced.
@@ -689,20 +713,31 @@ difference between the two.
 
 \input{../reports/tables/refinancing_assumptions.tex}
 
-\paragraph{Assumptions and their provenance.} Table
-\ref{tab:refinancing-assumptions} lists every input. One of them is sourced:
-the average maturity of the Portuguese debt stock was 7.2 years in 2024
-including official loans (IGCP, \emph{Annual Report 2024}, page 22). The
-central scenario converts that figure into a constant annual hazard
+Table \ref{tab:refinancing-assumptions} lists every assumption and its
+provenance. Only one input is externally sourced: the average maturity of the
+Portuguese debt stock was 7.2 years in 2024, including official loans (IGCP,
+\emph{Annual Report 2024}, page 22). The central scenario converts that figure
+into a constant annual hazard
 $p=1/7.2$ on the remaining legacy stock, so the expected repricing time is 7.2
 years. The hazard shape is an approximation applied here and is \emph{not}
 IGCP's redemption schedule, which is lumpy. After ten years the central
 scenario has repriced about 78 percent of the original stock. The slow and fast
 scenarios carry no external source at all; they bracket the central case so the
 reader can see how much the result depends on the assumption rather than on the
-data. The debt ratio and nominal GDP are held fixed at their 2025 values across
-the horizon, and cumulative euro amounts are undiscounted nominal amounts on
-that fixed base. This is a stylised model and not a forecast.
+data. The model does not use IGCP's maturity profile or issuance record. It
+also does not split the stock into retail savings instruments, official loans,
+marketable fixed-rate bonds, floating-rate liabilities, or other instruments
+with different repricing mechanics. Retail instruments may reprice faster than
+a bond-redemption hazard, while official-sector loans need not follow market
+rollover timing. Because those buckets are not modelled here, the direction of
+the pass-through bias is not identified from this exercise alone.
+
+Debt and nominal GDP are held fixed at their 2025 values across the horizon,
+and cumulative euro amounts are undiscounted nominal amounts on that fixed
+base. The convention isolates the refinancing channel, but it also
+mechanically overstates the burden path relative to a scenario with positive
+nominal GDP growth and the same euro interest costs. The exercise is stylised,
+not a forecast.
 
 \begin{figure}[H]
 \centering
@@ -711,12 +746,12 @@ that fixed base. This is a stylised model and not a forecast.
 \label{fig:refinancing-repricing}
 \end{figure}
 
-Figure \ref{fig:refinancing-incremental} reports the quantity that matters: the
-interest burden under each shock \emph{minus} the burden under a zero shock.
-Plotting total burden paths would confound the shock with the starting level.
-The zero-shock case is flat at zero by construction, and each shocked path
-approaches the static bound in Table \ref{tab:shock} as the legacy stock is
-gradually repriced.
+The relevant refinancing quantity is the interest burden under each shock
+\emph{minus} the burden under a zero shock, shown in Figure
+\ref{fig:refinancing-incremental}. Plotting total burden paths would confound
+the shock with the starting level. The zero-shock case is flat at zero by
+construction, and each shocked path approaches the static bound in Table
+\ref{tab:shock} as the legacy stock is gradually repriced.
 
 \begin{figure}[H]
 \centering
@@ -732,199 +767,178 @@ gradually repriced.
 \label{fig:refinancing-cost}
 \end{figure}
 
-The exercise has two fiscal implications. First, maturity structure is a form
-of risk management: it determines how quickly market conditions enter the
-budget, and a longer average maturity converts a rate shock into a slow,
-partial repricing. Second, favourable recent debt arithmetic should not be
-extrapolated mechanically. If higher market yields persist, the average rate
-rises gradually even without an immediate fiscal shock.
+Two fiscal implications follow. Maturity structure is a form of risk management
+because it determines how quickly market conditions enter the budget; a longer
+average maturity turns a rate shock into slow, partial repricing. At the same
+time, favourable recent debt arithmetic should not be extrapolated mechanically.
+If higher market yields persist, the average rate rises gradually even without
+an immediate fiscal shock.
 
 \section{Related Literature and Contribution}
 
-This paper is a measurement exercise, and it sits inside an accounting and
-empirical literature that it does not attempt to extend theoretically. The
-review below is organised by the questions the paper actually asks.
+The analysis is a measurement exercise rather than a theoretical extension, so
+the relevant literature is the work that disciplines the accounting choices.
+Institutional fiscal surveillance is the natural comparator. The European
+Commission's Debt Sustainability Monitor provides the official EU setting for
+medium- and long-term debt-risk assessment, and the Portuguese Public Finance
+Council provides national surveillance and fiscal-accounting commentary for
+Portugal \cite{ec_dsm2025,cfp2025}. Those frameworks are broader than the
+exercise here. They do not, however, publish the exact two-factor
+interest-burden decomposition, separate \(r^{AVG}\) from \(r^{DD}\) in the
+published output, or provide the per-value provenance pipeline used here.
 
-\paragraph{Debt-dynamics accounting.} The arithmetic used in Section
-\ref{sec:framework} is standard. Escolano \cite{escolano2010} sets out the
-identity linking the change in the debt ratio to the interest-growth
-differential, the primary balance, and the residual stock-flow adjustment, and
-is explicit that the effective interest rate entering the identity is interest
-accrued over the \emph{inherited} stock. That distinction is the reason this
-paper carries two effective-rate concepts rather than one.
+Debt-dynamics accounting supplies the core identity. Escolano
+\cite{escolano2010} sets out the link between the change in the debt ratio, the
+interest-growth differential, the primary balance, and the residual stock-flow
+adjustment, and is explicit that the effective rate in the identity is interest
+accrued over the inherited stock. Hall and Sargent \cite{hall_sargent2011} show
+in a historical setting why interest payments, growth, primary balances, and
+valuation or residual terms must be kept separate when explaining debt
+accumulation. That literature is why the present analysis carries two
+effective-rate concepts rather than one.
 
-\paragraph{The interest-growth differential.} Whether a negative differential
-makes debt comfortable is contested. Blanchard \cite{blanchard2019} argues that
-when safe rates are persistently below growth, debt rollovers may carry no
-fiscal cost, and that this configuration is closer to the historical norm than
-to an exception. Mauro and Zhou \cite{mauro2021} examine effective borrowing
-costs for 55 countries over up to two centuries and are more cautious: negative
-differentials have historically offered limited protection, because the marginal
-cost of borrowing can move sharply even when the average cost is low. Portugal's
-record over 2015--2025, where a favourable differential coexisted with a
-sizeable stock-flow adjustment, illustrates why the average and the margin have
-to be reported separately.
+The implications of a negative interest-growth differential are less settled.
+Blanchard \cite{blanchard2019} argues that when safe rates are persistently
+below growth, debt rollovers may carry no fiscal cost and that this
+configuration is closer to the historical norm than to an exception. Mauro and
+Zhou \cite{mauro2021}, using effective borrowing costs for 55 countries over up
+to two centuries, are more cautious: negative differentials have historically
+offered limited protection because marginal borrowing costs can move sharply
+even when the average cost remains low. Portugal's record over 2015--2025, in
+which a favourable differential coexisted with a sizeable stock-flow
+adjustment, fits the reason to keep the average and the margin separate.
 
-\paragraph{Fiscal sustainability.} Bohn \cite{bohn1998} proposes a
-sustainability test that does not require an assumption about the interest rate,
-asking instead whether the primary balance responds systematically to the debt
-ratio. This paper does not estimate such a response. It reports the
-debt-stabilising primary balance implied by the identity, which is a weaker and
-purely arithmetic object, and says so.
+Fiscal sustainability is treated here only through accounting requirements.
+Bohn \cite{bohn1998} proposes a sustainability test that does not require an
+assumption about the interest rate, asking instead whether the primary balance
+responds systematically to the debt ratio. No such reaction function is
+estimated here. The reported debt-stabilising primary balance is the weaker,
+purely arithmetic object implied by the identity. Euro-area sovereign borrowing costs
+raise a related measurement issue: market rates and average costs need
+not move together. De Grauwe and Ji \cite{degrauwe2013} find evidence
+consistent with self-fulfilling liquidity dynamics for euro-area members that
+issue in a currency they do not control. For the comparison in Section
+\ref{sec:comparison}, that means the effective rate on an existing stock should
+not be read as if it carried the same information as a marginal spread.
 
-\paragraph{Euro-area sovereign borrowing costs.} De Grauwe and Ji
-\cite{degrauwe2013} test whether euro-area sovereign spreads moved beyond what
-fundamentals justified, and find evidence consistent with self-fulfilling
-liquidity dynamics for members of a monetary union that issue in a currency they
-do not control. This matters for the comparison in Section
-\ref{sec:comparison}: the effective rate on an existing stock is a slow-moving
-average and does not carry the information that a marginal spread carries.
-
-\paragraph{Debt maturity and refinancing pass-through.} Missale and Blanchard
-\cite{missale1994} formalise how maturity structure governs the sensitivity of
-the real debt burden to shocks, introducing an effective-maturity notion.
+Debt maturity and refinancing pass-through determine how quickly rate shocks
+reach the budget. Missale and Blanchard \cite{missale1994} formalise the role
+of maturity structure in the sensitivity of the real debt burden to shocks, and
 Greenwood, Hanson and Stein \cite{greenwood2015} treat maturity choice as a
-trade-off faced by the sovereign rather than a technical detail. The cohort
-model in Section \ref{sec:refinancing} is a stylised version of the mechanism
-those papers describe, calibrated to the published average maturity of the
-Portuguese stock rather than estimated.
+sovereign trade-off rather than a technical detail. The cohort model in Section
+\ref{sec:refinancing} is a stylised version of that mechanism, calibrated to
+the published average maturity of the Portuguese stock rather than estimated.
+Inflation and nominal growth affect the denominator of the same burden ratio:
+Aizenman and Marion \cite{aizenman2011} stress that the erosion of debt through
+inflation depends on maturity and on whether inflation is anticipated. Portugal
+in 2022--2023, when nominal growth of roughly twelve and eleven percent
+coincided with a sharp fall in the debt ratio, is a case where the denominator
+did much of the work.
 
-\paragraph{Inflation and nominal growth.} Aizenman and Marion \cite{aizenman2011}
-assess how much of a debt ratio inflation can plausibly erode, and stress that
-the answer depends on maturity and on whether the inflation is anticipated.
-Portugal's 2022--2023 episode, where nominal growth of roughly twelve and eleven
-percent coincided with a sharp fall in the debt ratio, is a case where the
-denominator did most of the work.
+Stock-flow adjustments are kept as residuals rather than recast as behavioural
+parameters. Weber \cite{weber2012} documents that the discrepancy between the
+change in debt and the deficit is large, persistent, and only partly explained
+by balance-sheet effects; Seiferling \cite{seiferling2013} re-examines the same
+issue against the government's integrated balance sheet; and Campos, Jaimovich
+and Panizza \cite{campos2006} frame such discrepancies as the ``unexplained''
+part of public debt. Portuguese debt management enters more narrowly. The
+Portuguese treasury and debt agency supplies the average-maturity statistic
+used to calibrate the central stylised scenario \cite{igcp2024}; the 7.2-year
+average maturity of the debt stock in 2024, including official loans, is the
+single external assumption taken from outside Eurostat.
 
-\paragraph{Stock-flow adjustments.} Weber \cite{weber2012} documents that the
-discrepancy between the change in debt and the deficit is large, persistent, and
-only partly explained by balance-sheet effects, and that it is smaller in more
-fiscally transparent countries. Seiferling \cite{seiferling2013} re-examines the
-same discrepancy against the government's integrated balance sheet. Both are
-reasons to report the stock-flow adjustment as a residual to be investigated
-rather than a behavioural term to be interpreted.
-
-\paragraph{Portuguese debt management.} The Portuguese treasury and debt agency
-publishes the annual report that supplies the average-maturity statistic used to
-calibrate the central stylised scenario \cite{igcp2024}. The average maturity
-of the debt stock, 7.2 years in 2024 including official loans, is the single
-external assumption this paper takes from outside Eurostat.
-
-\paragraph{Contribution.} The paper's contribution is measurement discipline
-rather than a new estimate. Five things are done deliberately. First, every
-reported quantity is generated from an auditable ESA-consistent pipeline, with
-provenance, observation status, and source checksums travelling with each value.
-Second, the marginal yield and the realised average financing cost are kept
-apart, and the debt-dynamics rate is distinguished from the descriptive
-average-debt rate, because feeding the wrong one into an identity breaks it
-silently. Third, the change in the burden is decomposed exactly into a financing
-cost effect and a debt exposure effect, with the identity checked numerically
-before it is interpreted. Fourth, the euro-area comparison states its
-eligibility rule, its denominator, its ranking convention, and the observation
-status of every geography, so a rank cannot be quoted without its base. Fifth,
-the refinancing pass-through is presented as an explicitly stylised cohort model
-whose assumptions are tabulated and whose only externally sourced input is
-named. None of this is novel economics. It is the part that is usually left
-implicit.
+The contribution is measurement discipline rather than a new estimate. Reported
+quantities are generated from an auditable ESA-consistent pipeline, with
+provenance, observation status, and source checksums travelling with each
+value. The marginal yield, realised average financing cost, descriptive
+average-debt rate, and debt-dynamics rate are kept apart. The burden change is
+decomposed exactly into a financing-cost effect and a debt-exposure effect, the
+euro-area comparison states its eligibility rule and ranking base, and the
+refinancing pass-through is presented as an explicitly stylised cohort model
+whose assumptions are tabulated. Relative to institutional reports such as the
+Debt Sustainability Monitor and CFP publications, the narrower addition is the
+auditable decomposition and publication pipeline rather than a competing
+sustainability forecast.
 
 \section{Discussion and Limitations}
 
-The evidence indicates that no single variable explains the full decline in
-Portugal's interest burden. The long-run decline from \MainStartYear{} to \LatestYear{} reflects:
-\begin{itemize}
-  \item a large fall in the effective interest rate from high pre-euro and
-        convergence-period levels;
-  \item monetary-union and later ECB-era financing conditions that lowered the
-        average cost of the outstanding stock;
-  \item nominal GDP growth, especially after the pandemic;
-  \item a large decline in the debt ratio after the 2020 peak;
-  \item improved primary balances in several recent years.
-\end{itemize}
+No single variable explains the full decline in Portugal's interest burden.
+The long-run movement reflects the fall in the effective interest rate from
+high pre-euro and convergence-period levels, monetary-union and later ECB-era
+financing conditions, post-pandemic nominal GDP growth, the sharp fall in the
+debt ratio after the 2020 peak, and improved primary balances in several recent
+years. The crisis period shows the opposite combination: high debt, weak or
+negative nominal growth, and elevated financing stress. The recent period shows
+why high nominal growth can quickly reduce debt-ratio pressure, but also why
+interest in euros can rise even when the ratio is stable.
 
-The crisis period shows the opposite combination: high debt, weak or negative
-nominal growth, and elevated financing stress. The recent period shows why high
-nominal growth can quickly reduce debt-ratio pressure, but also why interest
-in euros can rise even when the ratio is stable.
+The analysis does not prove that Portugal's fiscal position is structurally
+safe, nor does it estimate future growth, future primary balances, or future
+market risk premia. Contingent liabilities, ageing costs, and detailed
+debt-maturity composition are outside its scope. The contribution is empirical
+and reproducible: an annually indexed dataset that separates national-accounts
+interest flows, debt stocks, growth, balances, market yields, and
+comparator-country metrics, with validation checks designed to reduce silent
+data corruption. For policy analysis, this is a foundation rather than a final
+sustainability judgement.
 
-The paper does not prove that Portugal's fiscal position is structurally safe.
-It does not estimate future growth, future primary balances, or future market
-risk premia. It also does not model contingent liabilities, ageing costs, or
-debt-maturity composition in full detail. Instead, it provides the measurement
-and accounting basis required before those questions can be studied rigorously.
-
-The contribution of this study is primarily empirical and reproducible. It
-does not propose a new macroeconomic theory. It provides a clean,
-auditable, annually indexed dataset that separates national-accounts interest
-flows, debt stocks, growth, balances, market yields, and comparator-country
-metrics. It also embeds validation checks that reduce the probability of
-silent data corruption. For policy analysis, this is a necessary foundation:
-fiscal interpretation is only as strong as the measurement layer underneath it.
-
-Five limitations are material.
-
-First, ESA interest payable is not the same as central-government cash
-interest. Users interested in budget execution, Treasury cash management, or
-debt-office operations would need a separate reconciliation layer.
-
-Second, annual data cannot identify within-year refinancing, issuance,
-redemption, or cash-management dynamics.
-
-Third, the average-debt interest rate is an average-cost measure, not a
-marginal cost of funds. It is useful for descriptive average-cost analysis but
-cannot replace the debt-dynamics rate or an issuance yield in debt-management
-analysis.
-
-Fourth, the cross-country panel is harmonised by Eurostat definitions but does
-not control for maturity structure, inflation-linked debt, cash buffers,
-official-sector loans, or country-specific fiscal institutions.
-
-Fifth, rate-shock simulations are deterministic arithmetic exercises. They
-omit feedback through growth, inflation, primary balances, market risk premia,
-and policy responses.
+Several boundaries follow from that design. ESA interest payable is not the
+same as central-government cash interest, so budget execution and Treasury cash
+management would require a separate reconciliation layer. Annual data cannot
+identify within-year refinancing, issuance, redemption, or cash-management
+dynamics, and the refinancing exercise uses a constant hazard calibrated to
+average maturity rather than IGCP's actual redemption profile. The
+average-debt interest rate is an average-cost measure, not a marginal cost of
+funds, and cannot replace the debt-dynamics rate or an issuance yield in
+debt-management analysis. The cross-country panel is harmonised by Eurostat
+definitions but does not control for maturity structure, inflation-linked debt,
+cash buffers, official-sector loans, or country-specific fiscal institutions.
+Finally, the rate-shock simulations omit feedback through growth, inflation,
+primary balances, market risk premia, and policy responses. Because nominal GDP
+is fixed in the scenario denominator, the burden effect is upward-biased
+relative to an otherwise identical positive nominal-growth path; because
+stock-flow adjustments are not decomposed into institutional components, they
+should not be read as policy actions without further fiscal-accounting evidence.
 
 \section{Conclusion}
 
-Portugal's general-government interest burden has declined dramatically in the
-harmonised ESA 2010 sample. The burden fell from \InitialInterestPctGdp{} percent of GDP in \MainStartYear{}
-to \LatestInterestPctGdp{} percent in \LatestYear{}. The nominal interest bill, however, remained material:
-EUR \LatestInterestEurBn{} billion in \LatestYear{}. This distinction is the core empirical lesson of the
-paper. The euro amount, the GDP ratio, the debt ratio, the effective interest
-rate, and the market yield are related but distinct objects.
+Portugal's general-government interest burden has declined sharply in the
+harmonised ESA 2010 sample, from \InitialInterestPctGdp{} percent of GDP in
+\MainStartYear{} to \LatestInterestPctGdp{} percent in \LatestYear{}. The
+nominal bill remained material, at EUR \LatestInterestEurBn{} billion in
+\LatestYear{}. That distinction is the core empirical lesson: the euro amount,
+the GDP ratio, the debt ratio, the effective interest rate, and the market yield
+are related but distinct objects.
 
 The sovereign-debt crisis and adjustment period remains the highest-burden
-regime in the sample. The post-2015 decline reflects a lower average cost of
-debt, refinancing effects, primary-balance improvement, and later nominal GDP
-growth and debt-ratio reduction. The generated endpoint decomposition shows
-that from 2014 to \LatestYear{} the reconstructed interest burden changed by
-\DecompTotalTwentyFourteenToLatestPp{} percentage points: the average
-financing-cost effect contributed \DecompRateTwentyFourteenToLatestPp{}
-percentage points and the debt-exposure effect contributed
-\DecompExposureTwentyFourteenToLatestPp{} percentage points. Over 1996--\LatestYear{},
-the corresponding total change was \DecompTotalNineteenNinetySixToLatestPp{}
-percentage points, with \DecompRateNineteenNinetySixToLatestPp{} percentage
-points from the average financing-cost effect and
-\DecompExposureNineteenNinetySixToLatestPp{} percentage points from
-debt exposure. The recent tightening period has not yet translated one-for-one
-into the interest burden because the debt stock reprices gradually and because
-the GDP denominator grew strongly. This does not remove the risk from sustained
-higher rates; it clarifies the channel through which that risk reaches the
-budget.
+regime in the sample, while the post-2015 decline reflects lower average debt
+costs, refinancing effects, primary-balance improvement, and later nominal GDP
+growth and debt-ratio reduction. The endpoint decomposition gives the clearest
+summary. From 2014 to \LatestYear{} the reconstructed burden changed by
+\DecompTotalTwentyFourteenToLatestPp{} percentage points, with
+\DecompRateTwentyFourteenToLatestPp{} percentage points from the average
+financing-cost effect and \DecompExposureTwentyFourteenToLatestPp{} percentage
+points from debt exposure. Over 1996--\LatestYear{}, the total change was
+\DecompTotalNineteenNinetySixToLatestPp{} percentage points, combining
+\DecompRateNineteenNinetySixToLatestPp{} percentage points from financing costs
+with \DecompExposureNineteenNinetySixToLatestPp{} percentage points from debt
+exposure. The recent tightening period has not translated one-for-one into the
+burden because the stock reprices gradually and because the GDP denominator
+grew strongly. Sustained higher rates would still matter; the point is the
+channel and timing through which they reach the budget.
 
 In the 2025 comparator panel, Portugal occupied an intermediate position among
-euro-area countries. It had a lower interest burden than Italy, Greece, Spain,
-Belgium, and France, but a higher burden than most other euro-area members.
-That ranking should be read as a harmonised descriptive comparison,
-not as a full fiscal-sustainability judgement. Eurostat flags Portugal's 2025
-comparison observations as provisional.
+euro-area countries: below Italy, Greece, Spain, Belgium, and France by
+interest burden, but above most other euro-area members. That ranking is a
+harmonised descriptive comparison, not a fiscal-sustainability judgement.
+Eurostat flags Portugal's 2025 comparison observations as provisional.
 
 \newpage
 \appendix
 
-\begin{landscape}
 \section{Appendix A: Debt-Dynamics Diagnostic Table}
 
 \input{../reports/tables/debt_dynamics_diagnostic_2020_2025.tex}
-\end{landscape}
 
 \begin{landscape}
 \section{Appendix B: Annual ESA 2010 Portugal Table}
@@ -994,13 +1008,16 @@ between \EarliestRetrievalTimestamp{} and \LatestRetrievalTimestamp{}. The
 observation statuses accepted into the euro-area comparison are
 \AcceptedObservationStatuses{}. The largest official-versus-reconstructed ratio
 discrepancy is \MaxRatioDiscrepancyPp{} percentage points, in
-\RatioBreachYears{}; the per-year rows for those years appear above. A
+\RatioBreachYears{}; the per-year rows for those years appear above.
+Portugal's \LatestYear{} comparison observations are flagged
+\PortugalComparisonStatus{} by Eurostat and are admitted only because that
+status is included in the stated eligibility rule. A
 data-revision log comparing the current processed vintage with the previous one
 is written to \texttt{reports/data\_revision\_log.csv} and
 \texttt{reports/data\_revision\_log.md}. An error-level validation failure stops
 the report build.
 
-\section{Appendix D: Replication Materials}
+\section{Appendix E: Replication Materials}
 
 The replication workflow produces the following analytical outputs:
 \begin{itemize}
@@ -1016,15 +1033,19 @@ Raw source downloads include retrieval timestamps, request metadata, payload
 sizes, and checksums. Processed rows preserve source-vintage and checksum
 metadata so revisions can be audited.
 
-\section{Appendix E: Reproducibility}
+\section{Appendix F: Reproducibility and Archiving}
 
 The full command sequence is documented in the repository README. The pipeline
 is reproduced with \texttt{pt-debt all --config config/default.yaml}, which
 performs acquisition, the analytical build, validation, figure and table
-generation, and the Markdown summary.
+generation, and the Markdown summary. The public repository is
+\url{https://github.com/diogo-ricardo/portugal-public-debt-interest}. The
+Zenodo release DOI for the archived research object is
+\doi{10.5281/zenodo.21722771}; the concept DOI is
+\doi{10.5281/zenodo.21722700}.
 
 \newpage
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 
 \bibitem{esa2010}
 Eurostat. \emph{European System of Accounts: ESA 2010}. Publications Office of
@@ -1032,13 +1053,36 @@ the European Union.
 
 \bibitem{eurostatgov}
 Eurostat. \emph{Government finance statistics: revenue, expenditure, deficit,
-debt, GDP, and long-term interest rate datasets}. Eurostat database.
+debt, GDP, and long-term interest rate datasets}. Eurostat database tables
+\texttt{gov\_10a\_main}, \texttt{gov\_10dd\_edpt1}, \texttt{nama\_10\_gdp},
+and \texttt{irt\_lt\_mcby\_a}; source data retrieved between
+\EarliestRetrievalTimestamp{} and \LatestRetrievalTimestamp{}.
+
+\bibitem{ec_dsm2025}
+European Commission (2026). \emph{Debt Sustainability Monitor 2025}.
+Institutional Paper, Directorate-General for Economic and Financial Affairs.
+\url{https://economy-finance.ec.europa.eu/publications/debt-sustainability-monitor-2025_en}
+
+\bibitem{cfp2025}
+Conselho das Finanças Públicas (2025). \emph{Economic and Fiscal Outlook
+2025--2029: Update}. Lisbon: CFP.
+\url{https://www.cfp.pt/en/publications/economic-and-fiscal-outlook/economic-and-fiscal-outlook-2025-2029-update}
+
+\bibitem{cfp_sfa}
+Conselho das Finanças Públicas (2026). \emph{Stock-flow adjustment glossary}.
+Lisbon: CFP.
+\url{https://www.cfp.pt/en/glossary/stock-flow-adjustment}
 
 \bibitem{escolano2010}
 Escolano, J. (2010). \emph{A Practical Guide to Public Debt Dynamics, Fiscal
 Sustainability, and Cyclical Adjustment of Budgetary Aggregates}. International
 Monetary Fund, Technical Notes and Manuals 10/02. Washington, DC: IMF.
 \url{https://www.imf.org/external/pubs/ft/tnm/2010/tnm1002.pdf}
+
+\bibitem{hall_sargent2011}
+Hall, G. J., \& Sargent, T. J. (2011). Interest Rate Risk and Other Determinants
+of Post-WWII U.S. Government Debt/GDP Dynamics. \emph{American Economic Journal:
+Macroeconomics}, 3(3), 192--214. \doi{10.1257/mac.3.3.192}
 
 \bibitem{blanchard2019}
 Blanchard, O. (2019). Public Debt and Low Interest Rates. \emph{American
@@ -1085,8 +1129,13 @@ Balance Sheet and Fiscal Transparency}. International Monetary Fund, Working
 Paper 13/63. Washington, DC: IMF.
 \url{https://www.imf.org/external/pubs/ft/wp/2013/wp1363.pdf}
 
+\bibitem{campos2006}
+Campos, C. F. S., Jaimovich, D., \& Panizza, U. (2006). The unexplained part of
+public debt. \emph{Emerging Markets Review}, 7(3), 228--243.
+\url{https://ideas.repec.org/a/eee/ememar/v7y2006i3p228-243.html}
+
 \bibitem{igcp2024}
-Ag\^encia de Gest\~ao da Tesouraria e da D\'ivida P\'ublica (IGCP) (2025).
+Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).
 \emph{Annual Report 2024}. Lisbon: IGCP.
 \url{https://www.igcp.pt/sites/default/files/2025-11/RA2024_20251118.pdf}
 

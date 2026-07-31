@@ -79,9 +79,14 @@ def _paper_source() -> str:
 
 
 def _debt_dynamics_prose(source: str) -> str:
-    """Return the debt-dynamics narrative block of the paper."""
-    start = source.index("The pandemic year 2020")
-    end = source.index("It is an accounting reconciliation term")
+    """Return the debt-dynamics narrative block of the paper.
+
+    Anchored on the generated macro rather than a prose phrase: the narrative
+    is edited freely, but the macro is the thing under test.
+    """
+    start = source.index(r"\DebtDynamicsInterestGrowthTwentyTwentyPp")
+    start = source.rindex("\n\n", 0, start) + 2
+    end = source.index(r"\label{sec:burden-decomposition}", start)
     return source[start:end]
 
 
