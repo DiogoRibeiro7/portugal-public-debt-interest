@@ -7,8 +7,8 @@
     }
   ],
   "description": "Reproducible analysis of Portugal's general-government public-debt interest burden using harmonised Eurostat ESA 2010 data, AMECO-linked historical context, validation checks, figures, and a publication-oriented LaTeX report.",
-  "version": "0.1.0",
-  "publication_date": "2026-07-28",
+  "version": "0.1.1",
+  "publication_date": "2026-07-31",
   "access_right": "open",
   "license": "mit",
   "upload_type": "software",
