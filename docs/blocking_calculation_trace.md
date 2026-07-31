@@ -174,8 +174,8 @@ claims to be generated or verified against the data.
 2. The interest-burden decomposition method currently exposes an interaction
    component in the main figure; the repair sequence later needs to decide
    whether that belongs in the figure or only in a validation artifact.
-3. Refinancing-path prose currently says "configured refinancing shares" in the
-   paper without showing the exact shares in the main text.
+3. Refinancing-path prose exposes the stylised cohort assumptions in the paper,
+   including the annual repricing shares and source status.
 4. The generated-output boundary is not fully enforced for all narrative
    numerical claims in the paper.
 5. No tests were added in this trace-only step.

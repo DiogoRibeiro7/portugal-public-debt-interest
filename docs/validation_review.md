@@ -474,7 +474,7 @@
 - File and symbol: `src/pt_debt_interest.config.AnalysisSection`
 - Reproduction procedure: instantiate `AnalysisSection(default_refinancing_shares=[0.6, 0.5])`, or instantiate it with overlapping regime windows such as 2000-2005 and 2005-2010.
 - Risk: an invalid refinancing schedule could fail only at plotting time, and overlapping regime boundaries could silently assign a year to whichever label appears first rather than to an unambiguous period.
-- Minimal correction: validate that configured refinancing shares sum to no more than one and that regime boundaries have non-reversed, non-overlapping year ranges.
+- Minimal correction: validate that stylised refinancing scenario shares sum to no more than one and that regime boundaries have non-reversed, non-overlapping year ranges.
 - Regression test: `tests/test_config.py::test_analysis_config_rejects_excess_refinancing_shares`, `tests/test_config.py::test_analysis_config_rejects_overlapping_regimes`, and `tests/test_config.py::test_analysis_config_rejects_reversed_regime`.
 
 ## Earlier source finding

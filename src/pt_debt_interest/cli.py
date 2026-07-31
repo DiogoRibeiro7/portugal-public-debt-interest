@@ -56,6 +56,17 @@ def _load_optional_panel_metrics(settings: Settings) -> pd.DataFrame | None:
     return pd.read_csv(panel_path)
 
 
+def _validation_result(settings: Settings, frame: pd.DataFrame) -> dict[str, Any]:
+    """Run the configured validation checks for report/table context."""
+    return validate_dataset(
+        frame,
+        settings.project.main_start_year,
+        settings.project.end_year,
+        settings.analysis.ratio_tolerance_pp,
+        settings.analysis.identity_tolerance_pp,
+    )
+
+
 def _existing_figure_paths(settings: Settings) -> list[Path]:
     if not settings.paths.figures.exists():
         return []
@@ -211,6 +222,7 @@ def tables_command(config: Path = DEFAULT_CONFIG) -> None:
     """Generate LaTeX tables from processed analytical data."""
     settings = _settings(config)
     frame = load_processed(settings)
+    validation_result = _validation_result(settings, frame)
     assumptions, results, main_scenario = _refinancing()
     save_refinancing_outputs(assumptions, results, settings)
     panel = _load_optional_panel_metrics(settings)
@@ -232,6 +244,8 @@ def tables_command(config: Path = DEFAULT_CONFIG) -> None:
         panel_frame=_load_optional_panel_metrics(settings),
         refinancing_assumptions=assumptions,
         refinancing_main_scenario=main_scenario,
+        validation_result=validation_result,
+        accepted_statuses=tuple(settings.analysis.accepted_observation_statuses),
     )
     for path in paths:
         typer.echo(path)
@@ -251,15 +265,15 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
                 typer.echo(f"Removed stale AMECO interim data: {stale_path}", err=True)
             typer.echo(f"AMECO extension skipped: {exc}", err=True)
     frame = build_dataset(settings)
-    result = validate_dataset(
-        frame,
-        settings.project.main_start_year,
-        settings.project.end_year,
-        settings.analysis.ratio_tolerance_pp,
-        settings.analysis.identity_tolerance_pp,
-    )
+    result = _validation_result(settings, frame)
     (settings.paths.reports / "validation.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
+    )
+    write_validation_and_revision_reports(
+        frame,
+        settings.paths.reports,
+        settings.paths.processed,
+        settings.analysis.ratio_tolerance_pp,
     )
     figure_paths = generate_all_plots(
         frame,
@@ -282,6 +296,8 @@ def all_command(config: Path = DEFAULT_CONFIG, include_ameco: bool = True) -> No
         settings.project.main_start_year,
         settings.analysis.static_rate_shocks_bps,
         panel_frame=_load_optional_panel_metrics(settings),
+        validation_result=result,
+        accepted_statuses=tuple(settings.analysis.accepted_observation_statuses),
     )
     if not result["passed"]:
         raise typer.Exit(code=1)

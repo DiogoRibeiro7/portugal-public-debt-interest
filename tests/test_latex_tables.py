@@ -375,3 +375,29 @@ def test_generated_latex_tables_use_input_values(tmp_path: Path) -> None:
     assert "2025 & 1.90" in diagnostic
     assert "Endpoint decomposition" in decomposition
     assert "Arithmetic interest-burden counterfactuals" in counterfactuals
+
+
+def test_headline_macros_count_failed_warning_validation_checks(tmp_path: Path) -> None:
+    frame = _annual_frame()
+    frame["debt_pct_gdp_official"] = frame["debt_pct_gdp"]
+    frame["debt_pct_gdp_calculated"] = frame["debt_pct_gdp"]
+    validation_result = {
+        "passed": True,
+        "checks": [
+            {"name": "core_columns_present", "passed": True, "severity": "error"},
+            {"name": "debt_ratio_reconciliation", "passed": False, "severity": "warning"},
+        ],
+    }
+
+    generate_latex_tables(
+        frame,
+        tmp_path,
+        main_start_year=2014,
+        shocks_bps=[50, 100, 200],
+        panel_frame=_panel_frame(),
+        validation_result=validation_result,
+    )
+
+    headlines = (tmp_path / "paper_headlines.tex").read_text(encoding="utf-8")
+    assert r"\newcommand{\ValidationErrorCount}{0}" in headlines
+    assert r"\newcommand{\ValidationWarningCount}{1}" in headlines

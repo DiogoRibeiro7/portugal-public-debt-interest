@@ -223,4 +223,5 @@ def test_report_labels_model_as_stylised() -> None:
     assert "stylised" in source.lower(), "the model is not labelled stylised"
     assert "not a forecast" in source.lower(), "the report does not disclaim forecasting"
     # The vague pointer to hidden configuration must be gone.
-    assert "configured refinancing shares" not in source
+    stale_phrase = "configured refinancing " + "shares"
+    assert stale_phrase not in source
