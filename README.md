@@ -4,6 +4,26 @@ A reproducible analysis of the interest paid by Portugal's general government, i
 
 The authoritative series begins in 1995 and uses harmonised ESA 2010 data from Eurostat. An optional AMECO extension can add earlier observations, while preserving an explicit accounting-basis and observed/forecast distinction.
 
+## Two research outputs in one repository
+
+This repository produces two papers that share a single measurement layer.
+
+| Paper | Package | Builds with |
+| --- | --- | --- |
+| **Interest burden and debt dynamics** | `pt_debt_interest` | `pt-debt all --config config/default.yaml` |
+| **Repricing kernel** (in progress) | `pt_debt.repricing` | `pt-debt repricing <subcommand> --config config/repricing.yaml` |
+
+The measurement layer — Eurostat acquisition, ESA concepts, validation, and the
+processed Portugal series — lives in `pt_debt_interest`. The repricing work
+**imports** it rather than duplicating it, and a regression test
+(`tests/test_burden_paper_regression.py`) asserts that the burden paper's
+generated artefacts are byte-identical after any change. That test is the
+contract between the two, and it fails the build on drift.
+
+The repricing paper relaxes the burden paper's constant-hazard repricing
+assumption. Its data availability, design revision, and specification log are in
+`reports/repricing/` and `docs/`.
+
 ## Description
 
 This project builds a transparent annual dataset for Portugal's public-debt interest burden. It downloads official Eurostat and AMECO data, reconciles interest, government expenditure, government revenue, debt, GDP, and balance ratios, calculates derived metrics, and produces validation checks, charts, and a Markdown report suitable for research or publication workflows.
