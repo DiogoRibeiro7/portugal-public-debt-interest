@@ -73,6 +73,10 @@ select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 [tool.ruff.lint.isort]
 known-first-party = ["pt_debt_interest", "nbtools"]
 
+[[tool.mypy.overrides]]
+module = ["statsmodels.*"]
+ignore_missing_imports = true
+
 [tool.mypy]
 python_version = "3.11"
 strict = true

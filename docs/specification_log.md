@@ -64,7 +64,20 @@ and is reported as such.
 
 | ID | Date | Description | Status |
 | --- | --- | --- | --- |
-| S1 | 2026-08-02 | Frozen baseline above | Frozen, pre-estimation |
+| S1 | 2026-08-02 | Frozen baseline above | Frozen, then estimated once. Result: null. |
 
 No other specification has been estimated. This table is appended to as work
 proceeds, including specifications that are tried and discarded.
+
+## Estimation outcome, S1
+
+Fitted once, on the frozen specification, at commit `796c264`. Result recorded
+in `reports/repricing/estimation.md`.
+
+No coefficient is distinguishable from zero. The asymmetry interval is
+[-0.0204, +0.0444] and covers zero. The placebo does not load, so the null is a
+precision problem rather than a contamination problem.
+
+**One specification has been estimated. No search was performed.** Any variant
+from here is an in-sample variant, reported alongside S1 rather than replacing
+it, and appended to the table above when it is run.
