@@ -4,7 +4,10 @@ version = "0.1.2"
 description = "Reproducible analysis of Portugal's public-debt interest burden"
 authors = ["Diogo"]
 readme = "README.md"
-packages = [{ include = "pt_debt_interest", from = "src" }]
+packages = [
+  { include = "pt_debt_interest", from = "src" },
+  { include = "pt_debt", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"

@@ -1,0 +1,52 @@
+# Repricing-kernel research configuration.
+#
+# Separate from config/default.yaml. The interest-burden paper must not read
+# this file and this file must not change that paper's outputs.
+
+paths:
+  raw: data/raw/repricing
+  processed: data/processed/repricing
+  reports: reports/repricing
+
+http:
+  timeout_seconds: 90
+  max_retries: 3
+  backoff_seconds: 1.0
+
+# --- Tier 1: the stock and its composition ------------------------------------
+# IGCP publishes these as Excel historical series. URLs carry a vintage folder
+# and are refreshed by IGCP; a changed URL is a loud failure, not a silent one.
+igcp:
+  debt_stock_monthly_url: >-
+    https://www.igcp.pt/sites/default/files/2026-07/Stock_divida_valores_mensais_Debt_stock_monthly_figures.xlsx
+  debt_indicators_url: >-
+    https://www.igcp.pt/sites/default/files/2026-07/Indicadores_divida_slonga_Debt_indicators_historical_series.xlsx
+
+# --- Tier 2: covariates driving the behavioural hazard -------------------------
+# ECB Data Portal dataflows and series keys. MIR is the monetary financial
+# institution interest rate statistics collection; the household deposit rate is
+# the principal competing return for a retail certificate holder.
+ecb:
+  series:
+    policy_rate_deposit_facility:
+      dataflow: FM
+      key: D.U2.EUR.4F.KR.DFR.LEV
+    household_deposit_rate_pt_outstanding:
+      dataflow: MIR
+      key: M.PT.B.L22.A.R.A.2250.EUR.N
+    # F = new business; L22 = deposits with agreed maturity. Verified against
+    # the ECB Data Portal rather than assumed.
+    household_deposit_rate_pt_new_business:
+      dataflow: MIR
+      key: M.PT.B.L22.F.R.A.2250.EUR.N
+    # Overnight household deposits: the most liquid competing return, and the
+    # closest substitute for an on-demand redeemable certificate.
+    household_deposit_rate_pt_overnight:
+      dataflow: MIR
+      key: M.PT.B.L21.A.R.A.2250.EUR.N
+    euro_area_yield_10y:
+      dataflow: YC
+      key: B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y
+    euro_area_yield_2y:
+      dataflow: YC
+      key: B.U2.EUR.4F.G_N_A.SV_C_YM.SR_2Y

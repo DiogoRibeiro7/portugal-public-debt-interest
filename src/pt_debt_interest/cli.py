@@ -40,6 +40,19 @@ from .storage import (
 from .validation import validate_dataset
 
 app = typer.Typer(no_args_is_help=True, help="Portugal public-debt interest analysis")
+
+
+# The repricing research registers its own command group on this app so the
+# repository keeps one entry point. Imported lazily-tolerantly: the burden
+# paper must still work if that package is absent.
+try:  # pragma: no cover - exercised by the CLI smoke test
+    from pt_debt.repricing.cli import app as _repricing_app
+except ImportError:  # pragma: no cover - burden paper works without it
+    pass
+else:
+    app.add_typer(_repricing_app, name="repricing")
+
+
 DEFAULT_CONFIG = Path("config/default.yaml")
 
 
