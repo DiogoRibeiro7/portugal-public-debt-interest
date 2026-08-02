@@ -81,3 +81,23 @@ precision problem rather than a contamination problem.
 **One specification has been estimated. No search was performed.** Any variant
 from here is an in-sample variant, reported alongside S1 rather than replacing
 it, and appended to the table above when it is run.
+
+## Backtest, run on the frozen specification
+
+Run at commit `55d8af3` on S1 as frozen. The specification was **not** revised
+in response to the result, and no alternative was tried.
+
+Primary cut 2021, with 2014 and 2018 as additional windows. Mean absolute error
+on the effective rate, basis points:
+
+| Cut | Estimated kernel | WAM benchmark |
+| --- | --- | --- |
+| 2014 | 52.44 | 55.69 |
+| 2018 | 47.81 | **45.16** |
+| 2021 | 14.24 | 14.66 |
+
+The estimated kernel does not beat the benchmark. It wins narrowly at two cuts
+and loses at one, by margins that are noise against the error levels. Reported
+in `reports/repricing/pass_through.md` as a negative result.
+
+**Total specifications estimated: one.**
