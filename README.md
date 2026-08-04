@@ -11,7 +11,7 @@ This repository produces two papers that share a single measurement layer.
 | Paper | Package | Builds with |
 | --- | --- | --- |
 | **Interest burden and debt dynamics** | `pt_debt_interest` | `pt-debt all --config config/default.yaml` |
-| **Repricing kernel** (in progress) | `pt_debt.repricing` | `pt-debt repricing <subcommand> --config config/repricing.yaml` |
+| **Repricing kernel** | `pt_debt.repricing` | `pt-debt repricing <subcommand> --config config/repricing.yaml` |
 
 The measurement layer — Eurostat acquisition, ESA concepts, validation, and the
 processed Portugal series — lives in `pt_debt_interest`. The repricing work
@@ -22,7 +22,27 @@ contract between the two, and it fails the build on drift.
 
 The repricing paper relaxes the burden paper's constant-hazard repricing
 assumption. Its data availability, design revision, and specification log are in
-`reports/repricing/` and `docs/`.
+`reports/repricing/` and `docs/`; its results, including the ones that came out
+null, are summarised in `reports/repricing/findings.md`.
+
+### Building the papers
+
+```bash
+# Interest burden
+cd paper && latexmk -pdf portugal_public_debt_interest_report.tex
+
+# Repricing kernel
+pt-debt repricing paper --config config/repricing.yaml   # regenerate the numbers
+cd paper/repricing && latexmk -pdf repricing_kernel.tex
+```
+
+The repricing manuscript quotes no hand-typed result. Every number is a macro in
+`paper/repricing/generated_values.tex`, written from the processed artefacts by
+`pt-debt repricing paper`, which exits non-zero if a literal has been typed into
+the body or a macro it calls no longer exists. `tests/test_repricing_manuscript.py`
+enforces the same checks in CI. Both the generated macros and the compiled PDF
+are committed, so the manuscript builds from a clone without rerunning the
+pipeline.
 
 ## Description
 

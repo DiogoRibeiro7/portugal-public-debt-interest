@@ -43,11 +43,11 @@ def _synthetic_stock_sheet() -> pd.DataFrame:
     rows = [
         ["Dívida Direta do Estado / State direct debt"] + [None] * (width - 1),
         header,
-        ["Dívida total / Total debt"] + values,
-        ["   OT / Fixed rate Treasury bonds (PGB)"] + values,
-        ["   Certific. Aforro / Saving Certificates"] + values,
-        ["   Certific. Tesouro / Treasury Certificates"] + values,
-        ["   Contas margem / Cash-collateral"] + values,
+        ["Dívida total / Total debt", *values],
+        ["   OT / Fixed rate Treasury bonds (PGB)", *values],
+        ["   Certific. Aforro / Saving Certificates", *values],
+        ["   Certific. Tesouro / Treasury Certificates", *values],
+        ["   Contas margem / Cash-collateral", *values],
         # A footnote repeating the wording but carrying no numbers.
         ["(*) Total debt series break note"] + [None] * (width - 1),
     ]

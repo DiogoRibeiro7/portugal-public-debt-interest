@@ -15,6 +15,7 @@ import yaml
 
 from pt_debt_interest.exceptions import SourceError
 
+from . import manuscript
 from . import panel as panel_module
 from .acquire import ecb, igcp
 
@@ -197,3 +198,40 @@ def build_panel_command(
         for row in failed.itertuples():
             typer.echo(f"  - {row.check}: {row.detail}")
         raise typer.Exit(code=1)
+
+
+@app.command("paper")
+def paper_command(
+    config: Path = DEFAULT_CONFIG,
+    paper_dir: Path = Path("paper/repricing"),
+) -> None:
+    """Regenerate the manuscript's macros and check for hand-typed numbers.
+
+    The manuscript quotes no literal results: every figure arrives through a
+    macro generated here from the processed artefacts. A number typed into the
+    body would drift silently when the pipeline is rerun, so this command fails
+    the build if it finds one.
+    """
+    settings = load_config(config)
+    processed = Path(settings["paths"]["processed"])
+    macro_path = manuscript.write_macros(
+        processed, processed / "repricing_panel.csv", paper_dir
+    )
+    typer.echo(macro_path)
+
+    tex_path = paper_dir / "repricing_kernel.tex"
+    missing = manuscript.undefined_macros(tex_path, macro_path)
+    if missing:
+        typer.echo(f"{tex_path}: macros used but not generated: {', '.join(missing)}")
+        raise typer.Exit(code=1)
+
+    literals = manuscript.verify_manuscript_values(tex_path)
+    if literals:
+        typer.echo(
+            f"{tex_path}: {len(literals)} hand-typed number(s) in the body; "
+            "every quantity must come from a generated macro:"
+        )
+        for literal in sorted(set(literals)):
+            typer.echo(f"  - {literal}")
+        raise typer.Exit(code=1)
+    typer.echo(f"{tex_path}: no hand-typed results")
