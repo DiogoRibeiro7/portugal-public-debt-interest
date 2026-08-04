@@ -21,13 +21,36 @@ import pandas as pd
 from .exceptions import ValidationError
 from .panel import aggregate_flag_mask
 
-#: Euro-area member states by Eurostat geography code.
-EURO_AREA_MEMBERS: Final[frozenset[str]] = frozenset(
-    {
-        "AT", "BE", "CY", "DE", "EE", "EL", "ES", "FI", "FR", "HR",
-        "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PT", "SI", "SK",
-    }
-)
+#: Year each state adopted the euro, by Eurostat geography code.
+#:
+#: Membership is a function of the comparison year, not of today. Ranking a
+#: 2014 cross-section against the 2026 membership list silently admits
+#: Lithuania (2015) and Croatia (2023) to a euro area that had eighteen
+#: members at the time.
+EURO_AREA_ADOPTION_YEAR: Final[dict[str, int]] = {
+    "AT": 1999, "BE": 1999, "DE": 1999, "ES": 1999, "FI": 1999,
+    "FR": 1999, "IE": 1999, "IT": 1999, "LU": 1999, "NL": 1999,
+    "PT": 1999,
+    "EL": 2001,
+    "SI": 2007,
+    "CY": 2008, "MT": 2008,
+    "SK": 2009,
+    "EE": 2011,
+    "LV": 2014,
+    "LT": 2015,
+    "HR": 2023,
+}
+
+#: Every state that has ever adopted the euro. Membership at a given year must
+#: go through :func:`euro_area_members`; this set is the union, not a snapshot.
+EURO_AREA_MEMBERS: Final[frozenset[str]] = frozenset(EURO_AREA_ADOPTION_YEAR)
+
+
+def euro_area_members(year: int) -> frozenset[str]:
+    """Return the euro-area membership as it stood in ``year``."""
+    return frozenset(
+        geo for geo, adopted in EURO_AREA_ADOPTION_YEAR.items() if adopted <= year
+    )
 
 #: Series a geography must carry to enter the headline comparison.
 REQUIRED_SERIES: Final[tuple[str, ...]] = (
@@ -96,6 +119,7 @@ def build_eligibility_table(
     if snapshot.empty:
         raise ValidationError(f"panel has no rows for {year}")
     snapshot["is_aggregate"] = aggregate_flag_mask(snapshot["is_aggregate"])
+    members = euro_area_members(year)
 
     rows: list[dict[str, object]] = []
     for row in snapshot.itertuples():
@@ -103,7 +127,7 @@ def build_eligibility_table(
         record: dict[str, object] = {
             "country": getattr(row, "geo_name", geo),
             "eurostat_code": geo,
-            "euro_area_member": geo in EURO_AREA_MEMBERS,
+            "euro_area_member": geo in members,
             "is_aggregate": bool(row.is_aggregate),
             "comparison_year": year,
         }
@@ -123,7 +147,12 @@ def build_eligibility_table(
         if record["is_aggregate"]:
             reasons.append("aggregate geography")
         if not record["euro_area_member"]:
-            reasons.append("not a euro-area member")
+            adopted = EURO_AREA_ADOPTION_YEAR.get(geo)
+            reasons.append(
+                f"not a euro-area member in {year} (adopted {adopted})"
+                if adopted is not None
+                else "not a euro-area member"
+            )
         if missing:
             reasons.append("missing series: " + ", ".join(missing))
         if not record["accepted_status"]:

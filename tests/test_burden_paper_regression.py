@@ -35,6 +35,12 @@ TRACKED = (
     "reports/tables/static_sensitivities.tex",
     "reports/tables/annual_portugal_table.tex",
     "reports/tables/european_comparison_2025.tex",
+    # The rank-change and fragility tables were outside this baseline while
+    # both carried published errors -- a membership list evaluated at the
+    # wrong year, and a tie lost to floating-point representation. They are
+    # tracked now.
+    "reports/tables/european_rank_change.tex",
+    "reports/tables/european_rank_sensitivity_2025.tex",
     "reports/tables/refinancing_assumptions.tex",
     "reports/tables/interest_share_of_budget.tex",
     "reports/generated/debt_dynamics_context.json",

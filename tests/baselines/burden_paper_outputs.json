@@ -1,9 +1,11 @@
 {
-  "paper/portugal_public_debt_interest_report.tex": "3724c6349af6aeba66b303d95b2fa18a823b69a4c685502dec125f8882debde1",
+  "paper/portugal_public_debt_interest_report.tex": "d0509cf5b51fdfee4bfbd39647e4ae4219a2381697abd12639d108ff4aefc1cb",
   "reports/generated/debt_dynamics_context.json": "52ff5da3f7326e7a99a4e282f226d7fe3d9880ce30ab503693887fa1f77fc803",
   "reports/tables/annual_portugal_table.tex": "1fde2e795ba9f3844159cb8cf887ef3e685cf8a67e81780688bee87dd9f3e3fc",
-  "reports/tables/debt_dynamics_diagnostic_2020_2025.tex": "a34c7ac68ea40a7d98b2c35da37e65af9f940ec1c991ad153899c587f167c647",
+  "reports/tables/debt_dynamics_diagnostic_2020_2025.tex": "86e022d0d03405de825489dde12a8ce75fec7b442f9adb39ec7533471c9e57a6",
   "reports/tables/european_comparison_2025.tex": "fa865448c2255a4cff62a74df4fd481fa35ff14e26567d33509528eb29d89000",
+  "reports/tables/european_rank_change.tex": "f4d616a399fc1a7dc23fafbb681040930a156715ddb9e49a3b6629c3deb4dc8f",
+  "reports/tables/european_rank_sensitivity_2025.tex": "26821239d0c32381d0d0ebc1c5eaa4deb549d7467e769d6da7bc452532d94215",
   "reports/tables/interest_burden_counterfactuals.tex": "3f40b1e9051755eb3c7c5356fe92ae88c887887d5cfe64025010754cf5b44348",
   "reports/tables/interest_burden_decomposition_endpoints.tex": "0e152ed49f31e55f82ccc98290e5e87c48c27f97a8b164304872f77c169728ff",
   "reports/tables/interest_share_of_budget.tex": "5b5c3e05c11189ea85ed349948044cdaed47656085711bd2cd100b06ca9a9bad",
