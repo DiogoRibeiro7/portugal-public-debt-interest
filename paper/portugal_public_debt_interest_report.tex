@@ -732,12 +732,31 @@ a bond-redemption hazard, while official-sector loans need not follow market
 rollover timing. Because those buckets are not modelled here, the direction of
 the pass-through bias is not identified from this exercise alone.
 
+That gap has since been closed, and not in this exercise's favour. A companion
+study in this repository (\texttt{paper/repricing/}) splits the stock using
+IGCP's monthly composition series and finds the bias is \emph{signable and
+positive}: the constant-hazard approximation used above understates how much of
+the stock reprices within a year by 10.90 percentage points, worth roughly EUR
+300 million of interest in the first year. The mechanism is compositional
+rather than behavioural. About 14 percent of the stock is floating-rate or
+inflation-linked and reprices on its own reset cycle \emph{without leaving the
+stock}, which a hazard calibrated to average maturity cannot represent, because
+such a hazard treats repricing and redemption as the same event. The
+scenarios below should therefore be read as a lower bound on near-term
+pass-through speed. The correction is not uniform across horizons: the same
+study finds the shape component turns negative at three and five years, so
+``the constant hazard is too slow'' holds early and reverses later.
+
 Debt and nominal GDP are held fixed at their 2025 values across the horizon,
 and cumulative euro amounts are undiscounted nominal amounts on that fixed
 base. The convention isolates the refinancing channel, but it also
 mechanically overstates the burden path relative to a scenario with positive
 nominal GDP growth and the same euro interest costs. The exercise is stylised,
-not a forecast.
+not a forecast. The companion study quantifies that overstatement: at a
+100 basis-point shock and a five-year horizon, the incremental burden falls
+from 0.475 percent of GDP under the fixed-GDP convention to 0.391 percent
+under central nominal growth, so the convention accounts for roughly
+18 percent of the measured effect.
 
 \begin{figure}[H]
 \centering
@@ -887,7 +906,10 @@ same as central-government cash interest, so budget execution and Treasury cash
 management would require a separate reconciliation layer. Annual data cannot
 identify within-year refinancing, issuance, redemption, or cash-management
 dynamics, and the refinancing exercise uses a constant hazard calibrated to
-average maturity rather than IGCP's actual redemption profile. The
+average maturity rather than IGCP's actual redemption profile; the companion
+repricing study shows that this approximation understates near-term
+pass-through, so the scenarios here are a lower bound rather than a neutral
+one. The
 average-debt interest rate is an average-cost measure, not a marginal cost of
 funds, and cannot replace the debt-dynamics rate or an issuance yield in
 debt-management analysis. The cross-country panel is harmonised by Eurostat
@@ -896,7 +918,9 @@ cash buffers, official-sector loans, or country-specific fiscal institutions.
 Finally, the rate-shock simulations omit feedback through growth, inflation,
 primary balances, market risk premia, and policy responses. Because nominal GDP
 is fixed in the scenario denominator, the burden effect is upward-biased
-relative to an otherwise identical positive nominal-growth path; because
+relative to an otherwise identical positive nominal-growth path, by roughly
+18 percent at a five-year horizon on the companion study's central growth path;
+because
 stock-flow adjustments are not decomposed into institutional components, they
 should not be read as policy actions without further fiscal-accounting evidence.
 
