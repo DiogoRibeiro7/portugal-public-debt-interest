@@ -27,7 +27,7 @@
   linkcolor=blue,
   urlcolor=blue,
   citecolor=blue,
-  pdftitle={Portugal's Public-Debt Interest Burden in a Reproducible ESA 2010 Assessment},
+  pdftitle={Portugal's Public-Debt Interest Burden: A Reproducible ESA 2010 Assessment},
   pdfauthor={Diogo Ribeiro}
 }
 
@@ -69,7 +69,8 @@
   \vskip 1.5em}
 \makeatother
 
-\title{\textbf{Portugal's Public-Debt Interest Burden in a Reproducible ESA 2010 Assessment}}
+\title{\textbf{Portugal's Public-Debt Interest Burden: A Reproducible ESA 2010
+Assessment, \MainStartYear{}--\LatestYear{}}}
 \author{Diogo Ribeiro\inst{1,*}\orcidID{0009-0001-2022-7072}}
 \authorrunning{D. Ribeiro}
 \institute{ESMAD, Instituto Polit\'ecnico do Porto, \\
@@ -98,9 +99,12 @@ cost effect was \DecompRateNineteenNinetySixToLatestPp{} percentage points,
 while debt exposure contributed
 \DecompExposureNineteenNinetySixToLatestPp{} percentage points. Official
 headline ratios and reconstructed decomposition values use different bases, so
-small endpoint differences are disclosed. In \LatestYear{}, Portugal ranked
-\PortugalComparatorRankWord{} among the \ComparatorCountryCountWord{} euro-area
-country comparators by interest expenditure as a percentage of GDP. Rate shocks
+small endpoint differences are disclosed. Portugal's position in the euro-area
+distribution has moved sharply: it carried the highest interest burden of any
+euro-area member in 2014 and ranked \PortugalComparatorRankWord{} of the
+\ComparatorCountryCountWord{} country comparators in \LatestYear{}, with
+membership evaluated at each comparison year. That rank is locally fragile
+upward and stable downward. Rate shocks
 reach the average cost of the outstanding stock gradually: a 100 basis-point
 full-stock shock at the \LatestYear{} debt ratio is approximately
 \ShockHundredApproxPp{} percentage points of GDP, but that number is an
@@ -545,7 +549,7 @@ verifies implementation consistency, not the economic content of the residual.
 Cash-buffer movements, financial-asset transactions, valuation effects, and
 other known stock-flow components are not decomposed here. Assigning
 institutional meaning to a large annual residual would require that separate
-fiscal-accounts exercise \cite{cfp_sfa}.
+fiscal-accounts exercise \cite{weber2012,seiferling2013,campos2006}.
 
 The denominator is Maastricht consolidated gross debt. That choice matters for
 both the debt-dynamics rate \(r^{DD}=I_t/D_{t-1}\) and the average-debt rate,
@@ -568,6 +572,23 @@ with a \DecompExposureNineteenNinetySixToLatestPp{} percentage point
 debt-exposure effect. In both intervals the reconciliation error is
 negligible: \DecompErrorTwentyFourteenToLatestPp{} and
 \DecompErrorNineteenNinetySixToLatestPp{} percentage points, respectively.
+
+The long-run financing-cost effect did not accumulate evenly, and the regime
+averages in Table \ref{tab:regimes} locate where it came from. Three
+episodes dominate, and they are of different kinds. Convergence and monetary
+union removed a currency-risk premium from a high-yield legacy stock: the
+mechanism was the entry price of the euro, and it operated on new issuance as
+the pre-euro stock retired. The programme and post-programme years pushed in
+the opposite direction, raising the average cost of the stock while the debt
+ratio was also rising, which is why the crisis period is the one interval where
+both components worsen together. The asset-purchase era then delivered the
+largest sustained decline, refinancing maturing high-coupon debt at yields
+that were low for an extended period rather than briefly. That last point
+matters for reading the recent numbers: because the effect works through
+refinancing, the low-rate era continued to lower the average cost of the stock
+for years after policy rates had turned, which is the same lag Section
+\ref{sec:refinancing} models. No causal claim is made here; the regime
+boundaries are institutional dates, not estimated breakpoints.
 
 \begin{figure}[H]
 \centering
@@ -648,25 +669,32 @@ primary balances, and maturity structure that this table does not make.
 
 \input{../reports/tables/european_comparison_2025.tex}
 
-The cross-section also needs a time anchor. Portugal was first among eligible
-euro-area countries by interest burden in 2014 and sixth in \ComparisonYear{},
-as Table \ref{tab:europe-rank-change} shows. The current rank is also locally
-fragile. With the other comparator values unchanged, a 0.30 percentage-point
-lower Portuguese burden would move the country to eighth, while a 0.30
-percentage-point higher burden would leave it sixth. Table
-\ref{tab:europe-rank-sensitivity} should therefore be read as a rank-fragility
-diagnostic rather than a statistical confidence interval.
-
-\input{../reports/tables/european_rank_change.tex}
-
-\input{../reports/tables/european_rank_sensitivity_2025.tex}
-
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{../reports/figures/08_european_comparison.pdf}
 \caption{European comparison of interest expenditure as a percentage of GDP. Eligible euro-area countries only, aggregates excluded; the vertical line marks the median. \ProvisionalComparatorCount{} geographies carry provisional Eurostat flags in \ComparisonYear{}.}
 \label{fig:europe}
 \end{figure}
+
+The cross-section also needs a time anchor. Portugal was first among eligible
+euro-area countries by interest burden in 2014 and sixth in \ComparisonYear{},
+as Table \ref{tab:europe-rank-change} shows. The current rank is also locally
+fragile, and asymmetrically so. With the other comparator values unchanged, a
+0.30 percentage-point \emph{higher} Portuguese burden would move the country to
+fourth, tying with Belgium and France at 2.2 percent, while a 0.30
+percentage-point lower burden would leave it sixth, tying with Austria and
+Finland at 1.6 percent rather than falling below them. The rank is therefore
+fragile upward and stable downward. That asymmetry is what matters for reading
+the provisional-data disclosure: \ProvisionalComparatorCount{} of the
+\ComparatorCountryCountWord{} geographies carry provisional flags, and an
+upward revision to Portugal's burden would cost two places while a downward
+revision of the same size would cost none. Table
+\ref{tab:europe-rank-sensitivity} should be read as a rank-fragility
+diagnostic rather than a statistical confidence interval.
+
+\input{../reports/tables/european_rank_change.tex}
+
+\input{../reports/tables/european_rank_sensitivity_2025.tex}
 
 Portugal's intermediate position reflects a combination of debt, rate, and
 balance conditions. Its debt ratio remained high by northern euro-area
@@ -724,7 +752,23 @@ IGCP's redemption schedule, which is lumpy. After ten years the central
 scenario has repriced about 78 percent of the original stock. The slow and fast
 scenarios carry no external source at all; they bracket the central case so the
 reader can see how much the result depends on the assumption rather than on the
-data. The model does not use IGCP's maturity profile or issuance record. It
+data.
+
+That bracket should not be over-read. The slow and fast scenarios vary the
+hazard \emph{rate}; they do not vary its \emph{functional form}. All three are
+geometric, and a geometric hazard is memoryless: the probability that a euro of
+legacy debt reprices in the next year is the same whether it was issued last
+year or nine years ago. Scheduled redemption is not memoryless. A real profile
+is lumpy, front-loaded where large benchmark lines mature and flat between
+them, so its curvature differs from exponential decay at every horizon
+regardless of what value $p$ takes. This shows in the tail: the central
+scenario leaves about 22 percent of the original stock unrepriced after ten
+years and the slow scenario 34.9 percent, which is not what a genuine 7.2-year
+weighted-average-maturity profile would do. A reader who sees a fast/slow band
+should therefore not infer that it covers the modelling uncertainty. It covers
+one parameter of one functional form. The companion repricing study replaces
+the form rather than its parameter, and finds the error runs in a consistent
+direction. The model does not use IGCP's maturity profile or issuance record. It
 also does not split the stock into retail savings instruments, official loans,
 marketable fixed-rate bonds, floating-rate liabilities, or other instruments
 with different repricing mechanics. Retail instruments may reprice faster than
@@ -1033,6 +1077,21 @@ observation statuses accepted into the euro-area comparison are
 \AcceptedObservationStatuses{}. The largest official-versus-reconstructed ratio
 discrepancy is \MaxRatioDiscrepancyPp{} percentage points, in
 \RatioBreachYears{}; the per-year rows for those years appear above.
+
+Two checks in the suite exist because of defects that reached a compiled draft,
+and both are the kind this paper's validation philosophy is meant to catch:
+silent, internally consistent, and plausible on the page. First, the rank
+tables must agree at zero perturbation. They once did not, because the
+perturbed burden $1.9 - 0.3$ evaluates in binary floating point to
+$1.5999999999999999$, which loses a tie it should have joined and cost Portugal
+two ranks in Table \ref{tab:europe-rank-sensitivity} alone; both tables used the
+documented ranking convention correctly, so nothing looked wrong. Perturbed
+values are now rounded to the precision Eurostat publishes before ranking.
+Second, euro-area membership must be evaluated at the comparison year rather
+than at the year of writing; ranking a 2014 cross-section against the current
+membership list silently admitted Lithuania and Croatia to a euro area that had
+eighteen members at the time. Both properties are asserted by tests rather than
+left to review.
 Portugal's \LatestYear{} comparison observations are flagged
 \PortugalComparisonStatus{} by Eurostat and are admitted only because that
 status is included in the stated eligibility rule. A
@@ -1063,7 +1122,7 @@ The full command sequence is documented in the repository README. The pipeline
 is reproduced with \texttt{pt-debt all --config config/default.yaml}, which
 performs acquisition, the analytical build, validation, figure and table
 generation, and the Markdown summary. The public repository is
-\url{https://github.com/diogo-ricardo/portugal-public-debt-interest}. The
+\url{https://github.com/DiogoRibeiro7/portugal-public-debt-interest}. The
 Zenodo release DOI for the archived research object is
 \doi{10.5281/zenodo.21722771}; the concept DOI is
 \doi{10.5281/zenodo.21722700}.
@@ -1091,11 +1150,6 @@ Institutional Paper, Directorate-General for Economic and Financial Affairs.
 Conselho das Finanças Públicas (2025). \emph{Economic and Fiscal Outlook
 2025--2029: Update}. Lisbon: CFP.
 \url{https://www.cfp.pt/en/publications/economic-and-fiscal-outlook/economic-and-fiscal-outlook-2025-2029-update}
-
-\bibitem{cfp_sfa}
-Conselho das Finanças Públicas (2026). \emph{Stock-flow adjustment glossary}.
-Lisbon: CFP.
-\url{https://www.cfp.pt/en/glossary/stock-flow-adjustment}
 
 \bibitem{escolano2010}
 Escolano, J. (2010). \emph{A Practical Guide to Public Debt Dynamics, Fiscal
@@ -1156,7 +1210,7 @@ Paper 13/63. Washington, DC: IMF.
 \bibitem{campos2006}
 Campos, C. F. S., Jaimovich, D., \& Panizza, U. (2006). The unexplained part of
 public debt. \emph{Emerging Markets Review}, 7(3), 228--243.
-\url{https://ideas.repec.org/a/eee/ememar/v7y2006i3p228-243.html}
+\doi{10.1016/j.ememar.2006.06.001}
 
 \bibitem{igcp2024}
 Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).

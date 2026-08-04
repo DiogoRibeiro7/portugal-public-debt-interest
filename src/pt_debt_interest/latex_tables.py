@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from contextlib import suppress
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 import pandas as pd
 
@@ -18,6 +18,7 @@ from .display import (
 from .eligibility import (
     build_comparison_summary,
     build_eligibility_table,
+    competition_rank,
     latest_common_year,
 )
 from .exceptions import ValidationError
@@ -32,6 +33,12 @@ from .report_context import (
 )
 from .revisions import build_validation_detail
 from .scenarios import static_rate_shock_table
+
+#: Decimals to round to before ranking perturbed burden values. Eurostat
+#: publishes the burden to one decimal and the perturbations are hundredths,
+#: so rounding here discards no information -- it only prevents binary
+#: representation error from deciding which comparators tie.
+PERTURBATION_DECIMALS: Final[int] = 2
 
 
 def _escape(value: object) -> str:
@@ -374,8 +381,10 @@ def debt_dynamics_diagnostic_table(
         rows=input_rows,
         notes=(
             "Notes: $r^{AVG}$ is the average-debt rate and $r^{DD}$ the "
-            "debt-dynamics rate. The first row uses the previous debt ratio "
-            "available in the processed dataset. " + SOURCE_NOTE
+            "debt-dynamics rate. Each row divides by the preceding year's debt "
+            "ratio; for the first row that year falls outside the window shown "
+            "but inside the processed series, so no fallback is used. "
+            + SOURCE_NOTE
         ),
     )
     contribution_table = _table(
@@ -531,11 +540,18 @@ def european_rank_sensitivity_table(
     rows = []
     for shock in shocks_pp:
         shocked = snapshot.copy()
-        shocked.loc[shocked["geo"].eq("PT"), "interest_pct_gdp"] = base + shock
-        shocked["rank"] = (
-            pd.to_numeric(shocked["interest_pct_gdp"], errors="coerce")
-            .rank(ascending=False, method="min")
-            .astype("Int64")
+        # Round the perturbed value before ranking. Eurostat publishes the
+        # burden to one decimal and the shocks are hundredths, so this is
+        # lossless -- but without it binary representation decides ties:
+        # 1.9 - 0.3 evaluates to 1.5999999999999999, which loses to a
+        # comparator's 1.6 and silently drops Portugal two ranks.
+        shocked.loc[shocked["geo"].eq("PT"), "interest_pct_gdp"] = round(
+            base + shock, PERTURBATION_DECIMALS
+        )
+        shocked["rank"] = competition_rank(
+            pd.to_numeric(shocked["interest_pct_gdp"], errors="coerce").round(
+                PERTURBATION_DECIMALS
+            )
         )
         pt = shocked.loc[shocked["geo"].eq("PT")].iloc[0]
         rows.append(
