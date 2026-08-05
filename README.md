@@ -157,7 +157,16 @@ pytest
 
 ## Citation
 
-Citation metadata is provided in `CITATION.cff` for GitHub and reference-manager
+Cite the Zenodo concept DOI, which covers all versions and resolves to the
+current one:
+
+> **10.5281/zenodo.21722700**
+
+Per-version DOIs exist and are listed on that record. Prefer the concept DOI
+unless you need to pin a specific release — a version DOI goes stale as soon as
+the next release is cut.
+
+Citation metadata is in `CITATION.cff` for GitHub and reference-manager
 workflows.
 
 ## Repository layout

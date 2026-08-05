@@ -164,6 +164,8 @@ def verify_manuscript_values(tex_path: Path) -> list[str]:
     body = source.split(r"\begin{document}")[-1].split(r"\begin{thebibliography}")[0]
     body = re.sub(r"\\includegraphics\[[^\]]*\]\{[^}]*\}", " ", body)
     body = re.sub(r"\\(?:label|ref|cite|input)\{[^}]*\}", " ", body)
+    # Identifiers, not results: a DOI or URL is full of digits and dots.
+    body = re.sub(r"\\(?:doi|url|texttt)\{[^}]*\}", " ", body)
     body = re.sub(r"%[^\n]*", " ", body)
     # Four-digit years are prose, not results.
     body = re.sub(r"(?<!\d)(19|20)\d{2}(?!\d)", " ", body)
