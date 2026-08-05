@@ -48,12 +48,24 @@ TRACKED = (
 )
 
 
+def _normalised(path: Path) -> bytes:
+    """Return the file's bytes with line endings normalised to LF.
+
+    Every tracked artefact is text. Hashing raw bytes made the baseline
+    platform-dependent: with ``core.autocrlf`` set, the same commit checks out
+    as CRLF on Windows and LF elsewhere, so the guard failed on a fresh clone
+    for a reason unrelated to the analysis. ``.gitattributes`` now pins LF in
+    the repository; this keeps the test honest regardless.
+    """
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
 def _checksums() -> dict[str, str]:
     recorded: dict[str, str] = {}
     for relative in TRACKED:
         path = REPO_ROOT / relative
         if path.is_file():
-            recorded[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+            recorded[relative] = hashlib.sha256(_normalised(path)).hexdigest()
     return recorded
 
 
