@@ -21,6 +21,10 @@ from .interest_decomposition import build_interest_burden_decomposition
 from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
 
+# Element ids in SVG output are salted at random by default, so identical
+# figures differ byte-for-byte between runs. A fixed salt makes them stable.
+matplotlib.rcParams["svg.hashsalt"] = "pt-debt-interest"
+
 
 def _source_note(frame: pd.DataFrame) -> str:
     """Build a human-readable source note.
@@ -52,9 +56,12 @@ def _save(fig: Figure, path: Path) -> list[Path]:
     png_path = path.with_suffix(".png")
     svg_path = path.with_suffix(".svg")
     pdf_path = path.with_suffix(".pdf")
-    fig.savefig(png_path, dpi=180, bbox_inches="tight")
-    fig.savefig(svg_path, bbox_inches="tight")
-    fig.savefig(pdf_path, bbox_inches="tight")
+    # Suppress the embedded creation timestamp. Without this every rebuild
+    # produces different bytes for identical figures, which makes the figures
+    # unreviewable in a diff and keeps them out of the regression baseline.
+    fig.savefig(png_path, dpi=180, bbox_inches="tight", metadata={"Software": None})
+    fig.savefig(svg_path, bbox_inches="tight", metadata={"Date": None})
+    fig.savefig(pdf_path, bbox_inches="tight", metadata={"CreationDate": None})
     plt.close(fig)
     return [png_path, svg_path, pdf_path]
 

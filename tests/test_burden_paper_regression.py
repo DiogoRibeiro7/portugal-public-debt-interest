@@ -21,9 +21,13 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BASELINE = REPO_ROOT / "tests" / "baselines" / "burden_paper_outputs.json"
 
-#: Generated artefacts that define the burden paper. Figures are excluded:
-#: matplotlib embeds a creation timestamp, so they are not byte-reproducible
-#: and a checksum over them would fail for reasons unrelated to the analysis.
+#: Generated artefacts that define the burden paper.
+#:
+#: Figures used to be excluded because matplotlib embedded a creation
+#: timestamp and randomised SVG element ids, so identical plots differed
+#: byte-for-byte between runs. Both are now suppressed in ``plotting._save``,
+#: the figures are reproducible, and every tracked figure PDF is checksummed
+#: alongside the tables -- see :func:`_figure_paths`.
 TRACKED = (
     "reports/tables/paper_headlines.tex",
     "reports/tables/summary_statistics.tex",
@@ -48,21 +52,44 @@ TRACKED = (
 )
 
 
-def _normalised(path: Path) -> bytes:
-    """Return the file's bytes with line endings normalised to LF.
+#: Suffixes git may newline-convert. Binary artefacts are hashed as-is.
+_TEXT_SUFFIXES = frozenset({".tex", ".json", ".csv", ".md"})
 
-    Every tracked artefact is text. Hashing raw bytes made the baseline
-    platform-dependent: with ``core.autocrlf`` set, the same commit checks out
-    as CRLF on Windows and LF elsewhere, so the guard failed on a fresh clone
-    for a reason unrelated to the analysis. ``.gitattributes`` now pins LF in
-    the repository; this keeps the test honest regardless.
+
+def _normalised(path: Path) -> bytes:
+    """Return the file's bytes, with LF line endings for text artefacts.
+
+    Hashing raw bytes made the baseline platform-dependent: with
+    ``core.autocrlf`` set, the same commit checks out as CRLF on Windows and
+    LF elsewhere, so the guard failed on a fresh clone for a reason unrelated
+    to the analysis. ``.gitattributes`` now pins LF in the repository; this
+    keeps the test honest regardless. Binary artefacts -- the figure PDFs --
+    are never newline-converted and must be hashed untouched.
     """
-    return path.read_bytes().replace(b"\r\n", b"\n")
+    raw = path.read_bytes()
+    if path.suffix.lower() not in _TEXT_SUFFIXES:
+        return raw
+    return raw.replace(b"\r\n", b"\n")
+
+
+def _figure_paths() -> tuple[str, ...]:
+    """Every committed figure PDF, in sorted order.
+
+    Globbed rather than listed so a new figure joins the baseline the moment
+    it is generated, instead of silently sitting outside it -- which is how
+    the two rank tables came to carry published errors unguarded.
+    """
+    figures = REPO_ROOT / "reports" / "figures"
+    if not figures.is_dir():
+        return ()
+    return tuple(
+        sorted(path.relative_to(REPO_ROOT).as_posix() for path in figures.glob("*.pdf"))
+    )
 
 
 def _checksums() -> dict[str, str]:
     recorded: dict[str, str] = {}
-    for relative in TRACKED:
+    for relative in (*TRACKED, *_figure_paths()):
         path = REPO_ROOT / relative
         if path.is_file():
             recorded[relative] = hashlib.sha256(_normalised(path)).hexdigest()
