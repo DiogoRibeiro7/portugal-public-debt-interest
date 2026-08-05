@@ -1,5 +1,45 @@
 # Changelog
 
+## v0.3.1 - 2026-08-05
+
+Release-metadata and citation fixes. No analytical results change.
+
+### Fixed
+
+- **`.zenodo.json` was left at 0.2.0 by the v0.3.0 bump**, so the archived
+  record would have been minted carrying the previous version number. The bump
+  missed it because the search for version strings excluded JSON files — the
+  one format that drives the archive.
+- **Appendix F cited a version DOI that was three releases stale.** It named
+  the v0.1.2 record as "the release DOI for the archived research object". A
+  version DOI printed in a manuscript is stale as soon as the next release is
+  cut, so the concept DOI is now the citation throughout: the manuscript, the
+  README, and `CITATION.cff`, which previously carried no DOI at all despite
+  being what GitHub and reference managers read.
+
+### Added
+
+- `tests/test_release_metadata.py`. Four files declare release identity and
+  nothing compared them. The tests enumerate those files rather than grepping,
+  so a new one has to be added deliberately instead of silently escaping the
+  check, and they assert the versions and dates agree, the version is semver,
+  the date is not in the future, the changelog has an entry for it, and
+  `.zenodo.json` carries the fields Zenodo needs.
+- A data-and-code availability statement in the repricing paper, which had
+  none.
+
+### Changed
+
+- The repricing manuscript's drift guard no longer reads a DOI as a hand-typed
+  result. `10.5281` matches a decimal; the verifier now strips `\doi`, `\url`,
+  and `\texttt` before looking for literals.
+
+### Verification
+
+- `pytest`: 306 tests passed.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+- Both manuscripts recompile with no undefined references.
+
 ## v0.3.0 - 2026-08-05
 
 Corrections to published numbers, and the second manuscript.
