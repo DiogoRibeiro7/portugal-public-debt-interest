@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "portugal-public-debt-interest"
-version = "0.2.0"
+version = "0.3.0"
 description = "Reproducible analysis of Portugal's public-debt interest burden"
 authors = ["Diogo"]
 readme = "README.md"
@@ -31,7 +31,7 @@ pre-commit = ">=3.8,<5.0"
 
 [project]
 name = "portugal-public-debt-interest"
-version = "0.2.0"
+version = "0.3.0"
 description = "Reproducible analysis of Portugal's public-debt interest burden"
 requires-python = ">=3.11"
 dependencies = [
