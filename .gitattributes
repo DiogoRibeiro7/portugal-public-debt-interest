@@ -1,0 +1,15 @@
+# Without this file, core.autocrlf decides line endings per checkout, so the
+# same commit yields different bytes on Windows and Linux. That is fine for
+# compilation and fatal for a checksum baseline: the burden-paper regression
+# test hashes these files, and it would fail on a fresh Windows clone for a
+# reason that has nothing to do with the analysis.
+
+* text=auto eol=lf
+
+# Build outputs and data that must survive byte-for-byte.
+*.pdf   binary
+*.png   binary
+*.xlsx  binary
+*.xls   binary
+*.sqlite binary
+*.db    binary
