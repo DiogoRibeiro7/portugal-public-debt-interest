@@ -34,10 +34,9 @@ def _top_level_imports(path: Path) -> set[str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             found.update(alias.name.split(".")[0] for alias in node.names)
-        elif isinstance(node, ast.ImportFrom):
-            # A relative import has no module of its own to declare.
-            if node.level == 0 and node.module:
-                found.add(node.module.split(".")[0])
+        # A relative import has no module of its own to declare.
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            found.add(node.module.split(".")[0])
     return found
 
 
