@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.3.2 - 2026-08-06
+
+Second-round referee layout and membership fixes.
+
+### Fixed
+
+- Split the annual Portugal appendix into two portrait tables so all columns
+  remain visible in the compiled PDF.
+- Removed landscape wrappers from the annual and variable-definition
+  appendices, keeping page numbers consistently positioned.
+- Applied year-specific euro-area membership in the common-year helper and
+  comparison plot path.
+
+### Verification
+
+- `pytest`: 318 tests passed.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+- The manuscript recompiles to a 26-page PDF with no rotated pages.
+
 ## v0.3.1 - 2026-08-05
 
 Release-metadata and citation fixes. No analytical results change.
