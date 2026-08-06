@@ -24,6 +24,7 @@ from pt_debt_interest.eligibility import (
     latest_common_year,
     three_year_average_ranking,
 )
+from pt_debt_interest.exceptions import ValidationError
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PANEL = REPO_ROOT / "data" / "processed" / "eurostat_panel_metrics.csv"
@@ -176,6 +177,12 @@ def test_latest_common_year() -> None:
     mask = reduced["geo"].eq("IE") & reduced["year"].eq(year)
     reduced.loc[mask, "interest_pct_gdp"] = np.nan
     assert latest_common_year(reduced) < computed
+
+
+def test_latest_common_year_refuses_missing_required_column() -> None:
+    panel = _synthetic_panel().drop(columns=["average_debt_interest_rate_pct"])
+    with pytest.raises(ValidationError, match="missing required series"):
+        latest_common_year(panel)
 
 
 def test_three_year_average_requires_minimum_observations() -> None:

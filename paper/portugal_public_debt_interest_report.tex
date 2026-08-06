@@ -765,41 +765,34 @@ scenario leaves about 22 percent of the original stock unrepriced after ten
 years and the slow scenario 34.9 percent, which is not what a genuine 7.2-year
 weighted-average-maturity profile would do. A reader who sees a fast/slow band
 should therefore not infer that it covers the modelling uncertainty. It covers
-one parameter of one functional form. The companion repricing study replaces
-the form rather than its parameter, and finds the error runs in a consistent
-direction. The model does not use IGCP's maturity profile or issuance record. It
-also does not split the stock into retail savings instruments, official loans,
-marketable fixed-rate bonds, floating-rate liabilities, or other instruments
-with different repricing mechanics. Retail instruments may reprice faster than
-a bond-redemption hazard, while official-sector loans need not follow market
-rollover timing. Because those buckets are not modelled here, the direction of
-the pass-through bias is not identified from this exercise alone.
+one parameter of one functional form. The model does not use IGCP's maturity
+profile or issuance record. It also does not split the stock into retail
+savings instruments, official loans, marketable fixed-rate bonds, floating-rate
+liabilities, or other instruments with different repricing mechanics. Retail
+instruments may reprice faster than a bond-redemption hazard, while
+official-sector loans need not follow market rollover timing. Because those
+buckets are not modelled here, the direction and size of any pass-through bias
+are not identified from this exercise alone.
 
-A companion study \cite{ribeiro_repricing} identifies that direction, and not
-in this exercise's favour. Splitting the stock by
-IGCP's monthly composition series, it finds the bias is \emph{signable and
-positive}: the constant-hazard approximation used above understates how much of
-the stock reprices within a year by 10.90 percentage points, worth roughly EUR
-300 million of interest in the first year. The mechanism is compositional
-rather than behavioural. About 14 percent of the stock is floating-rate or
-inflation-linked and reprices on its own reset cycle \emph{without leaving the
-stock}, which a hazard calibrated to average maturity cannot represent, because
-such a hazard treats repricing and redemption as the same event. The
-scenarios below should therefore be read as a lower bound on near-term
-pass-through speed. The correction is not uniform across horizons: the same
-study finds the shape component turns negative at three and five years, so
-``the constant hazard is too slow'' holds early and reverses later.
+A companion study \cite{ribeiro_repricing} explores that modelling uncertainty
+using IGCP's monthly composition series. Its present results should be read as
+preliminary sensitivity analysis rather than as inputs to the burden estimates
+in this paper. The exercise shows why a single maturity hazard is incomplete:
+some liabilities can reset without redemption, retail savings products are a
+stock-flow margin rather than a pure legacy-stock repricing event, and the
+available aggregate data do not identify all overlaps between instrument
+classes. The relevant lesson for this paper is therefore qualitative. The
+refinancing scenarios below are transparent constant-hazard exercises, not
+cash-flow schedules and not lower bounds established from mutually exclusive
+instrument-level data.
 
 Debt and nominal GDP are held fixed at their 2025 values across the horizon,
 and cumulative euro amounts are undiscounted nominal amounts on that fixed
-base. The convention isolates the refinancing channel, but it also
-mechanically overstates the burden path relative to a scenario with positive
-nominal GDP growth and the same euro interest costs. The exercise is stylised,
-not a forecast. The companion study quantifies that overstatement: at a
-100 basis-point shock and a five-year horizon, the incremental burden falls
-from 0.475 percent of GDP under the fixed-GDP convention to 0.391 percent
-under central nominal growth, so the convention accounts for roughly
-18 percent of the measured effect.
+base. The convention isolates the refinancing channel, but it also makes the
+burden path a denominator sensitivity, not a forecast. A positive
+nominal-GDP path would reduce the same euro interest increment as a share of
+GDP, with the size of that reduction depending mechanically on the chosen growth
+path.
 
 \begin{figure}[H]
 \centering
@@ -950,10 +943,8 @@ same as central-government cash interest, so budget execution and Treasury cash
 management would require a separate reconciliation layer. Annual data cannot
 identify within-year refinancing, issuance, redemption, or cash-management
 dynamics, and the refinancing exercise uses a constant hazard calibrated to
-average maturity rather than IGCP's actual redemption profile; the companion
-repricing study shows that this approximation understates near-term
-pass-through, so the scenarios here are a lower bound rather than a neutral
-one. The
+average maturity rather than IGCP's actual redemption profile or mutually
+exclusive instrument classes. The
 average-debt interest rate is an average-cost measure, not a marginal cost of
 funds, and cannot replace the debt-dynamics rate or an issuance yield in
 debt-management analysis. The cross-country panel is harmonised by Eurostat
@@ -961,10 +952,8 @@ definitions but does not control for maturity structure, inflation-linked debt,
 cash buffers, official-sector loans, or country-specific fiscal institutions.
 Finally, the rate-shock simulations omit feedback through growth, inflation,
 primary balances, market risk premia, and policy responses. Because nominal GDP
-is fixed in the scenario denominator, the burden effect is upward-biased
-relative to an otherwise identical positive nominal-growth path, by roughly
-18 percent at a five-year horizon on the companion study's central growth path;
-because
+is fixed in the scenario denominator, the burden effect should be interpreted
+as a ceteris-paribus sensitivity; because
 stock-flow adjustments are not decomposed into institutional components, they
 should not be read as policy actions without further fiscal-accounting evidence.
 

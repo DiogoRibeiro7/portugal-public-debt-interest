@@ -61,12 +61,13 @@ class KernelInputs:
 def geometric_kernel(
     horizons: np.ndarray[Any, Any], mean_maturity_years: float
 ) -> np.ndarray[Any, Any]:
-    """The weighted-average-maturity benchmark: a memoryless hazard.
+    """The weighted-average-maturity benchmark: a discrete annual hazard.
 
     This is exactly the burden paper's assumption, and the object this paper
     argues is biased.
     """
-    return 1.0 - np.exp(-horizons / mean_maturity_years)
+    hazard = 1.0 / mean_maturity_years
+    return 1.0 - (1.0 - hazard) ** horizons
 
 
 def linear_profile_kernel(

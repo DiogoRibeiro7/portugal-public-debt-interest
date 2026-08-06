@@ -2,9 +2,10 @@
 
 Two fixes to the burden paper's scenario section are built in.
 
-**Nominal GDP is not held fixed.** The burden paper freezes GDP and the debt
-ratio across a ten-year horizon, which contradicts its own finding that the
-denominator did most of the work in 2022-2025. Growth paths are explicit here.
+**Nominal GDP is not held fixed in every scenario.** The burden paper freezes
+GDP and the debt ratio to isolate refinancing arithmetic. Growth paths are
+explicit here so the denominator sensitivity can be inspected rather than
+treated as an empirical correction.
 
 **The stock is not homogeneous.** The kernel differentiates instrument classes,
 and that differentiation is preserved through the simulation rather than
@@ -79,7 +80,8 @@ def simulate_paths(
             rate = initial_rate_pct + repriced * shock_pct
             baseline_rate = initial_rate_pct + baseline * 0.0
 
-            # The denominator moves. This is the burden paper's fixed-GDP flaw.
+            # The denominator moves in these scenarios; the burden paper's
+            # fixed-GDP case remains a ceteris-paribus comparison.
             years = np.asarray(horizons, dtype=float)
             gdp = nominal_gdp_mio_eur * (1.0 + growth) ** years
             debt_ratio = debt_pct_gdp * (nominal_gdp_mio_eur / gdp)

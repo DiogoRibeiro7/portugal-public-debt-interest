@@ -15,7 +15,7 @@ import matplotlib
 import pandas as pd
 
 from pt_debt.repricing.estimate import OUTCOME, REGRESSORS
-from pt_debt.repricing.kernel import KernelInputs
+from pt_debt.repricing.kernel import KernelInputs, bias_table, fiscal_translation
 from pt_debt.repricing.simulate import (
     kernel_bootstrap_band,
     model_comparison,
@@ -90,6 +90,45 @@ def _simulation_inputs(paths: pd.DataFrame) -> dict[str, float]:
     }
 
 
+def _behavioural_sensitivity_bounds(replicates: pd.DataFrame) -> tuple[float, float, float]:
+    """Central behavioural effect is zero; the fitted response is a sensitivity."""
+    widening = replicates["spread_widening_pp"].dropna().astype(float)
+    return (
+        0.0,
+        min(0.0, float(widening.quantile(0.025))),
+        max(0.0, float(widening.quantile(0.975))),
+    )
+
+
+def _bias_frame(inputs: KernelInputs, replicates: pd.DataFrame) -> pd.DataFrame:
+    central, low, high = _behavioural_sensitivity_bounds(replicates)
+    return bias_table(
+        inputs,
+        shock_bps=100,
+        behavioural_response=central,
+        behavioural_low=low,
+        behavioural_high=high,
+    )
+
+
+def _fiscal_bias_frame(
+    bias: pd.DataFrame,
+    fiscal_reference: pd.DataFrame,
+) -> pd.DataFrame:
+    one_year = fiscal_reference.loc[fiscal_reference["horizon_years"].eq(1)].iloc[0]
+    old_bias = float(one_year["total_bias_pp"])
+    old_interest = float(one_year["bias_interest_mio_eur"])
+    old_pct_gdp = float(one_year["bias_interest_pct_gdp"])
+    debt_pct_gdp = old_pct_gdp / (old_bias / 100.0 * 100 / 10_000.0)
+    nominal_gdp_mio_eur = old_interest / (old_pct_gdp / 100.0)
+    return fiscal_translation(
+        bias,
+        debt_pct_gdp=debt_pct_gdp,
+        shock_bps=100,
+        nominal_gdp_mio_eur=nominal_gdp_mio_eur,
+    )
+
+
 def _table(
     *,
     caption: str,
@@ -136,8 +175,7 @@ def _row(frame: pd.DataFrame, column: str, value: str | int) -> pd.Series:
 
 def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
     """Read the artefacts and emit the manuscript's macros."""
-    bias = pd.read_csv(processed_dir / "kernels" / "kernel_bias.csv")
-    fiscal = pd.read_csv(processed_dir / "kernels" / "kernel_bias_fiscal.csv")
+    fiscal_reference = pd.read_csv(processed_dir / "kernels" / "kernel_bias_fiscal.csv")
     coefficients = pd.read_csv(processed_dir / "estimates" / "s1_coefficients.csv")
     replicates = pd.read_csv(
         processed_dir / "estimates" / "s1_bootstrap_replicates.csv"
@@ -149,6 +187,8 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
     panel["period"] = pd.to_datetime(panel["period"])
     inputs = _kernel_inputs_from_panel(panel)
     sim_inputs = _simulation_inputs(paths)
+    bias = _bias_frame(inputs, replicates)
+    fiscal = _fiscal_bias_frame(bias, fiscal_reference)
 
     macros: list[str] = []
 
@@ -257,11 +297,12 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
         _macro("FanBurdenHighHFive", f"{fan_five['burden_p95']:.3f}"),
     ]
 
+    _, behavioural_low, behavioural_high = _behavioural_sensitivity_bounds(replicates)
     sensitivity = sensitivity_grid(
         inputs,
-        behavioural_response=float(widening["coefficient"]),
-        behavioural_low=float(replicates["spread_widening_pp"].quantile(0.025)),
-        behavioural_high=float(replicates["spread_widening_pp"].quantile(0.975)),
+        behavioural_response=0.0,
+        behavioural_low=behavioural_low,
+        behavioural_high=behavioural_high,
         debt_pct_gdp=sim_inputs["debt_pct_gdp"],
     )
     one_year = sensitivity.loc[sensitivity["horizon_years"].eq(1), "bias_pp"]
@@ -283,7 +324,6 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     """Write LaTeX tables used by the repricing manuscript."""
     table_dir = output_dir / TABLE_DIRNAME
     table_dir.mkdir(parents=True, exist_ok=True)
-    bias = pd.read_csv(processed_dir / "kernels" / "kernel_bias.csv")
     coefficients = pd.read_csv(processed_dir / "estimates" / "s1_coefficients.csv")
     replicates = pd.read_csv(processed_dir / "estimates" / "s1_bootstrap_replicates.csv")
     backtest = pd.read_csv(processed_dir / "scenarios" / "backtest_summary.csv")
@@ -294,6 +334,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     latest = panel.loc[panel["period"].eq(panel["period"].max())]
     inputs = _kernel_inputs_from_panel(panel)
     sim_inputs = _simulation_inputs(scenario_paths)
+    bias = _bias_frame(inputs, replicates)
 
     paths: list[Path] = []
     portfolio_rows = [
@@ -374,7 +415,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     path = table_dir / "kernel_bias.tex"
     path.write_text(
         _table(
-            caption="Bias in the weighted-average-maturity proxy, +100 bps",
+            caption="Scenario bias in the weighted-average-maturity proxy, +100 bps",
             label="tab:bias",
             columns="rrrrrr",
             header=[
@@ -393,12 +434,12 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     )
     paths.append(path)
 
-    widening = _row(coefficients, "term", "spread_widening_pp")
+    _, behavioural_low, behavioural_high = _behavioural_sensitivity_bounds(replicates)
     sensitivity = sensitivity_grid(
         inputs,
-        behavioural_response=float(widening["coefficient"]),
-        behavioural_low=float(replicates["spread_widening_pp"].quantile(0.025)),
-        behavioural_high=float(replicates["spread_widening_pp"].quantile(0.975)),
+        behavioural_response=0.0,
+        behavioural_low=behavioural_low,
+        behavioural_high=behavioural_high,
         debt_pct_gdp=sim_inputs["debt_pct_gdp"],
     )
     labels = {
@@ -548,11 +589,11 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     figure_dir.mkdir(parents=True, exist_ok=True)
     panel = pd.read_csv(panel_path)
     panel["period"] = pd.to_datetime(panel["period"])
-    bias = pd.read_csv(processed_dir / "kernels" / "kernel_bias.csv")
     paths = pd.read_csv(processed_dir / "scenarios" / "pass_through_paths.csv")
     replicates = pd.read_csv(processed_dir / "estimates" / "s1_bootstrap_replicates.csv")
     inputs = _kernel_inputs_from_panel(panel)
     sim_inputs = _simulation_inputs(paths)
+    bias = _bias_frame(inputs, replicates)
 
     written: list[Path] = []
 

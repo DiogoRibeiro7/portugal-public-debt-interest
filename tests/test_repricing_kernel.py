@@ -34,6 +34,7 @@ def test_geometric_benchmark_is_memoryless() -> None:
     # A constant hazard means each year retires the same fraction of what is left.
     ratios = unrepriced[1:] / unrepriced[:-1]
     assert ratios == pytest.approx(ratios[0], rel=1e-9)
+    assert values[0] == pytest.approx(1.0 / 7.52)
 
 
 def test_kernel_components_sum_to_the_total() -> None:
@@ -89,7 +90,7 @@ def test_fiscal_translation_scales_with_the_shock() -> None:
 def test_benchmark_matches_the_burden_paper_assumption() -> None:
     benchmark = wam_implied_kernel(INPUTS)
     assert benchmark["repriced_share"].iloc[0] == pytest.approx(
-        1.0 - np.exp(-1.0 / 7.52)
+        1.0 / 7.52
     )
 
 

@@ -103,3 +103,13 @@ def test_repricing_paper_uses_generated_tables_and_figures() -> None:
 def test_repricing_paper_has_a_substantive_bibliography() -> None:
     source = TEX_PATH.read_text(encoding="utf-8")
     assert source.count(r"\bibitem{") >= 10
+
+
+def test_repricing_paper_does_not_headline_the_old_point_estimate() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    abstract = source.split(r"\begin{abstract}", 1)[1].split(r"\end{abstract}", 1)[0]
+    conclusion = source.split(r"\section{Conclusion}", 1)[1]
+    assert r"\BiasTotalHOne" not in abstract
+    assert r"\BiasInterestMioHOne" not in abstract
+    assert r"\BiasTotalHOne" not in conclusion
+    assert "bounded sensitivity" in abstract
