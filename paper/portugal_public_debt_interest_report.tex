@@ -1001,7 +1001,18 @@ Eurostat flags Portugal's 2025 comparison observations as provisional.
 
 \input{../reports/tables/annual_portugal_table.tex}
 
-\section{Appendix C: Variable Definitions}
+\section{Appendix C: Provisional-Year Robustness}
+
+\input{../reports/tables/provisional_robustness.tex}
+
+The table separates the main-text 2025 headline from the same comparison
+through 2024. This is not a substitute sample, but a check on whether the
+paper's central description depends on the provisional final year. The 2024
+row leaves the main qualitative reading unchanged: Portugal remains in the
+middle of the euro-area distribution, and the burden remains far below its
+late-1990s level.
+
+\section{Appendix D: Variable Definitions}
 
 \scriptsize
 % Identifiers must not hyphenate across lines or pages.
@@ -1049,7 +1060,7 @@ Source checksum & hash & Joined source checksum metadata. \\
 \endgroup
 \normalsize
 
-\section{Appendix D: Source and Validation Notes}
+\section{Appendix E: Source and Validation Notes}
 
 Eurostat source tables are \texttt{gov\_10a\_main},
 \texttt{gov\_10dd\_edpt1}, \texttt{nama\_10\_gdp}, and
@@ -1062,6 +1073,12 @@ observation statuses accepted into the euro-area comparison are
 \AcceptedObservationStatuses{}. The largest official-versus-reconstructed ratio
 discrepancy is \MaxRatioDiscrepancyPp{} percentage points, in
 \RatioBreachYears{}; the per-year rows for those years appear above.
+The discrepancy is treated as a bounded measurement issue. The published
+debt-ratio series remains the preferred series, and the reconstructed series
+is used as an alternative check. The affected years are early in the sample and
+do not drive the post-2014 decline, the 2020 pandemic peak, or the 2024--2025
+provisional comparison. No headline turning point or ranking result depends on
+replacing the published ratio in 1997--1998.
 
 Two conventions affect the euro-area comparison and are stated here because
 neither is self-evident from the tables. Ranks are computed on values rounded

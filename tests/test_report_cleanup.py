@@ -121,6 +121,23 @@ def test_variable_dictionary_layout() -> None:
     assert "\\exhyphenpenalty=10000" in source
 
 
+def test_provisional_robustness_appendix_is_present() -> None:
+    source = _paper()
+    assert "Appendix C: Provisional-Year Robustness" in source
+    assert "provisional_robustness" in source
+
+    content = _table("provisional_robustness.tex")
+    assert r"\label{tab:provisional-robustness}" in content
+    assert "2024" in content
+    assert "2025" in content
+
+
+def test_debt_ratio_discrepancy_is_interpreted() -> None:
+    source = _paper()
+    assert "The discrepancy is treated as a bounded measurement issue" in source
+    assert "No headline turning point or ranking result depends" in source
+
+
 def test_annual_appendix_is_split_for_portrait_layout() -> None:
     content = _table("annual_portugal_table.tex")
     assert "burden and stock" in content

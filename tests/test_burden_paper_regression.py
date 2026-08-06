@@ -38,6 +38,7 @@ TRACKED = (
     "reports/tables/interest_burden_counterfactuals.tex",
     "reports/tables/static_sensitivities.tex",
     "reports/tables/annual_portugal_table.tex",
+    "reports/tables/provisional_robustness.tex",
     "reports/tables/european_comparison_2025.tex",
     # The rank-change and fragility tables were outside this baseline while
     # both carried published errors -- a membership list evaluated at the

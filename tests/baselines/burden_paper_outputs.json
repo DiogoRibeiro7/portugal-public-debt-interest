@@ -1,5 +1,5 @@
 {
-  "paper/portugal_public_debt_interest_report.tex": "5e6c00b1c0dfcba167edacac64f2c52a26b8b0cfae048999226140dd81b0d017",
+  "paper/portugal_public_debt_interest_report.tex": "749e52c96e18cad50a303f2ca62f9edc74baa1f0059f83f40bce878410772981",
   "reports/figures/01_interest_pct_gdp.pdf": "7a6628ca9194c021ae2118c93bed38493bc4d0300346c2603b035f0960e1e012",
   "reports/figures/02_interest_billion_eur.pdf": "174a56c39503bd4d31ac640ad2227fe89b3a4aeef09ee42d4c979a6e78447db9",
   "reports/figures/03_debt_and_average_debt_rate.pdf": "f6a3341f5806b29194a9558cf0199ae1a30e3faed4d68863589383704e961051",
@@ -24,6 +24,7 @@
   "reports/tables/interest_burden_decomposition_endpoints.tex": "271bddafc0f41129254087ca4522799c9e62c9b271223714f48eefbf7db7ebb0",
   "reports/tables/interest_share_of_budget.tex": "ecfc0cc3779ed88ec6fcd169bdb064e8104f8081355c3258d63b5b20ce15c425",
   "reports/tables/paper_headlines.tex": "1d799fb81ba82387a3955ae1de23a9725acb839474187203a16e0d3a8d5c397f",
+  "reports/tables/provisional_robustness.tex": "c8a56d3f7f7ea31f3b6b240ba4821c928750c47833a2cedbdee41d5216b712c6",
   "reports/tables/recent_dynamics.tex": "1851d658badc8183488f2755d14d25889c89ecaa5587c0b842532bb920a50a45",
   "reports/tables/refinancing_assumptions.tex": "82dff1d05add0b265bfe2ad58111dd1dc03a2dd159d8007451bb2b101aceb780",
   "reports/tables/regime_averages.tex": "d635703f272a4fa140881216ea4d7c04ae81527f6bcf0a0d3ca1c688b05c6d65",

@@ -1233,6 +1233,68 @@ def interest_share_of_budget_table(
     return _write(output_dir / "interest_share_of_budget.tex", content)
 
 
+def provisional_robustness_table(
+    frame: pd.DataFrame,
+    panel_frame: pd.DataFrame,
+    output_dir: Path,
+) -> Path:
+    """Compare the final observed year with the provisional headline year."""
+    data = _observed_portugal(
+        frame,
+        int(pd.to_numeric(frame["year"]).min()),
+    ).set_index("year")
+    years = (2024, 2025)
+    rows: list[list[str]] = []
+    for year in years:
+        if year not in data.index:
+            continue
+        row = data.loc[year]
+        try:
+            eligibility = build_eligibility_table(panel_frame, year)
+            summary = build_comparison_summary(panel_frame, eligibility, year)
+            status = str(summary["home_observation_status"])
+            home_rank = int(_num(summary["home_rank"]))
+            eligible_countries = int(_num(summary["eligible_countries"]))
+            rank = f"{home_rank} of {eligible_countries}"
+        except ValidationError:
+            status = str(row.get("observation_status", "unknown"))
+            rank = ""
+        rows.append(
+            [
+                _int_text(year),
+                _escape(status),
+                _fmt(row["interest_pct_gdp"], 2),
+                _fmt(_num(row["interest_mio_eur"]) / 1000.0, 2),
+                _fmt(row["debt_pct_gdp"], 2),
+                _fmt(row["average_debt_interest_rate_pct"], 2),
+                _escape(rank),
+            ]
+        )
+    content = _table(
+        caption="Robustness of headline results to excluding 2025",
+        label="tab:provisional-robustness",
+        columns="llrrrrl",
+        header=[
+            "Year",
+            "Status",
+            "Interest (\\% GDP)",
+            "Interest (EUR bn)",
+            "Debt (\\% GDP)",
+            "Average rate (\\%)",
+            "EA rank",
+        ],
+        rows=rows,
+        notes=(
+            "Notes: The 2024 row shows the headline comparison when the 2025 "
+            "observation is excluded; the status column reports Eurostat's "
+            "derived source-status classification for each row. The rank is "
+            "Portugal's interest-burden rank among eligible euro-area countries "
+            "for that year. " + SOURCE_NOTE
+        ),
+    )
+    return _write(output_dir / "provisional_robustness.tex", content)
+
+
 def refinancing_assumptions_table(
     assumptions: pd.DataFrame,
     output_dir: Path,
@@ -1335,6 +1397,7 @@ def generate_latex_tables(
         annual_portugal_table(frame, output_dir, main_start_year),
     ]
     if panel_frame is not None:
+        paths.append(provisional_robustness_table(frame, panel_frame, output_dir))
         paths.append(european_comparison_table(panel_frame, output_dir, latest_year))
         paths.append(
             european_rank_change_table(panel_frame, output_dir, (2014, latest_year))
