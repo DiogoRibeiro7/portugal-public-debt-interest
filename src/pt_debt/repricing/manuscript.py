@@ -15,6 +15,13 @@ import matplotlib
 import pandas as pd
 
 from pt_debt.repricing.estimate import OUTCOME, REGRESSORS
+from pt_debt.repricing.kernel import KernelInputs
+from pt_debt.repricing.simulate import (
+    kernel_bootstrap_band,
+    model_comparison,
+    scenario_fan_chart,
+    sensitivity_grid,
+)
 from pt_debt_interest.exceptions import ValidationError
 
 matplotlib.use("Agg")
@@ -54,6 +61,33 @@ def _as_float(value: object) -> float:
 
 def _as_int(value: object) -> int:
     return int(_as_float(value))
+
+
+def _kernel_inputs_from_panel(panel: pd.DataFrame) -> KernelInputs:
+    latest = panel.loc[panel["period"].eq(panel["period"].max())]
+    return KernelInputs(
+        average_residual_maturity_years=float(
+            latest["average_residual_term_years"].iloc[0]
+        ),
+        fixed_rate_share=float(latest["share_fixed_rate_pct"].iloc[0]) / 100.0,
+        retail_share_of_stock=float(latest["share_of_total_debt"].sum()),
+    )
+
+
+def _simulation_inputs(paths: pd.DataFrame) -> dict[str, float]:
+    row = paths.loc[
+        paths["growth_path"].eq("central")
+        & paths["shock_bps"].eq(100)
+        & paths["horizon_years"].eq(1)
+    ].iloc[0]
+    burden = float(row["incremental_burden_pct_gdp"])
+    interest = float(row["incremental_interest_mio_eur"])
+    return {
+        "initial_rate_pct": float(row["effective_rate_pct"])
+        - float(row["repriced_share"]),
+        "debt_pct_gdp": float(row["debt_pct_gdp"]),
+        "nominal_gdp_mio_eur": interest / (burden / 100.0),
+    }
 
 
 def _table(
@@ -113,6 +147,8 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
     paths = pd.read_csv(processed_dir / "scenarios" / "pass_through_paths.csv")
     panel = pd.read_csv(panel_path)
     panel["period"] = pd.to_datetime(panel["period"])
+    inputs = _kernel_inputs_from_panel(panel)
+    sim_inputs = _simulation_inputs(paths)
 
     macros: list[str] = []
 
@@ -203,6 +239,35 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
         _macro("ShockBurdenCentralGrowth", f"{central:.3f}"),
         _macro("GrowthCorrectionPct", f"{(1.0 - central / zero) * 100.0:.0f}"),
     ]
+
+    fan = scenario_fan_chart(
+        inputs,
+        replicates["spread_widening_pp"],
+        debt_pct_gdp=sim_inputs["debt_pct_gdp"],
+        nominal_gdp_mio_eur=sim_inputs["nominal_gdp_mio_eur"],
+        initial_rate_pct=sim_inputs["initial_rate_pct"],
+    )
+    fan_five = _row(fan, "horizon_years", 5)
+    macros += [
+        _macro("FanDraws", f"{_as_int(fan_five['draws']):,}"),
+        _macro("FanMeanShockBps", f"{fan_five['mean_shock_bps']:.0f}"),
+        _macro("FanMeanGrowthPct", f"{fan_five['mean_nominal_growth_pct']:.1f}"),
+        _macro("FanBurdenLowHFive", f"{fan_five['burden_p05']:.3f}"),
+        _macro("FanBurdenMedianHFive", f"{fan_five['burden_p50']:.3f}"),
+        _macro("FanBurdenHighHFive", f"{fan_five['burden_p95']:.3f}"),
+    ]
+
+    sensitivity = sensitivity_grid(
+        inputs,
+        behavioural_response=float(widening["coefficient"]),
+        behavioural_low=float(replicates["spread_widening_pp"].quantile(0.025)),
+        behavioural_high=float(replicates["spread_widening_pp"].quantile(0.975)),
+        debt_pct_gdp=sim_inputs["debt_pct_gdp"],
+    )
+    one_year = sensitivity.loc[sensitivity["horizon_years"].eq(1), "bias_pp"]
+    macros.append(
+        _macro("SensitivityRangeHOne", f"{one_year.max() - one_year.min():.2f}")
+    )
     return macros
 
 
@@ -220,11 +285,15 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     table_dir.mkdir(parents=True, exist_ok=True)
     bias = pd.read_csv(processed_dir / "kernels" / "kernel_bias.csv")
     coefficients = pd.read_csv(processed_dir / "estimates" / "s1_coefficients.csv")
+    replicates = pd.read_csv(processed_dir / "estimates" / "s1_bootstrap_replicates.csv")
     backtest = pd.read_csv(processed_dir / "scenarios" / "backtest_summary.csv")
     half_life_frame = pd.read_csv(processed_dir / "scenarios" / "half_life.csv")
+    scenario_paths = pd.read_csv(processed_dir / "scenarios" / "pass_through_paths.csv")
     panel = pd.read_csv(panel_path)
     panel["period"] = pd.to_datetime(panel["period"])
     latest = panel.loc[panel["period"].eq(panel["period"].max())]
+    inputs = _kernel_inputs_from_panel(panel)
+    sim_inputs = _simulation_inputs(scenario_paths)
 
     paths: list[Path] = []
     portfolio_rows = [
@@ -324,6 +393,57 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     )
     paths.append(path)
 
+    widening = _row(coefficients, "term", "spread_widening_pp")
+    sensitivity = sensitivity_grid(
+        inputs,
+        behavioural_response=float(widening["coefficient"]),
+        behavioural_low=float(replicates["spread_widening_pp"].quantile(0.025)),
+        behavioural_high=float(replicates["spread_widening_pp"].quantile(0.975)),
+        debt_pct_gdp=sim_inputs["debt_pct_gdp"],
+    )
+    labels = {
+        "central": "Central kernel",
+        "slow_reset": "Slow reset",
+        "fast_reset": "Fast reset",
+        "memoryless_contractual_shape": "Memoryless contractual shape",
+        "behaviour_off": "Behaviour off",
+        "behaviour_lower_bound": "Behaviour lower bound",
+        "behaviour_upper_bound": "Behaviour upper bound",
+    }
+    sensitivity_rows = []
+    for scenario, group in sensitivity.groupby("scenario", sort=False):
+        ordered = group.set_index("horizon_years")
+        sensitivity_rows.append(
+            [
+                labels[str(scenario)],
+                _fmt(ordered.loc[1, "bias_pp"], 2),
+                _fmt(100.0 * _as_float(ordered.loc[5, "repriced_share"]), 2),
+                _fmt(ordered.loc[5, "incremental_burden_pct_gdp"], 3),
+            ]
+        )
+    path = table_dir / "sensitivity_checks.tex"
+    path.write_text(
+        _table(
+            caption="Sensitivity of the kernel to modelling assumptions, +100 bps",
+            label="tab:sensitivity",
+            columns="lrrr",
+            header=[
+                "Scenario",
+                "One-year bias (pp)",
+                "Five-year repriced share (\\%)",
+                "Five-year burden (\\% GDP)",
+            ],
+            rows=sensitivity_rows,
+            notes=(
+                "The table varies one assumption at a time around the central "
+                "kernel. Source: author simulations."
+            ),
+            resize=True,
+        ),
+        encoding="utf-8",
+    )
+    paths.append(path)
+
     half_life_rows = [
         [
             f"{_as_int(row.shock_bps)}",
@@ -344,6 +464,41 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
                 "The half-life is the first horizon at which the absolute "
                 "burden effect reaches half of its simulated maximum."
             ),
+        ),
+        encoding="utf-8",
+    )
+    paths.append(path)
+
+    comparison = model_comparison(backtest)
+    comparison_rows = [
+        [
+            str(row.model).replace("_", r"\_"),
+            _fmt(row.mean_abs_error_bps, 2),
+            _fmt(row.worst_bps, 2),
+            f"{_as_int(row.win_count)}",
+            f"{_as_int(row.cut_years)}",
+        ]
+        for row in comparison.itertuples()
+    ]
+    path = table_dir / "model_comparison.tex"
+    path.write_text(
+        _table(
+            caption="Model comparison across backtest cut years",
+            label="tab:model-comparison",
+            columns="lrrrr",
+            header=[
+                "Model",
+                "Mean abs. error (bps)",
+                "Worst error (bps)",
+                "Wins",
+                "Cuts",
+            ],
+            rows=comparison_rows,
+            notes=(
+                "Wins count cut years in which the model has the lowest mean "
+                "absolute error. Source: author calculations."
+            ),
+            resize=True,
         ),
         encoding="utf-8",
     )
@@ -395,6 +550,9 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     panel["period"] = pd.to_datetime(panel["period"])
     bias = pd.read_csv(processed_dir / "kernels" / "kernel_bias.csv")
     paths = pd.read_csv(processed_dir / "scenarios" / "pass_through_paths.csv")
+    replicates = pd.read_csv(processed_dir / "estimates" / "s1_bootstrap_replicates.csv")
+    inputs = _kernel_inputs_from_panel(panel)
+    sim_inputs = _simulation_inputs(paths)
 
     written: list[Path] = []
 
@@ -433,6 +591,44 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     ax.legend()
     written.append(_save_pdf(fig, figure_dir / "kernel_comparison.pdf"))
 
+    band = kernel_bootstrap_band(inputs, replicates["spread_widening_pp"])
+    fig, ax = plt.subplots(figsize=(7.2, 4.4))
+    x_band = band["horizon_years"].astype(float).to_numpy()
+    ax.fill_between(
+        x_band,
+        100.0 * band["repriced_share_p05"].to_numpy(),
+        100.0 * band["repriced_share_p95"].to_numpy(),
+        color="#4f46e5",
+        alpha=0.16,
+        label="5--95 percentile",
+    )
+    ax.fill_between(
+        x_band,
+        100.0 * band["repriced_share_p25"].to_numpy(),
+        100.0 * band["repriced_share_p75"].to_numpy(),
+        color="#4f46e5",
+        alpha=0.28,
+        label="25--75 percentile",
+    )
+    ax.plot(
+        x_band,
+        100.0 * band["repriced_share_p50"].to_numpy(),
+        color="#312e81",
+        marker="o",
+        label="Bootstrap median",
+    )
+    ax.plot(
+        x_band,
+        100.0 * bias["wam_implied_share"].to_numpy(),
+        color="#111827",
+        label="WAM",
+    )
+    ax.set_xlabel("Horizon, years")
+    ax.set_ylabel("Share repriced, percent")
+    ax.grid(True, alpha=0.25)
+    ax.legend()
+    written.append(_save_pdf(fig, figure_dir / "kernel_bootstrap_band.pdf"))
+
     subset = paths.loc[paths["shock_bps"].eq(100)].copy()
     labels = {
         "zero_growth": "Zero nominal growth",
@@ -453,6 +649,44 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     ax.grid(True, alpha=0.25)
     ax.legend()
     written.append(_save_pdf(fig, figure_dir / "pass_through_growth_paths.pdf"))
+
+    fan = scenario_fan_chart(
+        inputs,
+        replicates["spread_widening_pp"],
+        debt_pct_gdp=sim_inputs["debt_pct_gdp"],
+        nominal_gdp_mio_eur=sim_inputs["nominal_gdp_mio_eur"],
+        initial_rate_pct=sim_inputs["initial_rate_pct"],
+    )
+    fig, ax = plt.subplots(figsize=(7.2, 4.4))
+    x_fan = fan["horizon_years"].astype(float).to_numpy()
+    ax.fill_between(
+        x_fan,
+        fan["burden_p05"].to_numpy(),
+        fan["burden_p95"].to_numpy(),
+        color="#0f766e",
+        alpha=0.16,
+        label="5--95 percentile",
+    )
+    ax.fill_between(
+        x_fan,
+        fan["burden_p25"].to_numpy(),
+        fan["burden_p75"].to_numpy(),
+        color="#0f766e",
+        alpha=0.28,
+        label="25--75 percentile",
+    )
+    ax.plot(
+        x_fan,
+        fan["burden_p50"].to_numpy(),
+        color="#134e4a",
+        marker="o",
+        label="Median",
+    )
+    ax.set_xlabel("Horizon, years")
+    ax.set_ylabel("Incremental burden, percent of GDP")
+    ax.grid(True, alpha=0.25)
+    ax.legend()
+    written.append(_save_pdf(fig, figure_dir / "scenario_fan_chart.pdf"))
     return written
 
 

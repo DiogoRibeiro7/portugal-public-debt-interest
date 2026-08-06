@@ -83,10 +83,11 @@ def linear_profile_kernel(
 
 def build_kernel(
     inputs: KernelInputs,
-    shock_bps: int = 0,
+    shock_bps: float = 0.0,
     behavioural_response: float = 0.0,
     horizons: tuple[int, ...] = DEFAULT_HORIZONS,
     use_shape_profile: bool = True,
+    reset_cycle_years: float = RESET_CYCLE_YEARS,
 ) -> pd.DataFrame:
     """Repriced share by horizon, decomposed into its three components.
 
@@ -94,6 +95,9 @@ def build_kernel(
     point of spread, from the estimation step. Its estimate is a null, so a
     caller propagating uncertainty will pass values spanning zero.
     """
+    if reset_cycle_years <= 0.0:
+        raise ValidationError("reset cycle must be positive")
+
     grid = np.asarray(horizons, dtype=float)
     floating_share = 1.0 - inputs.fixed_rate_share
 
@@ -107,7 +111,7 @@ def build_kernel(
     contractual = contractual_base * max(maturity_track, 0.0)
 
     # Floating debt reprices on its cycle regardless of the shock.
-    reset = floating_share * np.clip(grid / RESET_CYCLE_YEARS, 0.0, 1.0)
+    reset = floating_share * np.clip(grid / reset_cycle_years, 0.0, 1.0)
 
     # The behavioural track responds to the shock. A zero response leaves the
     # retail block repricing only as fast as its contractual base.
@@ -123,7 +127,7 @@ def build_kernel(
     return pd.DataFrame(
         {
             "horizon_years": grid.astype(int),
-            "shock_bps": shock_bps,
+            "shock_bps": float(shock_bps),
             "contractual_share": contractual,
             "reset_share": reset,
             "behavioural_share": behavioural,

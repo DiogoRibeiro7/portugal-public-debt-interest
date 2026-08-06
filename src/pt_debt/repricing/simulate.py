@@ -26,7 +26,13 @@ import pandas as pd
 
 from pt_debt_interest.exceptions import ValidationError
 
-from .kernel import KernelInputs, build_kernel, geometric_kernel
+from .kernel import (
+    DEFAULT_HORIZONS,
+    KernelInputs,
+    build_kernel,
+    geometric_kernel,
+    wam_implied_kernel,
+)
 
 #: Nominal growth paths. Zero is retained purely for comparability with the
 #: burden paper's implicit assumption; it is not a plausible central case.
@@ -38,6 +44,7 @@ GROWTH_PATHS: Final[dict[str, float]] = {
 
 SHOCKS_BPS: Final[tuple[int, ...]] = (-200, -100, -50, 0, 50, 100, 200)
 HORIZON_YEARS: Final[int] = 10
+MONTE_CARLO_SEED: Final[int] = 20260806
 
 
 def simulate_paths(
@@ -204,3 +211,190 @@ def backtest_summary(scores: pd.DataFrame) -> pd.DataFrame:
         .rename(columns={"mean": "mean_abs_error_bps", "max": "worst_bps", "size": "n"})
     )
     return summary.sort_values(["cut_year", "mean_abs_error_bps"]).reset_index(drop=True)
+
+
+def model_comparison(summary: pd.DataFrame) -> pd.DataFrame:
+    """Collapse cut-year backtests into a compact model comparison."""
+    required = {"cut_year", "model", "mean_abs_error_bps", "worst_bps"}
+    missing = required.difference(summary.columns)
+    if missing:
+        raise ValidationError(f"model comparison requires columns: {sorted(missing)}")
+
+    winners = summary.loc[
+        summary.groupby("cut_year")["mean_abs_error_bps"].idxmin(), ["cut_year", "model"]
+    ]
+    win_counts = winners["model"].value_counts()
+    output = (
+        summary.groupby("model")
+        .agg(
+            mean_abs_error_bps=("mean_abs_error_bps", "mean"),
+            worst_bps=("worst_bps", "max"),
+            cut_years=("cut_year", "nunique"),
+        )
+        .reset_index()
+    )
+    output["win_count"] = output["model"].map(win_counts).fillna(0).astype(int)
+    return output.sort_values(["mean_abs_error_bps", "model"]).reset_index(drop=True)
+
+
+def sensitivity_grid(
+    inputs: KernelInputs,
+    *,
+    behavioural_response: float,
+    behavioural_low: float,
+    behavioural_high: float,
+    debt_pct_gdp: float,
+    shock_bps: float = 100.0,
+    horizons: tuple[int, ...] = (1, 5),
+) -> pd.DataFrame:
+    """Vary the principal modelling assumptions around the central kernel."""
+    scenarios: list[tuple[str, float, bool, float]] = [
+        ("central", behavioural_response, True, 1.0),
+        ("slow_reset", behavioural_response, True, 2.0),
+        ("fast_reset", behavioural_response, True, 0.5),
+        ("memoryless_contractual_shape", behavioural_response, False, 1.0),
+        ("behaviour_off", 0.0, True, 1.0),
+        ("behaviour_lower_bound", behavioural_low, True, 1.0),
+        ("behaviour_upper_bound", behavioural_high, True, 1.0),
+    ]
+    benchmark = wam_implied_kernel(inputs, horizons)["repriced_share"].to_numpy()
+    shock_rate = shock_bps / 10_000.0
+    rows: list[dict[str, object]] = []
+    for scenario, response, use_shape_profile, reset_cycle_years in scenarios:
+        kernel = build_kernel(
+            inputs,
+            shock_bps=shock_bps,
+            behavioural_response=response,
+            horizons=horizons,
+            use_shape_profile=use_shape_profile,
+            reset_cycle_years=reset_cycle_years,
+        )
+        repriced = kernel["repriced_share"].to_numpy()
+        for index, horizon in enumerate(horizons):
+            rows.append(
+                {
+                    "scenario": scenario,
+                    "horizon_years": horizon,
+                    "repriced_share": repriced[index],
+                    "bias_pp": (repriced[index] - benchmark[index]) * 100.0,
+                    "incremental_burden_pct_gdp": repriced[index]
+                    * debt_pct_gdp
+                    * shock_rate,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def kernel_bootstrap_band(
+    inputs: KernelInputs,
+    behavioural_draws: pd.Series,
+    *,
+    shock_bps: float = 100.0,
+    horizons: tuple[int, ...] = DEFAULT_HORIZONS,
+) -> pd.DataFrame:
+    """Propagate bootstrap behavioural draws through the repricing kernel."""
+    draws = behavioural_draws.dropna().astype(float)
+    if draws.empty:
+        raise ValidationError("kernel bootstrap band requires behavioural draws")
+
+    rows: list[dict[str, object]] = []
+    for horizon in horizons:
+        values = [
+            float(
+                build_kernel(
+                    inputs,
+                    shock_bps=shock_bps,
+                    behavioural_response=response,
+                    horizons=(horizon,),
+                )["repriced_share"].iloc[0]
+            )
+            for response in draws
+        ]
+        series = pd.Series(values)
+        rows.append(
+            {
+                "horizon_years": horizon,
+                "repriced_share_p05": series.quantile(0.05),
+                "repriced_share_p25": series.quantile(0.25),
+                "repriced_share_p50": series.quantile(0.50),
+                "repriced_share_p75": series.quantile(0.75),
+                "repriced_share_p95": series.quantile(0.95),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def scenario_fan_chart(
+    inputs: KernelInputs,
+    behavioural_draws: pd.Series,
+    *,
+    debt_pct_gdp: float,
+    nominal_gdp_mio_eur: float,
+    initial_rate_pct: float,
+    draws: int = 2_000,
+    horizon_years: int = HORIZON_YEARS,
+) -> pd.DataFrame:
+    """Monte Carlo fan chart for rate-shock pass-through and GDP dilution."""
+    behaviour = behavioural_draws.dropna().astype(float).to_numpy()
+    if len(behaviour) == 0:
+        raise ValidationError("scenario fan chart requires behavioural draws")
+
+    generator = np.random.default_rng(MONTE_CARLO_SEED)
+    shock_draws = np.clip(generator.normal(loc=100.0, scale=50.0, size=draws), 0.0, 250.0)
+    growth_draws = np.clip(generator.normal(loc=0.04, scale=0.015, size=draws), -0.01, 0.08)
+    behaviour_draws = generator.choice(behaviour, size=draws, replace=True)
+
+    rows: list[dict[str, object]] = []
+    horizons = tuple(range(1, horizon_years + 1))
+    for draw, (shock, growth, response) in enumerate(
+        zip(shock_draws, growth_draws, behaviour_draws, strict=True)
+    ):
+        kernel = build_kernel(
+            inputs,
+            shock_bps=float(shock),
+            behavioural_response=float(response),
+            horizons=horizons,
+        )
+        repriced = kernel["repriced_share"].to_numpy()
+        shock_pct = shock / 100.0
+        years = np.asarray(horizons, dtype=float)
+        gdp = nominal_gdp_mio_eur * (1.0 + growth) ** years
+        debt_ratio = debt_pct_gdp * (nominal_gdp_mio_eur / gdp)
+        rate = initial_rate_pct + repriced * shock_pct
+        baseline_rate = np.full_like(rate, initial_rate_pct)
+        burden = rate * debt_ratio / 100.0
+        baseline_burden = baseline_rate * debt_ratio / 100.0
+        incremental_burden = burden - baseline_burden
+
+        for index, horizon in enumerate(horizons):
+            rows.append(
+                {
+                    "draw": draw,
+                    "horizon_years": horizon,
+                    "shock_bps": shock,
+                    "nominal_growth": growth,
+                    "behavioural_response": response,
+                    "incremental_burden_pct_gdp": incremental_burden[index],
+                }
+            )
+
+    frame = pd.DataFrame(rows)
+    quantiles = (
+        frame.groupby("horizon_years")["incremental_burden_pct_gdp"]
+        .quantile(np.asarray([0.05, 0.25, 0.50, 0.75, 0.95], dtype=float))
+        .unstack()
+        .rename(
+            columns={
+                0.05: "burden_p05",
+                0.25: "burden_p25",
+                0.50: "burden_p50",
+                0.75: "burden_p75",
+                0.95: "burden_p95",
+            }
+        )
+        .reset_index()
+    )
+    quantiles["mean_shock_bps"] = float(shock_draws.mean())
+    quantiles["mean_nominal_growth_pct"] = float(growth_draws.mean() * 100.0)
+    quantiles["draws"] = draws
+    return quantiles

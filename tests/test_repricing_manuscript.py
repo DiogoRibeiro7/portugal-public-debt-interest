@@ -80,8 +80,8 @@ def test_repricing_title_contains_no_colon() -> None:
 
 def test_repricing_paper_uses_generated_tables_and_figures() -> None:
     source = TEX_PATH.read_text(encoding="utf-8")
-    assert source.count(r"\input{tables/") >= 5
-    assert source.count(r"\includegraphics") >= 3
+    assert source.count(r"\input{tables/") >= 7
+    assert source.count(r"\includegraphics") >= 5
 
     for relative in (
         "tables/portfolio_inputs.tex",
@@ -89,9 +89,13 @@ def test_repricing_paper_uses_generated_tables_and_figures() -> None:
         "tables/kernel_bias.tex",
         "tables/half_life.tex",
         "tables/backtest_summary.tex",
+        "tables/sensitivity_checks.tex",
+        "tables/model_comparison.tex",
         "figures/retail_stock_and_spread.pdf",
         "figures/kernel_comparison.pdf",
+        "figures/kernel_bootstrap_band.pdf",
         "figures/pass_through_growth_paths.pdf",
+        "figures/scenario_fan_chart.pdf",
     ):
         assert (PAPER_DIR / relative).is_file(), f"missing generated artefact: {relative}"
 

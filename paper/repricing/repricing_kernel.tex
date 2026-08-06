@@ -347,6 +347,13 @@ whose central value is reported but whose uncertainty matters.
 \label{fig:kernel-comparison}
 \end{figure}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/kernel_bootstrap_band.pdf}
+\caption{Bootstrap uncertainty in the estimated repricing kernel. The bands propagate the moving-block bootstrap draws for the behavioural response through the full kernel.}
+\label{fig:kernel-bootstrap}
+\end{figure}
+
 The mechanism is compositional. At one year the shape component contributes
 \BiasShapeHOne\ percentage points and requires no behavioural assumption
 whatsoever: \FloatingSharePct\ percent of the stock reprices within a year on
@@ -372,6 +379,14 @@ horizons. That pattern is the reason for using the phrase
 ``compositionally biased'' rather than the easier phrase ``too slow''. The
 standard proxy is not wrong in one direction at every point of the curve; it is
 using the wrong clock for part of the stock.
+
+Figure \ref{fig:kernel-bootstrap} adds the empirical uncertainty that the point
+curve alone hides. The band is not mainly a story about debt managers changing
+contractual maturities; those inputs are held fixed. It is the uncertainty from
+the retail-flow estimate carried through the kernel. That is why the band is
+useful even though the behavioural coefficient is a null. It shows which part
+of the measurement correction is stable composition and which part is still a
+thin-data behavioural estimate.
 
 \section{Pass-through}
 \label{sec:passthrough}
@@ -406,6 +421,42 @@ that freezes GDP is useful for comparability with full-pass-through arithmetic,
 but it should not be read as a central projection. The economic object is a
 euro interest bill; the political and fiscal object is usually the bill as a
 share of GDP. The two should not be allowed to drift into each other.
+
+\section{Uncertainty and sensitivity}
+\label{sec:uncertainty}
+
+The deterministic paths above are useful because they isolate one mechanism at
+a time. They are not enough by themselves. A reader also needs to know whether
+the result survives plausible movements in the modelling choices. The paper
+therefore adds two generated checks: a Monte Carlo fan chart for the burden path
+and a one-at-a-time sensitivity table for the kernel assumptions.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/scenario_fan_chart.pdf}
+\caption{Monte Carlo fan chart for incremental burden pass-through. The draws combine rate-shock uncertainty, nominal-GDP-growth uncertainty, and bootstrap uncertainty in the behavioural response.}
+\label{fig:scenario-fan}
+\end{figure}
+
+Figure \ref{fig:scenario-fan} uses \FanDraws\ generated draws. The mean shock
+in the draw set is \FanMeanShockBps\ basis points and the mean nominal-growth
+draw is \FanMeanGrowthPct\ percent. By the fifth year, the simulated burden
+effect has a median of \FanBurdenMedianHFive\ percent of GDP, with a
+5--95 percentile interval from \FanBurdenLowHFive\ to \FanBurdenHighHFive.
+The wide band is not a failure of the kernel; it is the fiscal reality that the
+same repricing path can look quite different once the shock size and GDP
+denominator are allowed to vary.
+
+\input{tables/sensitivity_checks.tex}
+
+Table \ref{tab:sensitivity} asks a different question. Instead of randomising
+the macro environment, it moves the main modelling assumptions one at a time.
+The one-year bias range across those checks is \SensitivityRangeHOne\
+percentage points. The slow-reset row matters most because it directly attacks
+the compositional claim: if reset instruments are assumed to take longer to
+receive the new rate, the first-year correction shrinks. The behavioural rows
+matter less for the central conclusion. They widen or narrow the total, but
+they do not remove the reason the WAM proxy is incomplete.
 
 \section{Implications for fiscal reporting}
 \label{sec:implications}
@@ -453,6 +504,8 @@ that kernel error is isolated from yield-path error. The realised effective rate
 is imported from the companion paper.
 
 \input{tables/backtest_summary.tex}
+
+\input{tables/model_comparison.tex}
 
 The estimated kernel does not beat the benchmark in a way that would justify
 forecasting claims. It wins narrowly at two cut dates, loses at one, and every
