@@ -5,10 +5,24 @@ on:
     branches: [main, develop]
   pull_request:
 
+# A public repository runs workflows on every push. Cancel superseded runs on
+# the same ref so a branch that is pushed twice does not queue two full
+# matrices.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
     strategy:
+      # Report every interpreter. With fail-fast the first failure cancelled
+      # the others, so a version-specific break was invisible until the first
+      # one was fixed.
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
     steps:
@@ -17,9 +31,56 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
+          cache-dependency-path: pyproject.toml
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
+      - name: Record the resolved environment
+        # Dependencies float within their ranges, so a green run and a red run
+        # can differ only by a transitive upgrade. Print what was actually
+        # installed before anything can fail.
+        run: pip freeze
       - run: ruff check .
+      # No `ruff format --check`: the tree has never been formatter-clean, and
+      # reformatting 23 files to turn CI green would bury every real change.
       - run: mypy src
-      - run: pytest --cov=pt_debt_interest --cov-report=term-missing
+      - run: pytest --cov=pt_debt_interest --cov=pt_debt --cov-report=term-missing
       - run: python -m pip check
+
+  papers:
+    # The repository's central claim is that both manuscripts build from a
+    # clone with no pipeline run. Asserting it in a test is not the same as
+    # doing it, so CI does it.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install a minimal TeX Live
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            latexmk texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended texlive-science
+      - name: Build the interest-burden paper
+        working-directory: paper
+        run: latexmk -pdf -interaction=nonstopmode -halt-on-error
+          portugal_public_debt_interest_report.tex
+      - name: Build the repricing paper
+        working-directory: paper/repricing
+        run: latexmk -pdf -interaction=nonstopmode -halt-on-error
+          repricing_kernel.tex
+      - name: Fail on undefined references or citations
+        # latexmk exits zero on these; an undefined \ref renders as "??" in the
+        # published PDF, which is exactly the kind of silent defect this
+        # repository exists to catch.
+        run: |
+          if grep -qE "Citation .* undefined|Reference .* undefined|undefined control" \
+              paper/*.log paper/repricing/*.log; then
+            grep -hE "Citation .* undefined|Reference .* undefined|undefined control" \
+              paper/*.log paper/repricing/*.log
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manuscripts
+          path: |
+            paper/portugal_public_debt_interest_report.pdf
+            paper/repricing/repricing_kernel.pdf
