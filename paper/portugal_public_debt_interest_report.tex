@@ -89,7 +89,8 @@ in \MainStartYear{} to \LatestInterestPctGdp{} percent in \LatestYear{}; that
 published decline is the starting point. The contribution is the reconstruction
 around it: national-accounts interest expense, the GDP-normalised burden, the
 average financing cost of the outstanding stock, the debt-dynamics rate, and
-the benchmark yield on new debt are kept separate in an auditable pipeline. In
+the benchmark yield on new debt are measured and reported as distinct
+quantities rather than as one effective rate. In
 the exact 2014--\LatestYear{} decomposition, the reconstructed burden changed by
 \DecompTotalTwentyFourteenToLatestPp{} percentage points, with
 \DecompRateTwentyFourteenToLatestPp{} percentage points from the average
@@ -154,12 +155,13 @@ That scope also defines the relationship with institutional surveillance work.
 The European Commission's Debt Sustainability Monitor and the Portuguese Public
 Finance Council provide broader fiscal-risk assessments and forward-looking
 surveillance frameworks \cite{ec_dsm2025,cfp2025}. The narrower contribution
-here is reproducibility: Section \ref{sec:burden-decomposition} publishes the
-exact two-factor interest-burden decomposition, distinguishes the average
-portfolio rate \(r^{AVG}\) from the debt-dynamics rate \(r^{DD}\), and carries
-per-value provenance, observation-status, and checksum metadata through the
-pipeline. Those institutions assess sustainability; the added value here is the
-auditable measurement layer beneath a specific burden calculation.
+here is measurement: Section \ref{sec:burden-decomposition} publishes the
+exact two-factor interest-burden decomposition and distinguishes the average
+portfolio rate \(r^{AVG}\) from the debt-dynamics rate \(r^{DD}\), recording
+the vintage and observation status of every value it uses. Those institutions
+assess sustainability; the narrower question here is what the burden was, which
+rate concept answers which question, and how much of the change each factor
+accounts for.
 
 The paper answers four research questions:
 \begin{enumerate}
@@ -395,8 +397,7 @@ national-accounts GDP series. Nothing in the data identifies which side moved,
 so the cause is recorded as \DebtRatioCauseNineteenNinetySeven{} rather than
 guessed. A GDP-vintage mismatch is a plausible mechanism for this type of
 warning, but this build does not verify it against contemporaneous notification
-vintages. Per-year detail is written to \texttt{reports/validation\_detail.csv}
-and \texttt{reports/validation\_detail.md}.
+vintages.
 
 Data integrity is checked before any figure or table is produced. Every
 observation must represent one calendar year; denominators such as GDP and debt
@@ -634,8 +635,7 @@ is not a finding. A geography enters the ranking only if it is a
 euro-area member, is not an aggregate, and carries every required series:
 interest in euro and as a share of GDP, the debt ratio, nominal GDP, and the
 average-debt rate. Eligibility, availability, observation status, and the
-reason for every exclusion are written to
-\texttt{data/processed/euro\_area\_eligibility.csv}.
+reason for every exclusion are recorded for each geography.
 
 Observation status is derived from Eurostat's per-series flags rather than
 asserted. The distinction matters because the panel's own status column labels
@@ -776,9 +776,9 @@ a bond-redemption hazard, while official-sector loans need not follow market
 rollover timing. Because those buckets are not modelled here, the direction of
 the pass-through bias is not identified from this exercise alone.
 
-That gap has since been closed, and not in this exercise's favour. A companion
-study in this repository (\texttt{paper/repricing/}) splits the stock using
-IGCP's monthly composition series and finds the bias is \emph{signable and
+A companion study \cite{ribeiro_repricing} identifies that direction, and not
+in this exercise's favour. Splitting the stock by
+IGCP's monthly composition series, it finds the bias is \emph{signable and
 positive}: the constant-hazard approximation used above understates how much of
 the stock reprices within a year by 10.90 percentage points, worth roughly EUR
 300 million of interest in the first year. The mechanism is compositional
@@ -848,7 +848,8 @@ Council provides national surveillance and fiscal-accounting commentary for
 Portugal \cite{ec_dsm2025,cfp2025}. Those frameworks are broader than the
 exercise here. They do not, however, publish the exact two-factor
 interest-burden decomposition, separate \(r^{AVG}\) from \(r^{DD}\) in the
-published output, or provide the per-value provenance pipeline used here.
+published output, or report the source vintage and observation status of each
+value as is done here.
 
 Debt-dynamics accounting supplies the core identity. Escolano
 \cite{escolano2010} sets out the link between the change in the debt ratio, the
@@ -910,17 +911,17 @@ used to calibrate the central stylised scenario \cite{igcp2024}; the 7.2-year
 average maturity of the debt stock in 2024, including official loans, is the
 single external assumption taken from outside Eurostat.
 
-The contribution is measurement discipline rather than a new estimate. Reported
-quantities are generated from an auditable ESA-consistent pipeline, with
-provenance, observation status, and source checksums travelling with each
-value. The marginal yield, realised average financing cost, descriptive
-average-debt rate, and debt-dynamics rate are kept apart. The burden change is
+The contribution is measurement discipline rather than a new estimate. Every
+reported quantity is ESA-consistent and carries the source vintage and
+observation status of the value behind it. The marginal yield, the realised
+average financing cost, the descriptive average-debt rate, and the
+debt-dynamics rate are kept apart. The burden change is
 decomposed exactly into a financing-cost effect and a debt-exposure effect, the
 euro-area comparison states its eligibility rule and ranking base, and the
 refinancing pass-through is presented as an explicitly stylised cohort model
 whose assumptions are tabulated. Relative to institutional reports such as the
 Debt Sustainability Monitor and CFP publications, the narrower addition is the
-auditable decomposition and publication pipeline rather than a competing
+exact decomposition and the separation of rate concepts rather than a competing
 sustainability forecast.
 
 \section{Discussion and Limitations}
@@ -1032,32 +1033,32 @@ Column & Unit & Definition \\
 Column & Unit & Definition \\
 \midrule
 \endhead
-\texttt{year} & year & Calendar year. \\
-\texttt{interest\_mio\_eur} & EUR million & General-government interest payable. \\
-\texttt{interest\_pct\_gdp} & percent of GDP & Preferred interest burden: official Eurostat ratio with calculated fallback. \\
-\texttt{government\_expenditure\_mio\_eur} & EUR million & General-government total expenditure. \\
-\texttt{government\_expenditure\_pct\_gdp} & percent of GDP & Preferred total-expenditure ratio: official Eurostat ratio with calculated fallback. \\
-\texttt{government\_revenue\_mio\_eur} & EUR million & General-government total revenue. \\
-\texttt{government\_revenue\_pct\_gdp} & percent of GDP & Preferred total-revenue ratio: official Eurostat ratio with calculated fallback. \\
-\texttt{nominal\_gdp\_mio\_eur} & EUR million & GDP at current market prices. \\
-\texttt{debt\_mio\_eur} & EUR million & Maastricht consolidated gross debt. \\
-\texttt{debt\_pct\_gdp} & percent of GDP & Preferred debt ratio. \\
-\texttt{average\_debt\_interest\_rate\_pct} & percent & Interest payable divided by average debt. \\
-\texttt{debt\_dynamics\_interest\_rate\_pct} & percent & Interest payable divided by previous-year debt. \\
-\texttt{overall\_balance\_pct\_gdp} & percent of GDP & Net lending or borrowing. \\
-\texttt{primary\_balance\_pct\_gdp} & percent of GDP & Overall balance plus interest expenditure. \\
-\texttt{nominal\_gdp\_growth\_pct} & percent & Annual growth of current-price GDP. \\
-\texttt{real\_gdp\_growth\_pct} & percent & Chain-linked volume growth rate. \\
-\texttt{gdp\_deflator\_growth\_pct} & percent & Derived GDP deflator growth. \\
-\texttt{interest\_growth\_differential\_pct} & percentage points & Debt-dynamics interest rate minus nominal GDP growth. \\
-\texttt{debt\_stabilising\_primary\_balance\_before\_sfa\_pct\_gdp} & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
-\texttt{stock\_flow\_adjustment\_pp} & percentage points & Debt-dynamics residual. \\
-\texttt{ten\_year\_yield\_pct} & percent & Long-term government bond yield. \\
-\texttt{source} & category & Source family; Eurostat in this build. \\
-\texttt{accounting\_basis} & category & Accounting framework label. \\
-\texttt{observation\_status} & category & Observed or forecast status. \\
-\texttt{retrieval\_timestamp\_utc} & timestamp & Joined UTC source retrieval timestamp where available. \\
-\texttt{source\_checksum\_sha256} & hash & Joined source checksum metadata. \\
+Year & year & Calendar year. \\
+Interest payable & EUR million & General-government interest payable. \\
+Interest burden & percent of GDP & Preferred interest burden: official Eurostat ratio with calculated fallback. \\
+Total expenditure & EUR million & General-government total expenditure. \\
+Expenditure ratio & percent of GDP & Preferred total-expenditure ratio: official Eurostat ratio with calculated fallback. \\
+Total revenue & EUR million & General-government total revenue. \\
+Revenue ratio & percent of GDP & Preferred total-revenue ratio: official Eurostat ratio with calculated fallback. \\
+Nominal GDP & EUR million & GDP at current market prices. \\
+Maastricht debt & EUR million & Maastricht consolidated gross debt. \\
+Debt ratio & percent of GDP & Preferred debt ratio. \\
+Average-debt interest rate & percent & Interest payable divided by average debt. \\
+Debt-dynamics interest rate & percent & Interest payable divided by previous-year debt. \\
+Overall balance & percent of GDP & Net lending or borrowing. \\
+Primary balance & percent of GDP & Overall balance plus interest expenditure. \\
+Nominal GDP growth & percent & Annual growth of current-price GDP. \\
+Real GDP growth & percent & Chain-linked volume growth rate. \\
+GDP deflator growth & percent & Derived GDP deflator growth. \\
+Interest-growth differential & percentage points & Debt-dynamics interest rate minus nominal GDP growth. \\
+Debt-stabilising primary balance & percent of GDP & Primary balance required to stabilise debt absent stock-flow adjustment. \\
+Stock-flow adjustment & percentage points & Debt-dynamics residual. \\
+Ten-year yield & percent & Long-term government bond yield. \\
+Source & category & Source family; Eurostat in this build. \\
+Accounting basis & category & Accounting framework label. \\
+Observation status & category & Observed or forecast status. \\
+Retrieval timestamp & timestamp & Joined UTC source retrieval timestamp where available. \\
+Source checksum & hash & Joined source checksum metadata. \\
 \bottomrule
 \end{longtable}
 \endgroup
@@ -1078,57 +1079,18 @@ observation statuses accepted into the euro-area comparison are
 discrepancy is \MaxRatioDiscrepancyPp{} percentage points, in
 \RatioBreachYears{}; the per-year rows for those years appear above.
 
-Two checks in the suite exist because of defects that reached a compiled draft,
-and both are the kind this paper's validation philosophy is meant to catch:
-silent, internally consistent, and plausible on the page. First, the rank
-tables must agree at zero perturbation. They once did not, because the
-perturbed burden $1.9 - 0.3$ evaluates in binary floating point to
-$1.5999999999999999$, which loses a tie it should have joined and cost Portugal
-two ranks in Table \ref{tab:europe-rank-sensitivity} alone; both tables used the
-documented ranking convention correctly, so nothing looked wrong. Perturbed
-values are now rounded to the precision Eurostat publishes before ranking.
-Second, euro-area membership must be evaluated at the comparison year rather
-than at the year of writing; ranking a 2014 cross-section against the current
-membership list silently admitted Lithuania and Croatia to a euro area that had
-eighteen members at the time. Both properties are asserted by tests rather than
-left to review.
+Two conventions affect the euro-area comparison and are stated here because
+neither is self-evident from the tables. Ranks are computed on values rounded
+to the precision Eurostat publishes, so ties in the table are ties in the
+published data. Euro-area membership is evaluated at the comparison year, not
+at the year of writing, so the 2014 cross-section ranks the eighteen members of
+that year rather than the current twenty.
+
 Portugal's \LatestYear{} comparison observations are flagged
 \PortugalComparisonStatus{} by Eurostat and are admitted only because that
-status is included in the stated eligibility rule. A
-data-revision log comparing the current processed vintage with the previous one
-is written to \texttt{reports/data\_revision\_log.csv} and
-\texttt{reports/data\_revision\_log.md}. An error-level validation failure stops
-the report build.
-
-\section{Appendix E: Replication Materials}
-
-The replication workflow produces the following analytical outputs:
-\begin{itemize}
-  \item \texttt{data/processed/portugal\_debt\_interest.csv};
-  \item \texttt{data/processed/portugal\_debt\_interest.sqlite};
-  \item \texttt{data/processed/eurostat\_panel\_metrics.csv};
-  \item \texttt{reports/validation.json};
-  \item \texttt{reports/summary.md};
-  \item publication-oriented figures in \texttt{reports/figures/}.
-\end{itemize}
-
-Raw source downloads include retrieval timestamps, request metadata, payload
-sizes, and checksums. Processed rows preserve source-vintage and checksum
-metadata so revisions can be audited.
-
-\section{Appendix F: Reproducibility and Archiving}
-
-The full command sequence is documented in the repository README. The pipeline
-is reproduced with \texttt{pt-debt all --config config/default.yaml}, which
-performs acquisition, the analytical build, validation, figure and table
-generation, and the Markdown summary. The public repository is
-\url{https://github.com/DiogoRibeiro7/portugal-public-debt-interest}. The
-archived research object should be cited by its Zenodo concept DOI,
-\doi{10.5281/zenodo.21722700}, which resolves to the current version and
-covers all of them. Per-version DOIs exist and are listed on that record, but
-this manuscript does not name one: a version DOI printed in a paper is stale
-the moment the next release is cut, and the figure previously printed here had
-fallen three releases behind.
+status is included in the stated eligibility rule. Each processed vintage is
+compared with its predecessor so that source revisions are visible rather than
+absorbed silently.
 
 \newpage
 \begin{thebibliography}{99}
@@ -1214,6 +1176,10 @@ Paper 13/63. Washington, DC: IMF.
 Campos, C. F. S., Jaimovich, D., \& Panizza, U. (2006). The unexplained part of
 public debt. \emph{Emerging Markets Review}, 7(3), 228--243.
 \doi{10.1016/j.ememar.2006.06.001}
+
+\bibitem{ribeiro_repricing}
+Ribeiro, D. (2026). \emph{What Reprices, and How Fast: The Composition Bias in
+Weighted-Average-Maturity Pass-Through}. Companion working paper.
 
 \bibitem{igcp2024}
 Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).

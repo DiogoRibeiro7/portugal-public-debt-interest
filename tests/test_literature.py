@@ -134,8 +134,11 @@ def test_contribution_statement_is_explicit() -> None:
     section = _literature_section(_paper())
     assert "The contribution is measurement discipline" in section
     contribution = section.split("The contribution is measurement discipline")[1]
+    # "auditable" was once required here. The contribution is stated in terms
+    # of what is measured, not of how the pipeline works: an article is not the
+    # place to describe its own build.
     for claim in (
-        "auditable",
+        "esa-consistent",
         "average financing cost",
         "decomposed exactly",
         "eligibility",
