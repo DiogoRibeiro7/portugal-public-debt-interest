@@ -711,7 +711,7 @@ def interest_burden_counterfactuals_table(frame: pd.DataFrame, output_dir: Path)
 
 def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year: int) -> Path:
     data = _observed_portugal(frame, main_start_year)
-    rows = [
+    full_rows = [
         [
             _int_text(row.year),
             _fmt(row.interest_pct_gdp, 1),
@@ -724,31 +724,64 @@ def annual_portugal_table(frame: pd.DataFrame, output_dir: Path, main_start_year
         ]
         for row in data.itertuples()
     ]
+
+    def longtable(
+        *,
+        caption: str,
+        label: str,
+        columns: str,
+        header: list[str],
+        rows: list[list[str]],
+    ) -> list[str]:
+        heading = " & ".join(header) + r" \\"
+        return [
+            r"\footnotesize",
+            rf"\begin{{longtable}}{{{columns}}}",
+            rf"\caption{{{caption}}}\\",
+            rf"\label{{{label}}}\\",
+            r"\toprule",
+            heading,
+            r"\midrule",
+            r"\endfirsthead",
+            r"\toprule",
+            heading,
+            r"\midrule",
+            r"\endhead",
+            *(" & ".join(row) + r" \\" for row in rows),
+            r"\bottomrule",
+            r"\end{longtable}",
+            r"\normalsize",
+        ]
+
+    burden_rows = [row[:5] for row in full_rows]
+    fiscal_rows = [[row[0], row[5], row[6], row[7]] for row in full_rows]
     lines = [
-        r"\scriptsize",
-        r"\begin{longtable}{rrrrrrrr}",
-        r"\caption{Annual Portugal ESA 2010 analytical table}\\",
-        r"\label{tab:annual-all}\\",
-        r"\toprule",
-        (
-            r"Year & Int./GDP (\%) & Interest (EUR m) & Debt/GDP (\%) & "
-            r"Avg. debt rate (\%) & Overall bal. (\% GDP) & "
-            r"Primary bal. (\% GDP) & Nom. growth (\%) \\"
+        *longtable(
+            caption="Annual Portugal ESA 2010 analytical table: burden and stock",
+            label="tab:annual-all",
+            columns="rrrrr",
+            header=[
+                "Year",
+                "Int./GDP (\\%)",
+                "Interest (EUR m)",
+                "Debt/GDP (\\%)",
+                "Avg. debt rate (\\%)",
+            ],
+            rows=burden_rows,
         ),
-        r"\midrule",
-        r"\endfirsthead",
-        r"\toprule",
-        (
-            r"Year & Int./GDP (\%) & Interest (EUR m) & Debt/GDP (\%) & "
-            r"Avg. debt rate (\%) & Overall bal. (\% GDP) & "
-            r"Primary bal. (\% GDP) & Nom. growth (\%) \\"
+        r"\medskip",
+        *longtable(
+            caption="Annual Portugal ESA 2010 analytical table: fiscal balance and growth",
+            label="tab:annual-fiscal-growth",
+            columns="rrrr",
+            header=[
+                "Year",
+                "Overall bal. (\\% GDP)",
+                "Primary bal. (\\% GDP)",
+                "Nom. growth (\\%)",
+            ],
+            rows=fiscal_rows,
         ),
-        r"\midrule",
-        r"\endhead",
-        *(" & ".join(row) + r" \\" for row in rows),
-        r"\bottomrule",
-        r"\end{longtable}",
-        r"\normalsize",
     ]
     return _write(output_dir / "annual_portugal_table.tex", "\n".join(lines) + "\n")
 

@@ -119,9 +119,18 @@ def test_plot_titles_not_duplicated() -> None:
 def test_variable_dictionary_layout() -> None:
     source = _paper()
     assert "\\begin{longtable}" in source, "the dictionary is not a longtable"
+    assert "\\begin{landscape}" not in source
+    assert "\\usepackage{pdflscape}" not in source
     # Identifiers must not hyphenate across lines or pages.
     assert "\\hyphenpenalty=10000" in source
     assert "\\exhyphenpenalty=10000" in source
+
+
+def test_annual_appendix_is_split_for_portrait_layout() -> None:
+    content = _table("annual_portugal_table.tex")
+    assert "burden and stock" in content
+    assert "fiscal balance and growth" in content
+    assert "\\begin{longtable}{rrrrrrrr}" not in content
 
 
 def test_regime_label_is_neutral() -> None:

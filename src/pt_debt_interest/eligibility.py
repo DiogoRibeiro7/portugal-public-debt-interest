@@ -184,12 +184,21 @@ def latest_common_year(
         raise ValidationError("panel contains no euro-area countries")
 
     present = [name for name in required_series if name in countries.columns]
-    expected = countries["geo"].nunique()
     complete_years: list[int] = []
     for year_key, group in countries.groupby("year"):
+        year = int(float(str(year_key)))
+        members = euro_area_members(year)
+        if not members:
+            continue
+        member_group = group.loc[group["geo"].astype(str).isin(members)]
+        expected = len(members)
         usable = group.dropna(subset=present)
-        if usable["geo"].nunique() == expected:
-            complete_years.append(int(float(str(year_key))))
+        usable = usable.loc[usable["geo"].astype(str).isin(members)]
+        if (
+            member_group["geo"].nunique() == expected
+            and usable["geo"].nunique() == expected
+        ):
+            complete_years.append(year)
     if not complete_years:
         raise ValidationError("no year has complete coverage for every country")
     return max(complete_years)

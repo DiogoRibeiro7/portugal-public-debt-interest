@@ -16,7 +16,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from .display import SOURCE_NOTE
-from .eligibility import EURO_AREA_MEMBERS, derive_observation_status
+from .eligibility import EURO_AREA_MEMBERS, derive_observation_status, euro_area_members
 from .interest_decomposition import build_interest_burden_decomposition
 from .panel import aggregate_flag_mask
 from .scenarios import refinancing_pass_through
@@ -375,11 +375,11 @@ def plot_european_comparison(
     # observation_status column, which labels every row "observed".
     if "is_aggregate" in panel.columns:
         panel = panel.loc[~aggregate_flag_mask(panel["is_aggregate"])]
-    panel = panel.loc[panel["geo"].astype(str).isin(EURO_AREA_MEMBERS)]
     panel["year_numeric"] = pd.to_numeric(panel["year"], errors="coerce")
     panel = panel.loc[
         np.isfinite(panel["year_numeric"]) & panel["year_numeric"].mod(1).eq(0)
     ]
+    panel = panel.loc[panel["geo"].astype(str).isin(EURO_AREA_MEMBERS)]
     panel = panel.dropna(subset=["interest_pct_gdp"])
     panel = panel.dropna(subset=["year_numeric"])
     if panel.empty:
@@ -388,7 +388,10 @@ def plot_european_comparison(
     if portugal_years.empty:
         return None
     latest_year = int(portugal_years.max())
-    latest = panel.loc[panel["year_numeric"].eq(latest_year)].copy()
+    latest = panel.loc[
+        panel["year_numeric"].eq(latest_year)
+        & panel["geo"].astype(str).isin(euro_area_members(latest_year))
+    ].copy()
     if latest.empty:
         return None
     latest["_derived_status"] = latest.apply(derive_observation_status, axis=1)

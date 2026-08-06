@@ -18,7 +18,6 @@
 \usepackage{setspace}
 \usepackage{enumitem}
 \usepackage{threeparttable}
-\usepackage{pdflscape}
 
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
@@ -27,7 +26,7 @@
   linkcolor=blue,
   urlcolor=blue,
   citecolor=blue,
-  pdftitle={Portugal's Public-Debt Interest Burden: A Reproducible ESA 2010 Assessment},
+  pdftitle={Portugal's Public-Debt Interest Burden: A Reproducible ESA 2010 Assessment, 1995--2025},
   pdfauthor={Diogo Ribeiro}
 }
 
@@ -1009,13 +1008,10 @@ Eurostat flags Portugal's 2025 comparison observations as provisional.
 
 \input{../reports/tables/debt_dynamics_diagnostic_2020_2025.tex}
 
-\begin{landscape}
 \section{Appendix B: Annual ESA 2010 Portugal Table}
 
 \input{../reports/tables/annual_portugal_table.tex}
-\end{landscape}
 
-\begin{landscape}
 \section{Appendix C: Variable Definitions}
 
 \scriptsize
@@ -1023,7 +1019,7 @@ Eurostat flags Portugal's 2025 comparison observations as provisional.
 \begingroup
 \hyphenpenalty=10000
 \exhyphenpenalty=10000
-\begin{longtable}{L{0.34\linewidth}L{0.12\linewidth}L{0.48\linewidth}}
+\begin{longtable}{L{0.28\textwidth}L{0.18\textwidth}L{0.46\textwidth}}
 \caption{Core analytical variables}\\
 \toprule
 Column & Unit & Definition \\
@@ -1063,7 +1059,6 @@ Source checksum & hash & Joined source checksum metadata. \\
 \end{longtable}
 \endgroup
 \normalsize
-\end{landscape}
 
 \section{Appendix D: Source and Validation Notes}
 
@@ -1189,4 +1184,3 @@ Agência de Gestão da Tesouraria e da Dívida Pública (IGCP) (2025).
 \end{thebibliography}
 
 \end{document}
-
