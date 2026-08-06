@@ -70,3 +70,32 @@ def test_generated_macros_are_committed_alongside_the_manuscript() -> None:
     """The paper must build from a clone without rerunning the pipeline."""
     assert MACRO_PATH.is_file()
     assert MACRO_PATH.read_text(encoding="utf-8").count("newcommand") >= 40
+
+
+def test_repricing_title_contains_no_colon() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    title = source.split("\\title{")[1].split("\n")[0]
+    assert ":" not in title
+
+
+def test_repricing_paper_uses_generated_tables_and_figures() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    assert source.count(r"\input{tables/") >= 5
+    assert source.count(r"\includegraphics") >= 3
+
+    for relative in (
+        "tables/portfolio_inputs.tex",
+        "tables/estimation_coefficients.tex",
+        "tables/kernel_bias.tex",
+        "tables/half_life.tex",
+        "tables/backtest_summary.tex",
+        "figures/retail_stock_and_spread.pdf",
+        "figures/kernel_comparison.pdf",
+        "figures/pass_through_growth_paths.pdf",
+    ):
+        assert (PAPER_DIR / relative).is_file(), f"missing generated artefact: {relative}"
+
+
+def test_repricing_paper_has_a_substantive_bibliography() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    assert source.count(r"\bibitem{") >= 10

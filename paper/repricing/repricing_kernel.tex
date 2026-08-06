@@ -11,12 +11,16 @@
 \usepackage{longtable}
 \usepackage[hidelinks]{hyperref}
 \providecommand{\doi}[1]{DOI: \href{https://doi.org/#1}{#1}}
+\hypersetup{
+  pdftitle={What Reprices and How Fast in Weighted-Average-Maturity Pass-Through},
+  pdfauthor={Diogo Ribeiro}
+}
 
 % Every number below is generated. Nothing is typed by hand.
 \input{generated_values.tex}
 
-\title{\textbf{What Reprices, and How Fast: The Composition Bias in
-Weighted-Average-Maturity Pass-Through}}
+\title{\textbf{What Reprices and How Fast in Weighted-Average-Maturity
+Pass-Through}}
 \author{Diogo Ribeiro}
 \date{\today}
 
@@ -24,53 +28,128 @@ Weighted-Average-Maturity Pass-Through}}
 \maketitle
 
 \begin{abstract}
-Analyses of how a rate shock reaches sovereign interest expenditure almost
-universally proxy the speed of pass-through with weighted average maturity,
-usually by assuming a constant repricing hazard whose expected repricing time
-equals the published figure. We show that this proxy is biased in a signable
-direction, quantify the bias, and identify its mechanism. For Portugal, a
-100 basis-point shock reprices \BiasTotalHOne\ percentage points more of the
-stock within one year than the proxy implies, worth about EUR
-\BiasInterestMioHOne\ million of interest in the first year alone. The bias is
-predominantly \emph{compositional} rather than behavioural: \FloatingSharePct\
-percent of the stock is floating-rate or inflation-linked and reprices within a
-year regardless of maturity, and a maturity-calibrated hazard cannot represent
-that because those instruments reprice \emph{without exiting}. We also test a
-behavioural channel, using Portuguese retail savings certificates, which are
-redeemable on demand and therefore a candidate for state-dependent pass-through.
-That test returns a well-measured null: the response to the competing-return
-spread is not distinguishable from zero, the predicted asymmetry has a bootstrap
-interval of [\AsymmetryLow, \AsymmetryHigh], and the estimated kernel does not
-beat the standard benchmark out of sample. We report the null, and we report
-that the raw data contradicts the sign of the behavioural hypothesis: during the
-2022--2023 tightening Portuguese households moved money \emph{into} the
-certificates, not out.
+Weighted average maturity is a natural first statistic for judging how quickly
+a rate shock reaches a sovereign interest bill. It is also easy to overuse.
+Maturity describes when debt leaves the stock; not all repricing waits for that
+event. This paper separates the Portuguese debt stock into maturity-driven,
+reset-driven, and retail-flow components and asks how much of the opening stock
+has actually received a new rate by each horizon. For Portugal, a 100
+basis-point shock reprices \BiasTotalHOne\ percentage points more of the stock
+within one year than the usual weighted-average-maturity proxy implies, worth
+about EUR \BiasInterestMioHOne\ million in first-year interest. The reason is
+mostly composition: \FloatingSharePct\ percent of the stock is floating-rate or
+inflation-linked and reprices within a year without maturing. The paper also
+tests whether retail savings certificates add a behavioural channel. The answer
+is cautious. The competing-return spread is not estimated precisely, the
+bootstrap interval for asymmetry is [\AsymmetryLow, \AsymmetryHigh], and the
+kernel does not beat the maturity benchmark out of sample. The raw episode is
+nevertheless informative, because households moved money into certificates
+during the 2022--2023 tightening rather than redeeming them. The result is a
+practical measurement correction, not a claim to forecast interest expenditure
+better from a short annual sample.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
 
-The speed at which a change in market yields reaches a sovereign's interest bill
-is governed by portfolio repricing. Practitioners and the official sector proxy
-that speed with weighted average maturity: a stock with an average maturity of
-$m$ years is treated as repricing at a constant hazard $1/m$. The companion
-paper on Portugal's interest burden makes exactly this assumption, and it is the
-object this paper relaxes.
+When interest rates rise, the public debate usually moves quickly from the
+market yield to the budget line. That leap hides the part of the problem that
+matters most for annual fiscal accounts: the old debt stock does not wake up
+one morning carrying the new rate. Some of it matures and is refinanced; some
+of it resets while staying in place; some of it is retail money that may flow
+in or out when the offered return changes. Weighted average maturity is a useful
+summary of the first channel, but it is often asked to do the work of all
+three.
 
-The proxy has a structural problem that has nothing to do with behaviour. A
-constant hazard treats the stock as homogeneous. Real sovereign portfolios are
-not: a material share is floating-rate or inflation-linked, and those
-instruments reprice on their own reset cycle \emph{without leaving the stock}. A
-hazard calibrated to maturity cannot see them, because in a maturity model
-repricing and exit are the same event. They are not.
+The shortcut is attractive because it is clean. A portfolio with average
+maturity $m$ can be treated as if each remaining euro has a constant probability
+$1/m$ of repricing every year. The companion paper uses exactly that device in
+its refinancing section because it makes the timing assumption visible. This
+paper keeps the same question and removes the homogeneity assumption. The
+object of interest is not the average date at which a bond matures; it is the
+share of the opening stock that has actually received a new rate by each
+horizon.
 
-We quantify the resulting bias for Portugal, decompose it into a compositional
-component and a behavioural component, and test the behavioural component
-directly. Section \ref{sec:setting} explains why Portugal permits that test at
-all. Section \ref{sec:framework} sets out the kernel. Sections
-\ref{sec:data}--\ref{sec:estimation} describe what the published data does and
-does not identify. Sections \ref{sec:kernel}--\ref{sec:backtest} report the bias,
-the pass-through simulation, and an out-of-sample backtest.
+That distinction changes the interpretation of a rate shock before any
+behavioural story enters. Floating-rate and inflation-linked liabilities do not
+need to leave the stock in order to reprice. Retail instruments can also add
+new money at the prevailing rate, which is economically similar to repricing
+from the budget's point of view even when it is not redemption and replacement.
+A maturity-calibrated hazard cannot see either channel. It treats repricing and
+retirement as the same event, which is why it has trouble with portfolios that
+contain meaningful reset and retail blocks.
+
+The Portuguese case is useful because those blocks are observable enough to
+separate. IGCP publishes monthly instrument-class stocks and portfolio
+indicators, and the 2022--2023 tightening created a natural stress test for
+retail savings certificates. The raw pattern is already informative:
+households moved money into certificates when short rates rose, because the
+certificate remuneration formula became attractive relative to bank deposits.
+The behavioural channel therefore runs through subscriptions, not through the
+redemption margin that a simple ``holders flee to higher rates'' story would
+suggest.
+
+The main result is a measurement correction rather than a forecast. For
+Portugal, a 100 basis-point shock reprices \BiasTotalHOne\ percentage points
+more of the stock within one year than the weighted-average-maturity proxy
+implies, worth about EUR \BiasInterestMioHOne\ million in first-year interest.
+Most of the credibility of that number comes from composition, not from a
+fragile behavioural regression: \FloatingSharePct\ percent of the stock is
+floating-rate or inflation-linked and reprices within a year regardless of
+residual maturity. The behavioural estimates are deliberately treated with
+caution. The spread coefficient is imprecise, the bootstrap interval for
+asymmetry covers zero, and the backtest does not establish a forecasting gain
+over the maturity benchmark.
+
+The paper's practical message is correspondingly modest. Weighted average
+maturity should not be discarded; it should be used for the part of the stock
+whose repricing is genuinely tied to maturity. Reset instruments and retail
+flows need their own clocks. Once those clocks are separated, the fiscal
+burden also needs an explicit GDP path, because the same euro interest bill can
+look quite different as a share of GDP.
+
+\section{Related literature}
+\label{sec:literature}
+
+The paper sits between debt-maturity theory, sovereign pass-through accounting,
+and household-deposit pass-through. The maturity literature explains why the
+term structure of public liabilities matters for fiscal risk. Missale and
+Blanchard \cite{missale1994} make debt maturity central to the burden of
+government debt. Angeletos \cite{angeletos2002} shows how a non-contingent
+maturity structure can replicate state-contingent fiscal payoffs in a complete
+set of maturities. Greenwood, Hanson and Stein \cite{greenwood2015} study
+maturity choice as a comparative-advantage problem for government debt
+management. Arellano and Ramanarayanan \cite{arellano2012} and Broner,
+Lorenzoni and Schmukler \cite{broner2013} show, in different settings, that
+maturity is not a neutral technical detail: it interacts with spreads, crisis
+conditions, and rollover risk.
+
+This paper does not estimate an optimal maturity structure and does not model
+default. Its narrower concern is the measurement step that often comes before
+those questions. If a sensitivity exercise says that a rate shock reaches the
+budget according to weighted average maturity, it has already assumed that the
+portfolio is homogeneous enough for one maturity clock to stand in for all
+repricing clocks. The Portuguese data give a concrete way to check that
+assumption.
+
+The retail part of the design is closer to the deposit-rate literature than to
+standard sovereign bond pricing. Drechsler, Savov and Schnabl
+\cite{drechsler2017} emphasise that monetary tightening changes the relative
+return on deposits and therefore the behaviour of deposit holders and banks.
+Portuguese savings certificates are not bank deposits, but they compete with
+household deposit rates and are held by households. That makes the
+subscription margin a plausible place to look for state-dependent pass-through,
+while also making clear why the paper cannot infer household-level behaviour
+from aggregate stock data.
+
+The accounting side links the paper back to the companion burden study.
+Escolano \cite{escolano2010} gives the standard debt-dynamics bridge from
+interest rates and growth to public-debt ratios, while Blanchard
+\cite{blanchard2019} shows why that bridge became politically important in a
+low-rate environment. This paper is about the step before that bridge is used:
+how much of the inherited stock has actually received the new rate. That step
+is easy to compress into one maturity statistic, but the compression is exactly
+where the Portuguese portfolio loses information.
 
 \section{Institutional setting}
 \label{sec:setting}
@@ -84,37 +163,96 @@ debt. A holder facing a change in the competing return on bank deposits can act
 on it, so the repricing of that block is in principle a behavioural object
 rather than a contractual one.
 
-The 2022--2023 tightening provides the episode. Certificados de Aforro grew from
-EUR \RetailStockStartBn\ billion in June 2022 to EUR \RetailStockPeakBn\ billion
-by May 2023, a rise of \RetailGrowthPct\ percent, peaking at a monthly inflow of
-EUR \RetailPeakInflowMio\ million.
+The 2022--2023 tightening provides a clean episode in the everyday sense, not
+in the econometric sense. Certificados de Aforro grew from EUR
+\RetailStockStartBn\ billion in June 2022 to EUR \RetailStockPeakBn\ billion
+by May 2023, a rise of \RetailGrowthPct\ percent, peaking at a monthly inflow
+of EUR \RetailPeakInflowMio\ million. That is a large movement in a visible
+instrument class, but it is also one episode, taking place while inflation,
+household liquidity, deposit competition, and policy communication were all
+moving.
 
-The direction matters and it is the reverse of the intuitive prediction. The
-behavioural argument for faster pass-through under tightening is that holders
-redeem and reinvest at the new rate. Portuguese households did the opposite:
-the certificate's remuneration formula tracked short rates, so tightening made
-it \emph{out-compete} bank deposits and drew money in. Money arriving on the
-prevailing rate reprices the stock exactly as effectively as redemption and
-reissue, so the channel is real --- but it operates on the subscription margin,
-not the redemption margin.
+The direction of the movement is the useful clue. A simple behavioural story
+would say that tightening speeds pass-through because retail holders redeem
+low-yielding instruments and reinvest elsewhere at higher rates. Portugal does
+not fit that story. The certificate's remuneration formula tracked short rates
+closely enough that the instrument became attractive relative to deposits and
+drew money in. For the budget, money arriving at the prevailing rate is still
+repriced money. The channel exists, but it is not the one implied by a
+redemption hazard.
 
-\section{Framework}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/retail_stock_and_spread.pdf}
+\caption{Retail savings certificates and the competing-return spread. The stock is the outstanding amount of Certificados de Aforro; the spread is the policy-rate measure used in the panel less the Portuguese household deposit-rate measure.}
+\label{fig:retail-spread}
+\end{figure}
+
+Figure \ref{fig:retail-spread} is included because the shape of the episode is
+easier to understand visually than in coefficient form. The stock rises during
+tightening, then the change in terms offered on new subscriptions arrests the
+inflow. The figure is not causal evidence on its own, but it is enough to
+discipline the empirical design: the paper should model the subscription
+margin and should not pretend to have observed gross redemptions.
+
+\section{Data construction}
+\label{sec:data}
+
+Instrument-class stocks and portfolio indicators come from IGCP historical
+series, monthly. Competing-return covariates come from the ECB Data Portal. The
+measurement layer for aggregate debt, GDP, and interest is imported from the
+companion paper rather than recomputed. The data architecture is intentionally
+plain: one monthly panel for the repricing question, one annual aggregate
+dataset for the burden translation, and generated manuscript tables so the
+paper does not contain hand-typed results. Table \ref{tab:repricing-portfolio}
+summarises the portfolio state used to initialise the kernel. The average
+maturity input is the IGCP annual-report statistic \cite{igcp2024}.
+
+\input{tables/portfolio_inputs.tex}
+
+The data are informative, but they do not do more than they say. The unit of
+observation is a class-month, not a holder. Retail certificate data are
+published only as aggregate stocks, so the panel cannot separate households
+that subscribe, redeem, roll over, or remain inactive within the month. The
+paper therefore avoids individual language. It is a portfolio-flow design, not
+a household microeconometric design.
+
+The other constraint is that only net stock is observed. Gross subscriptions
+and gross redemptions are not published in the source series. A flat month is
+consistent with no activity and with large offsetting flows, which means a
+redemption hazard is not identified. The empirical design estimates the
+subscription margin, where positive net flow bounds the repriced amount from
+below. Months of net outflow are recorded as outflows, not converted into zero
+repricing events.
+
+The contractual side has a different limitation. No dated redemption schedule
+is published in machine-readable form for the whole stock, so the contractual
+track uses a stylised retirement profile with the same mean maturity. That is
+not a reconstruction of IGCP's cash-flow calendar. It is a deliberately
+transparent counterfactual that lets the paper isolate the composition problem:
+what changes when part of the stock reprices without maturing?
+
+\section{Kernel framework}
 \label{sec:framework}
 
 Let $K(h)$ be the share of the stock outstanding at the horizon origin that
-carries a repriced rate by horizon $h$. We build it from three components,
-combined rather than conflated.
+carries a repriced rate by horizon $h$. The notation is simple, but the
+interpretation is important. A euro can join $K(h)$ because it matures and is
+reissued, because it resets while staying outstanding, or because new retail
+money arrives on the offered rate. Those are different clocks. Putting them
+into one hazard is convenient, but it hides the part of the mechanism this
+paper is trying to measure.
 
-\paragraph{Contractual.} Debt that reprices by maturing and being reissued.
-Deterministic given a redemption schedule.
-
-\paragraph{Reset.} Floating-rate and inflation-linked debt, which reprices on
-its own cycle without exiting. \emph{This is not a survival event}, and forcing
-it into a maturity model is the source of the compositional bias.
-
-\paragraph{Behavioural.} Retail money arriving on the prevailing rate. This
-component is a function of the shock, which is what makes the kernel
-state-dependent rather than a portfolio constant.
+The contractual component is debt that reprices by maturing and being reissued.
+This is the component for which a maturity clock is conceptually appropriate.
+If a redemption schedule is known, it should be used directly. If only a mean
+maturity is known, a stylised profile is a second-best approximation. The reset
+component is different. Floating-rate and inflation-linked debt can receive a
+new rate without leaving the stock, so it is not a survival event. The
+behavioural component is different again: retail money can arrive on the
+prevailing rate, and that arrival can depend on the shock. The empirical test
+below is deliberately modest; it asks only whether the subscription margin
+carries a detectable response to the competing-return spread.
 
 The benchmark against which we measure is the standard proxy,
 \begin{equation}
@@ -125,44 +263,39 @@ with $m$ the published weighted average maturity. Equation \eqref{eq:wam} is
 memoryless: it implies a long right tail, leaving a substantial share unrepriced
 after a decade.
 
-\section{Data}
-\label{sec:data}
-
-Instrument-class stocks and portfolio indicators come from IGCP historical
-series, monthly. Competing-return covariates come from the ECB Data Portal. The
-measurement layer for the aggregate debt and interest series is imported from
-the companion paper rather than recomputed.
-
-Two limitations belong in the body, not an appendix.
-
-\paragraph{The unit of observation is a class-month, not a holder.} Retail
-certificate data is published only as an aggregate stock. An aggregate
-class-month panel is not an individual-level model and we do not describe it as
-one.
-
-\paragraph{Only net stock is observed.} Gross subscriptions and gross
-redemptions are not published. A redemption hazard is therefore not identified:
-a flat month is equally consistent with no activity and with large offsetting
-flows. We estimate the subscription margin, where positive net flow bounds the
-repriced amount from below, and we drop the redemption margin rather than
-fudging it. Months of net outflow are recorded as outflows, not as zero
-repricing.
-
-No dated redemption schedule is published either, so the contractual track uses
-a linear retirement profile with the same mean. That is a stylised
-counterfactual shape, not the issuer's schedule, and the compositional result
-inherits the assumption.
+The estimated kernel is
+\begin{equation}
+  K(h,\Delta)
+  =
+  K^{C}(h)
+  +
+  K^{R}(h)
+  +
+  K^{B}(h,\Delta),
+  \label{eq:kernel}
+\end{equation}
+where $K^{C}$ is contractual repricing, $K^{R}$ is reset repricing, and
+$K^{B}$ is behavioural repricing under shock $\Delta$. The bias relative to the
+maturity proxy is then
+\begin{equation}
+  B(h,\Delta) = K(h,\Delta) - K^{\mathrm{WAM}}(h).
+  \label{eq:bias}
+\end{equation}
+The decomposition reported in the tables splits $B$ into a shape component and
+a behavioural component. The shape component is identified from portfolio
+composition and the stylised retirement track; the behavioural component uses
+the estimated subscription response.
 
 \section{Estimation}
 \label{sec:estimation}
 
 The specification was frozen before fitting and estimated once; no
 specification search was performed. The outcome is the repriced share of the
-opening stock; regressors are the signed parts of the lagged competing-return
-spread, an indicator for the June 2023 change in the terms offered on new
-subscriptions, and portfolio composition. Standard errors are Newey--West.
-With two instrument classes, cluster-robust inference is not valid and we do not
-report it.
+opening stock. The regressors are the signed parts of the lagged
+competing-return spread, an indicator for the June 2023 change in the terms
+offered on new subscriptions, and portfolio composition. Standard errors are
+Newey--West. With two instrument classes, cluster-robust inference would carry
+a false sense of authority, so it is not reported.
 
 The result is a null. The spread-widening coefficient is \SpreadWideningCoef\
 with a standard error of \SpreadWideningSe\ ($p = \SpreadWideningP$). The
@@ -175,38 +308,44 @@ contamination: the fixed-rate share, a portfolio statistic no household observes
 loads at \PlaceboCoef\ ($p = \PlaceboP$) and leaves the other coefficients
 essentially unchanged.
 
-Three reasons for the imprecision, none repaired by a different specification.
-The sample contains one large widening episode, so its timing cannot be
-separated from anything else moving with it. The certificate's contractual
-remuneration rate is not published machine-readably, so a short-rate index
-stands in and attenuation of unknown size is expected. And the outcome is a
-one-sided bound, so net-outflow months contribute uninformative zeros.
+That null is not surprising. The sample contains one large widening episode, so
+its timing cannot be separated cleanly from everything else moving with it. The
+certificate's contractual remuneration rate is not published machine-readably,
+so a short-rate index stands in and attenuation of unknown size is expected.
+The outcome is also a one-sided bound: positive net flow gives a lower bound on
+newly repriced money, while net-outflow months tell us that money left but not
+how much gross subscription and redemption occurred underneath. A more flexible
+specification would make the table look more elaborate without creating the
+missing gross-flow data.
+
+\input{tables/estimation_coefficients.tex}
+
+Table \ref{tab:repricing-estimation} is deliberately shown in full because a
+compressed ``behavioural response'' number would overstate what the data can
+support. The policy break has the expected negative sign, yet it is not precise
+enough to carry a structural interpretation. The maturity covariate is
+similarly weak. The result is still useful, but mainly as a restraint. The
+behavioural component can be carried through the kernel as a sensitivity, not
+as the centrepiece of the paper.
 
 \section{The kernel and the bias}
 \label{sec:kernel}
 
 Table \ref{tab:bias} reports the bias at a 100 basis-point shock. The sign is
-positive at every horizon: \emph{the standard proxy understates how much of the
-stock reprices}.
+positive at every reported horizon: \emph{the standard proxy understates how
+much of the stock reprices}. The table also shows why that statement should
+not be reduced to ``WAM is too slow''. The bias is a combination of an early
+reset effect, a stylised contractual-shape effect, and a behavioural component
+whose central value is reported but whose uncertainty matters.
 
-\begin{table}[H]
+\input{tables/kernel_bias.tex}
+
+\begin{figure}[H]
 \centering
-\caption{Bias in the weighted-average-maturity proxy, +100 bps}
-\label{tab:bias}
-\begin{tabular}{lrrrr}
-\toprule
-Horizon & Proxy share & Estimated share & Total bias (pp) & of which shape (pp) \\
-\midrule
-1 year & \WamShareHOne & \EstimatedShareHOne & \BiasTotalHOne & \BiasShapeHOne \\
-3 years & \WamShareHThree & \EstimatedShareHThree & \BiasTotalHThree & \BiasShapeHThree \\
-5 years & \WamShareHFive & \EstimatedShareHFive & \BiasTotalHFive & \BiasShapeHFive \\
-10 years & \WamShareHTen & \EstimatedShareHTen & \BiasTotalHTen & \BiasShapeHTen \\
-\bottomrule
-\end{tabular}
-
-\smallskip
-\small Source: author calculations. Shape and behaviour sum to the total.
-\end{table}
+\includegraphics[width=0.86\textwidth]{figures/kernel_comparison.pdf}
+\caption{Weighted-average-maturity proxy and estimated repricing kernel. The interval is the generated behavioural interval around the estimated kernel.}
+\label{fig:kernel-comparison}
+\end{figure}
 
 The mechanism is compositional. At one year the shape component contributes
 \BiasShapeHOne\ percentage points and requires no behavioural assumption
@@ -225,20 +364,85 @@ be precisely the failure this paper criticises.
 In fiscal terms the one-year bias is \BiasInterestPctGdpHOne\ percent of GDP,
 about EUR \BiasInterestMioHOne\ million.
 
+Figure \ref{fig:kernel-comparison} makes the non-monotonicity visible. The
+estimated kernel is above the WAM proxy at the reported horizons, but the gap
+does not widen smoothly. The reset block brings pass-through forward; the
+stylised contractual profile can then sit below the memoryless tail at middle
+horizons. That pattern is the reason for using the phrase
+``compositionally biased'' rather than the easier phrase ``too slow''. The
+standard proxy is not wrong in one direction at every point of the curve; it is
+using the wrong clock for part of the stock.
+
 \section{Pass-through}
 \label{sec:passthrough}
 
-Simulating forward under the estimated kernel corrects a further defect in the
-companion paper, which holds nominal GDP fixed across a ten-year horizon. At a
-100 basis-point shock and a five-year horizon, the incremental burden is
-\ShockBurdenZeroGrowth\ percent of GDP under the frozen-GDP assumption and
-\ShockBurdenCentralGrowth\ percent under central nominal growth. Realistic
-growth removes about \GrowthCorrectionPct\ percent of the measured effect.
+Simulating forward under the estimated kernel also clarifies the denominator
+problem. The companion paper holds nominal GDP fixed across the ten-year
+horizon to isolate refinancing arithmetic. That convention is transparent, but
+it is not innocuous. At a 100 basis-point shock and a five-year horizon, the
+incremental burden is \ShockBurdenZeroGrowth\ percent of GDP under the
+frozen-GDP assumption and \ShockBurdenCentralGrowth\ percent under central
+nominal growth. Realistic growth removes about \GrowthCorrectionPct\ percent
+of the measured effect.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/pass_through_growth_paths.pdf}
+\caption{Incremental burden under a +100 basis-point shock across nominal-GDP paths. The lines differ only in the denominator path.}
+\label{fig:growth-paths}
+\end{figure}
+
+\input{tables/half_life.tex}
 
 We note one artefact so it is not mistaken for a finding. Simulated half-lives
 differ by shock direction, but that asymmetry is manufactured by clipping the
 behavioural response at zero, which prevents a rate fall producing a negative
 contribution. It is a modelling choice, and the estimated asymmetry was a null.
+
+The pass-through exercise therefore has two separate lessons. The kernel
+decides how much of the stock has received the shock. The GDP path decides how
+large that same euro interest change looks as a burden ratio. A fiscal note
+that freezes GDP is useful for comparability with full-pass-through arithmetic,
+but it should not be read as a central projection. The economic object is a
+euro interest bill; the political and fiscal object is usually the bill as a
+share of GDP. The two should not be allowed to drift into each other.
+
+\section{Implications for fiscal reporting}
+\label{sec:implications}
+
+The easiest way to use this result is not to replace weighted average maturity
+with a new black box. The useful change is smaller and more practical: report a
+short repricing bridge beside the usual maturity statistic. The bridge should
+state how much of the opening stock is fixed-rate and maturity-driven, how much
+is reset-linked, and how much belongs to retail or other instruments whose
+stock can move with offered terms. A reader can then see why the same published
+maturity can imply different first-year budget exposure across countries or
+across years.
+
+This also changes how uncertainty should be presented. A conventional
+sensitivity table often gives a clean interest-cost number for a rate shock and
+then leaves the timing assumption implicit. In the Portuguese case the more
+honest presentation would separate the contractual component, which is mostly a
+portfolio-accounting issue, from the behavioural component, which is genuinely
+uncertain in published data. That distinction matters because it tells the
+reader which part of the number is anchored in the stock and which part is a
+scenario.
+
+The retail result is particularly useful for policy communication. It would be
+tempting to say that households accelerate pass-through by fleeing old retail
+debt when market rates rise. The Portuguese episode points the other way:
+households subscribed when the certificate return became attractive. The fiscal
+problem was not that existing holders had to be replaced at a higher rate; it
+was that new retail funding arrived on terms tied to the new rate environment.
+That is still pass-through, but the language is different and the policy lever
+is different.
+
+The final implication concerns publication practice. If gross subscriptions and
+redemptions were published in a stable machine-readable series, the
+behavioural block could be estimated directly rather than treated as a bound.
+The paper therefore has a data-policy conclusion as well as a modelling one:
+routine publication of gross retail flows would materially improve public
+understanding of interest-cost pass-through.
 
 \section{Backtest}
 \label{sec:backtest}
@@ -248,49 +452,50 @@ only information available at that date, feeding in realised issuance yields so
 that kernel error is isolated from yield-path error. The realised effective rate
 is imported from the companion paper.
 
-\begin{table}[H]
-\centering
-\caption{Out-of-sample mean absolute error, basis points on the effective rate}
-\label{tab:backtest}
-\begin{tabular}{lrr}
-\toprule
-Cut date & Estimated kernel & Proxy benchmark \\
-\midrule
-2014 & \BacktestEstFourteen & \BacktestWamFourteen \\
-2018 & \BacktestEstEighteen & \BacktestWamEighteen \\
-2021 & \BacktestEstTwentyOne & \BacktestWamTwentyOne \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/backtest_summary.tex}
 
-\textbf{The estimated kernel does not beat the benchmark.} It wins narrowly at
-two cut dates, loses at one, and every margin is noise against the error levels.
-The 2021 cut places the entire tightening episode out of sample, which is where
-a behaviourally responsive kernel should have won most clearly.
+The estimated kernel does not beat the benchmark in a way that would justify
+forecasting claims. It wins narrowly at two cut dates, loses at one, and every
+margin is small relative to the error levels. The 2021 cut places the entire
+tightening episode out of sample, which is where a behaviourally responsive
+kernel should have won most clearly. The honest reading is that the kernel is
+useful for decomposing timing, not for promising lower forecast errors in a
+short annual backtest.
 
 This is consistent with the rest of the paper rather than in tension with it.
 The compositional bias is concentrated in the first year, and a backtest over
-four annual observations has little power to detect it against effective-rate
-volatility.
+the available annual observations has little power to detect it against
+effective-rate volatility. The backtest is still necessary because it prevents
+the kernel from being sold as a superior forecasting model when its strongest
+evidence is a measurement decomposition.
 
 \section{Discussion and limitations}
 \label{sec:discussion}
 
 The contribution is a measurement result: the standard pass-through proxy is
-biased, the bias is signable and quantified, and its mechanism is compositional.
-Anyone using weighted average maturity to time a rate shock through a budget
-should adjust for the share of the stock that reprices without exiting.
+biased, the bias is signable and quantified, and its mechanism is
+compositional. Anyone using weighted average maturity to time a rate shock
+through a budget should adjust for the share of the stock that reprices without
+exiting. This is not a refinement for the sake of refinement. A first-year
+budget exercise is exactly where floating and indexed liabilities matter, and
+that is exactly where a maturity-only proxy is least able to see them.
 
-The behavioural thesis is not supported. We state that plainly. The channel is
+The behavioural thesis is not supported in the strong form. The channel is
 visible in the raw data --- a \RetailGrowthPct\ percent inflow and an abrupt
 stop at a dated policy change --- but it is not identifiable at the precision
 published sources allow, principally because gross retail flows are not
-published and the contractual remuneration rate is not machine-readable.
+published and the contractual remuneration rate is not machine-readable. That
+is a useful negative result. It prevents the paper from turning an attractive
+Portuguese institutional episode into a broad claim about household portfolio
+elasticities.
 
-Further limitations: the contractual track rests on a stylised retirement
-profile in the absence of a published schedule; the unit of observation is a
-class-month, not a holder; and the sample contains a single large tightening
-episode.
+The limitations are therefore part of the argument rather than a disclaimer at
+the end. The contractual track rests on a stylised retirement profile in the
+absence of a published schedule; the unit of observation is a class-month, not
+a holder; and the sample contains a single large tightening episode. The model
+also treats reset instruments as repricing within the first year rather than
+modelling their exact reset dates. That assumption is appropriate for annual
+fiscal pass-through, but it is too coarse for monthly cash-flow management.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -301,6 +506,15 @@ one year for Portugal, because a maturity-calibrated hazard cannot represent
 instruments that reprice without exiting. A behavioural channel exists and runs
 opposite to the intuitive direction, but the published data does not identify it.
 
+The practical recommendation is simple. Start from weighted average maturity
+only for the part of the stock whose repricing is tied to maturity. Put
+floating-rate and indexed debt on a reset track, put retail instruments on a
+separate subscription and redemption track where gross flows exist, and then
+translate euro interest effects into burden ratios under explicit GDP paths.
+That workflow is more demanding than the one-number WAM proxy, but it prevents
+the proxy from assigning the wrong timing to instruments whose repricing clock
+is not a maturity clock.
+
 \section*{Data availability}
 
 All inputs are public. Instrument-class stocks and portfolio indicators come
@@ -309,15 +523,35 @@ Portal; aggregate debt and interest from Eurostat. The aggregate series are
 those of the companion interest-burden study \cite{ribeiro_burden}, used
 unchanged.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 
 \bibitem{ribeiro_burden}
-Ribeiro, D. (2026). \emph{Portugal's Public-Debt Interest Burden: A
-Reproducible ESA 2010 Assessment, 1995--2025}. Companion working paper.
+Ribeiro, D. (2026). \emph{Portugal's Public-Debt Interest Burden under ESA
+2010, 1995--2025}. Companion working paper.
 
 \bibitem{blanchard2019}
 Blanchard, O. (2019). Public Debt and Low Interest Rates. \emph{American
 Economic Review}, 109(4), 1197--1229. \doi{10.1257/aer.109.4.1197}
+
+\bibitem{angeletos2002}
+Angeletos, G.-M. (2002). Fiscal Policy with Noncontingent Debt and the
+Optimal Maturity Structure. \emph{The Quarterly Journal of Economics},
+117(3), 1105--1131. \doi{10.1162/003355302760193977}
+
+\bibitem{arellano2012}
+Arellano, C., \& Ramanarayanan, A. (2012). Default and the Maturity Structure
+in Sovereign Bonds. \emph{Journal of Political Economy}, 120(2), 187--232.
+\doi{10.1086/666589}
+
+\bibitem{broner2013}
+Broner, F. A., Lorenzoni, G., \& Schmukler, S. L. (2013). Why Do Emerging
+Economies Borrow Short Term? \emph{Journal of the European Economic
+Association}, 11(S1), 67--100. \doi{10.1111/j.1542-4774.2012.01094.x}
+
+\bibitem{drechsler2017}
+Drechsler, I., Savov, A., \& Schnabl, P. (2017). The Deposits Channel of
+Monetary Policy. \emph{The Quarterly Journal of Economics}, 132(4),
+1819--1876.
 
 \bibitem{greenwood2015}
 Greenwood, R., Hanson, S. G., \& Stein, J. C. (2015). A Comparative-Advantage

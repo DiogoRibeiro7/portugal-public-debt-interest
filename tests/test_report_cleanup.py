@@ -85,16 +85,11 @@ def test_tied_minimum_years_reported() -> None:
     )
 
 
-def test_title_uses_the_subtitle_form() -> None:
-    """Second-round review asked for a colon; this guard was the reverse.
-
-    The earlier rule came from an internal style pass, not from review. The
-    reviewer objected that "Burden in a Reproducible Assessment" reads as
-    though the burden sits inside the assessment, and asked for a subtitle.
-    """
+def test_title_contains_no_colon() -> None:
     title = _title(_paper())
-    assert ":" in title, "the title must separate subject from description"
+    assert ":" not in title
     assert "Burden in a Reproducible" not in title
+    assert "under ESA 2010" in title
 
 
 def test_no_near_empty_reproducibility_page() -> None:

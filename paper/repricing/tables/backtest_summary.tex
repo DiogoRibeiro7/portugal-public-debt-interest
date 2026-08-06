@@ -1,0 +1,27 @@
+\begin{table}[H]
+\centering
+\caption{Out-of-sample backtest errors}
+\label{tab:backtest}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{rlrrr}
+\toprule
+Cut year & Model & Mean abs. error (bps) & Worst error (bps) & $N$ \\
+\midrule
+2014 & estimated\_kernel & 52.44 & 130.95 & 11 \\
+2014 & wam\_benchmark & 55.69 & 129.07 & 11 \\
+2014 & immediate\_full\_pass\_through & 95.09 & 178.70 & 11 \\
+2014 & random\_walk & 120.75 & 197.39 & 11 \\
+2018 & wam\_benchmark & 45.16 & 90.60 & 7 \\
+2018 & estimated\_kernel & 47.81 & 87.74 & 7 \\
+2018 & random\_walk & 63.62 & 104.35 & 7 \\
+2018 & immediate\_full\_pass\_through & 119.67 & 178.70 & 7 \\
+2021 & estimated\_kernel & 14.24 & 24.83 & 4 \\
+2021 & wam\_benchmark & 14.66 & 22.85 & 4 \\
+2021 & random\_walk & 24.52 & 32.45 & 4 \\
+2021 & immediate\_full\_pass\_through & 81.05 & 115.72 & 4 \\
+\bottomrule
+\end{tabular}
+}
+\par\smallskip
+\parbox{0.92\textwidth}{\small Errors are basis points on the realised average debt rate. Source: author calculations.}
+\end{table}

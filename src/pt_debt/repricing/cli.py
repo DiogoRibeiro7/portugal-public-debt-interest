@@ -218,6 +218,14 @@ def paper_command(
         processed, processed / "repricing_panel.csv", paper_dir
     )
     typer.echo(macro_path)
+    for path in manuscript.write_tables(
+        processed, processed / "repricing_panel.csv", paper_dir
+    ):
+        typer.echo(path)
+    for path in manuscript.write_figures(
+        processed, processed / "repricing_panel.csv", paper_dir
+    ):
+        typer.echo(path)
 
     tex_path = paper_dir / "repricing_kernel.tex"
     missing = manuscript.undefined_macros(tex_path, macro_path)
