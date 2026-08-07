@@ -63,18 +63,39 @@ Artefact: `data/processed/repricing/scenarios/pass_through_paths.csv`.
 
 ## What the study fails to establish
 
-### The behavioural channel is a null
+### The behavioural channel is detectable but not identified
 
-No coefficient in the frozen specification is distinguishable from zero. The
-spread-widening term is +0.0187 (se 0.0148, p = 0.20). The asymmetry the design
-turns on has a bootstrap interval of **[−0.020, +0.044]** over 1,000
-moving-block replicates and covers zero. n = 494, R² = 0.041.
+**This section changed after the estimator was corrected.** Estimation now runs
+on the two retail classes aggregated to one monthly series. Previously it ran
+on the stacked class-month panel, which is sorted by class and then period, so
+calendar time jumped backwards at the class boundary — a twelve-month bootstrap
+block could straddle a fifteen-year gap, and the Newey–West lag structure did
+not correspond to month-to-month dependence. Aggregating also weights each
+class by the euros it carries instead of giving a small and a large class equal
+influence.
+
+The spread-widening term is now **+0.0214 (se 0.0061, p < 0.001)**, n = 304,
+R² = 0.343. Previously it was +0.0187 (se 0.0148, p = 0.20) on n = 494 with
+R² = 0.041, and the section read "no coefficient is distinguishable from zero."
+
+That is *not* a finding, for two reasons:
+
+- The asymmetry the design turns on still has a bootstrap interval of
+  **[−0.016, +0.046]** over 1,000 moving-block replicates and covers zero.
+- **The placebo no longer passes cleanly.** The fixed-rate share — a portfolio
+  statistic no household observes — now loads at −0.00051 (**p = 0.07**),
+  against p = 0.86 before. That is close enough to significance to read as a
+  warning: the monthly series carries common time variation the specification
+  cannot separate from the spread.
+
+So the coefficient is reported as **descriptive** — an association in the
+observable lower-bound process — not as an identified behavioural response.
+Nothing downstream treats it as identified: the kernel's central behavioural
+effect stays at zero and the fitted response enters only as a sensitivity band.
 
 The specification was frozen at `796c264` before fitting and estimated once.
 `docs/specification_log.md` records that: "Total specifications estimated: one."
-
-This is imprecision, not contamination. The placebo — the fixed-rate share, a
-portfolio statistic no household observes — loads at −0.00019 (p = 0.86).
+The aggregation changes the estimator, not the specification.
 
 Artefacts: `data/processed/repricing/estimates/s1_coefficients.csv`,
 `s1_bootstrap_replicates.csv`, `s1_placebo.csv`.
@@ -87,11 +108,18 @@ Mean absolute error on the effective rate, basis points:
 | --- | --- | --- |
 | 2014 | 46.91 | **43.24** |
 | 2018 | 13.79 | **12.92** |
-| 2021 | 11.14 | **9.81** |
+| 2021 | **9.24** | 9.81 |
 
-**The benchmark wins at every cut date.** Margins stay small relative to the
-error levels, so this is not evidence that the constant hazard is right — but
-it is no longer possible to claim the kernel forecasts better.
+**The benchmark wins at two of three cut dates.** The kernel wins only at 2021 —
+the cut that places the whole tightening episode out of sample, and therefore
+the one where a behavioural channel has anything to do. That is suggestive on
+four annual observations at a single cut date, and it is not evidence of
+forecasting skill. Margins are small relative to the error levels throughout.
+
+This table has changed twice. The 2021 row moved from 11.14 to 9.24 once the
+fitted spread response was actually passed to the model labelled "estimated
+kernel" — before that the pipeline passed zero, so the model carrying the name
+of the estimate was not using it.
 
 An earlier version of this table reported the kernel winning two of three cuts
 (52.44/55.69, 47.81/45.16, 14.24/14.66). That ranking was an artefact of three
@@ -103,7 +131,7 @@ cut, so a 2014 prediction was built from a 2026 portfolio.
 
 The 2021 cut places the whole tightening episode out of sample, which is where
 a behaviourally responsive kernel would have the best chance of separating
-itself. It does not.
+itself. It is also the only cut where it does.
 
 Artefact: `data/processed/repricing/scenarios/backtest_summary.csv`.
 
@@ -122,10 +150,11 @@ the redemption hazard rather than approximating it. See
 **The half-life asymmetry between rate rises and falls is manufactured by the
 model, not measured.** The behavioural response is clipped at zero, which
 prevents a rate fall producing a negative contribution. The estimated asymmetry
-was a null. The manuscript labels this in the body.
+does not separate from zero. The manuscript labels this in the body.
 
 **The behavioural band runs from zero at every horizon**, because the estimate
-behind it is the null above. Reporting the central path without that band would
+behind it is not identified, for the reasons above. Reporting the central path
+without that band would
 be the same overconfidence the study criticises in the proxy.
 
 ---

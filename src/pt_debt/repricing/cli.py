@@ -317,11 +317,18 @@ def all_command(
     paths.to_csv(scenarios / "pass_through_paths.csv", index=False)
     simulate.half_life(paths).to_csv(scenarios / "half_life.csv", index=False)
 
+    # The model labelled "estimated kernel" must actually carry the estimate.
+    fitted_response = float(
+        fitted.coefficients.loc[
+            fitted.coefficients["term"].eq("spread_widening_pp"), "coefficient"
+        ].iloc[0]
+    )
     scores = simulate.backtest_across_cuts(
         burden,
         frame,
         lambda as_of: manuscript._kernel_inputs_from_panel(frame, as_of),
         cut_years=(2014, 2018, 2021),
+        behavioural_response=fitted_response,
     )
     scores.to_csv(scenarios / "backtest_scores.csv", index=False)
     simulate.backtest_summary(scores).to_csv(

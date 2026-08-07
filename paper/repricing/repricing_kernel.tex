@@ -33,11 +33,14 @@ a rate shock reaches a sovereign interest bill. It is also easy to overuse.
 Maturity describes when debt leaves the stock; not all repricing waits for that
 event. This paper separates the Portuguese debt stock into maturity-driven,
 reset-driven, and retail-flow components and asks how wide the plausible
-pass-through range becomes once those clocks are separated. The paper no longer
-treats the behavioural coefficient as a central correction: the competing-return
-spread is not estimated precisely, the bootstrap interval for asymmetry is
-[\AsymmetryLow, \AsymmetryHigh], and the kernel does not beat the maturity
-benchmark out of sample. The raw episode is nevertheless informative, because
+pass-through range becomes once those clocks are separated. The paper does not
+treat the behavioural coefficient as a central correction. The competing-return
+spread does carry a detectable positive association with retail repricing, but
+the falsification test loads at $p = \PlaceboP$ on a statistic no household
+observes, so the association is reported as descriptive rather than identified;
+the bootstrap interval for asymmetry is [\AsymmetryLow, \AsymmetryHigh]; and
+the kernel beats the maturity benchmark at only one of three cut dates out of
+sample. The raw episode is nevertheless informative, because
 households moved money into certificates during the 2022--2023 tightening
 rather than redeeming them. The defensible result is a bounded sensitivity
 exercise. Portuguese aggregate data are enough to show that weighted average
@@ -88,10 +91,14 @@ suggest.
 The main result is a measurement warning rather than a forecast. Weighted
 average maturity is not enough to determine one-year pass-through once reset
 instruments, retail instruments, and maturity-driven debt are separated. The
-central behavioural effect is set to zero in the kernel tables because the
-spread coefficient is imprecise, the bootstrap interval for asymmetry covers
-zero, and the backtest does not establish a forecasting gain over the maturity
-benchmark. Behavioural responses are carried as sensitivity bounds instead.
+central behavioural effect is set to zero in the kernel tables. That is not
+because the spread coefficient is small --- it is statistically detectable ---
+but because a falsification test on a statistic no household observes also
+loads at $p = \PlaceboP$, which points to common time variation the
+specification cannot separate from the spread. The bootstrap interval for
+asymmetry covers zero, and the backtest establishes no general forecasting gain
+over the maturity benchmark. Behavioural responses are therefore carried as
+sensitivity bounds rather than as a central correction.
 
 The paper's practical message is correspondingly modest. Weighted average
 maturity should not be discarded; it should be used for the part of the stock
@@ -322,24 +329,41 @@ specification search was performed. The outcome is the repriced share of the
 opening stock. The regressors are the signed parts of the lagged
 competing-return spread, an indicator for the June 2023 change in the terms
 offered on new subscriptions, and portfolio composition. Standard errors are
-Newey--West. With two instrument classes, cluster-robust inference would carry
-a false sense of authority, so it is not reported.
+Newey--West. Estimation is on the two retail classes aggregated to a single
+monthly series, \EstimationObservations\ months. That aggregation is not
+cosmetic. Stacking the classes places every month of one class before every
+month of the other, so calendar time jumps backwards at the join: a
+twelve-month bootstrap block can straddle a fifteen-year gap, and the
+Newey--West lag structure does not correspond to month-to-month dependence.
+Aggregating also weights each class by the euros it carries rather than giving
+a small class and a large one equal influence, which removes the need for class
+effects.
 
-The result is a null. The spread-widening coefficient is \SpreadWideningCoef\
-with a standard error of \SpreadWideningSe\ ($p = \SpreadWideningP$). The
-asymmetry the design turns on --- whether widening and narrowing load
-differently --- has a bootstrap interval of [\AsymmetryLow, \AsymmetryHigh]
-across \BootstrapReplicates\ moving-block replicates and covers zero.
+The spread-widening coefficient is \SpreadWideningCoef\ with a standard error
+of \SpreadWideningSe\ ($p = \SpreadWideningP$). Taken alone that is a
+detectable positive association between the competing-return spread and retail
+repricing. Two things stop it supporting a causal reading.
 
-A falsification test provides no evidence of one particular contamination
-channel: the fixed-rate share, a portfolio statistic no household observes,
-loads at \PlaceboCoef\ ($p = \PlaceboP$) and leaves the other coefficients
-essentially unchanged. Failing to reject a placebo association does not
-establish that the identifying variation is valid, and with one dominant
-episode and an imprecise model it carries little power. It is a diagnostic,
-not a validation.
+First, the asymmetry the design turns on --- whether widening and narrowing
+load differently --- has a bootstrap interval of [\AsymmetryLow,
+\AsymmetryHigh] across \BootstrapReplicates\ moving-block replicates and still
+covers zero. The directional claim the study was built to test remains
+unresolved.
 
-That null is not surprising. The sample contains one large widening episode, so
+Second, and more seriously, the falsification test no longer passes cleanly.
+The fixed-rate share is a portfolio statistic no household observes and should
+carry no weight; it loads at \PlaceboCoef\ ($p = \PlaceboP$). That is close
+enough to conventional significance to be a warning rather than a reassurance.
+The natural reading is that the monthly series carries common time variation
+which the specification cannot separate from the spread. The coefficient above
+should therefore be read as descriptive --- an association in the observable
+lower-bound process --- and not as an identified behavioural response. Nothing
+downstream in this paper treats it as identified: the kernel's central
+behavioural effect is set to zero and the fitted response enters only as a
+sensitivity band.
+
+That fragility is not surprising. The sample contains one large widening
+episode, so
 its timing cannot be separated cleanly from everything else moving with it. The
 certificate's contractual remuneration rate is not published machine-readably,
 so a short-rate index stands in and attenuation of unknown size is expected.
@@ -399,7 +423,8 @@ window the memoryless tail retires more than a profile that has already retired
 its fast component. ``The constant-hazard kernel is too slow'' is true early
 and false later under the zero-behaviour central case. Second, the behavioural
 component's band runs from zero at every horizon, because the estimate behind
-it is the null of Section \ref{sec:estimation}. We report behavioural upside
+it is not identified, for the reasons in Section \ref{sec:estimation}. We
+report behavioural upside
 only as a sensitivity; a point estimate without that caveat would be precisely
 the failure this paper criticises.
 
@@ -420,7 +445,8 @@ Figure \ref{fig:kernel-bootstrap} adds the empirical uncertainty that the point
 curve alone hides. The band is not mainly a story about debt managers changing
 contractual maturities; those inputs are held fixed. It is the uncertainty from
 the retail-flow estimate carried through the kernel. That is why the band is
-useful even though the behavioural coefficient is a null. It shows which part
+useful even though the behavioural coefficient is not identified. It shows
+which part
 of the measurement correction is stable composition and which part is still a
 thin-data behavioural estimate.
 
@@ -448,7 +474,8 @@ sensitivity, not an empirical correction.
 We note one artefact so it is not mistaken for a finding. Simulated half-lives
 differ by shock direction, but that asymmetry is manufactured by clipping the
 behavioural response at zero, which prevents a rate fall producing a negative
-contribution. It is a modelling choice, and the estimated asymmetry was a null.
+contribution. It is a modelling choice, and the estimated asymmetry does not
+separate from zero.
 
 The pass-through exercise therefore has two separate lessons. The kernel
 decides how much of the stock has received the shock. The GDP path decides how
@@ -556,20 +583,22 @@ latest one. The realised effective rate is imported from the companion paper.
 
 \input{tables/model_comparison.tex}
 
-The estimated kernel does not beat the benchmark. Once the backtest is
-vintage-consistent and built from each cut date's own portfolio state, the
-constant-hazard benchmark has the lower mean absolute error at \emph{every}
-cut date, though the margins remain small relative to the error levels. An
-earlier version of this exercise reported the kernel winning at two of three
-cuts; that ranking was an artefact of applying each year's yield to the whole
-cumulative repriced share. The 2021 cut places the entire
-tightening episode out of sample, which is where a behaviourally responsive
-kernel would have the best chance of separating itself; it does not. That
-comparison is only meaningful because the behavioural channel is live in the
-backtest --- an earlier implementation built the kernel at zero shock, which
-silences the channel whatever response is supplied, so the same sentence was
-previously unsupported by the code that produced the table. The honest reading
-is that the kernel is
+The estimated kernel does not systematically beat the benchmark. It has the
+lower mean absolute error at one of the three cut dates and the higher error at
+the other two, and every margin is small relative to the error levels. The one
+it wins is \BacktestEstTwentyOne\ against \BacktestWamTwentyOne\ basis points
+at the 2021 cut --- the cut that places the entire tightening episode out of
+sample, and therefore the one where a behavioural channel has something to do.
+That is suggestive and it is a single cut date with four annual observations;
+it is not evidence of forecasting skill.
+
+That comparison is only meaningful because the behavioural channel is live in
+the backtest. An earlier implementation built the kernel at zero shock, which
+silences the channel whatever response is supplied, and applied each year's
+yield to the whole cumulative repriced share rather than to the cohort that
+repriced. Both are corrected here, and the correction moved the ranking: the
+earlier version reported the kernel winning at two cut dates for reasons that
+had nothing to do with its economics. The honest reading is that the kernel is
 useful for decomposing timing, not for promising lower forecast errors in a
 short annual backtest.
 
