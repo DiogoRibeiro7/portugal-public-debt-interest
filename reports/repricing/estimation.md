@@ -52,7 +52,9 @@ does not observe and has no reason to respond to. It should not load.
 | `share_fixed_rate_pct` | −0.00019 | 0.86 |
 
 It does not load, and adding it leaves the other coefficients essentially
-unchanged. **Identification is not contaminated.** There is simply no
+unchanged. **This provides no evidence of that particular contamination
+channel.** Failing to reject a placebo does not establish that the identifying
+variation is valid; it is a diagnostic, not a validation. There is simply no
 detectable signal at this precision.
 
 ## Regime stability

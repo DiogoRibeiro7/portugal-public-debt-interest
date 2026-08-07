@@ -221,8 +221,12 @@ and gross redemptions are not published in the source series. A flat month is
 consistent with no activity and with large offsetting flows, which means a
 redemption hazard is not identified. The empirical design estimates the
 subscription margin, where positive net flow bounds the repriced amount from
-below. Months of net outflow are recorded as outflows, not converted into zero
-repricing events.
+below. Net outflow is retained as its own series, but the regression outcome is
+the lower bound $\max(\text{net flow}, 0)$, so in a month of net outflow the
+dependent variable is exactly zero. That zero is a valid \emph{bound} on gross
+subscription, not an observation that no repricing occurred. The coefficient is
+therefore an association in the observable lower-bound process, not a point
+estimate of the gross flow response, and it is not interpreted as one below.
 
 This also means the behavioural block is not a clean opening-stock repricing
 kernel. Positive retail subscriptions are new financing flows, not euros from
@@ -254,7 +258,16 @@ This is the component for which a maturity clock is conceptually appropriate.
 If a redemption schedule is known, it should be used directly. If only a mean
 maturity is known, a stylised profile is a second-best approximation. The reset
 component is different. Floating-rate and inflation-linked debt can receive a
-new rate without leaving the stock, so it is not a survival event. The
+new rate without leaving the stock, so it is not a survival event. Two
+assumptions are bundled there and should be separated. The first is
+\emph{reset timing}: how often the rate is refreshed, taken centrally as one
+year. The second is \emph{shock loading}: how much of a given shock each
+instrument absorbs, taken here as one for one. Neither is estimated, and they
+are not the same object --- an inflation-linked coupon does not respond to a
+policy or market-rate shock the way a Euribor-linked coupon does, and the two
+need not reset on the same schedule. Treating the whole non-fixed residual as a
+single one-year, one-for-one reset block is therefore a scenario choice, and
+the sensitivity table varies the timing leg of it. The
 behavioural component is different again: retail money can arrive on the
 prevailing rate, and that arrival can depend on the shock. The empirical test
 below is deliberately modest; it asks only whether the subscription margin
@@ -289,9 +302,17 @@ maturity proxy is then
   \label{eq:bias}
 \end{equation}
 The decomposition reported in the tables splits $B$ into a shape component and
-a behavioural component. The shape component is identified from portfolio
-composition and the stylised retirement track; the behavioural component uses
-the estimated subscription response.
+a behavioural component. Neither is an identified estimate. The shape component
+combines observed portfolio composition with an \emph{imposed} linear
+retirement track and an \emph{imposed} reset cycle, because the dated
+redemption schedule is not published; the paper shows below that a two-year
+reset assumption reverses the sign at one year. The behavioural component uses
+a subscription response whose estimate is a null. Both are therefore
+model-based sensitivities. The claim this paper defends is not that the bias
+equals a particular number, but that weighted average maturity and a mean do
+not determine a unique repricing path: plausible composition and timing
+assumptions generate materially different paths, of different signs relative to
+the constant-hazard benchmark.
 
 \section{Estimation}
 \label{sec:estimation}
@@ -310,10 +331,13 @@ asymmetry the design turns on --- whether widening and narrowing load
 differently --- has a bootstrap interval of [\AsymmetryLow, \AsymmetryHigh]
 across \BootstrapReplicates\ moving-block replicates and covers zero.
 
-A falsification test supports reading this as imprecision rather than
-contamination: the fixed-rate share, a portfolio statistic no household observes,
+A falsification test provides no evidence of one particular contamination
+channel: the fixed-rate share, a portfolio statistic no household observes,
 loads at \PlaceboCoef\ ($p = \PlaceboP$) and leaves the other coefficients
-essentially unchanged.
+essentially unchanged. Failing to reject a placebo association does not
+establish that the identifying variation is valid, and with one dominant
+episode and an imprecise model it carries little power. It is a diagnostic,
+not a validation.
 
 That null is not surprising. The sample contains one large widening episode, so
 its timing cannot be separated cleanly from everything else moving with it. The
@@ -446,7 +470,7 @@ and a one-at-a-time sensitivity table for the kernel assumptions.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/scenario_fan_chart.pdf}
-\caption{Monte Carlo fan chart for incremental burden pass-through. The draws combine rate-shock uncertainty, nominal-GDP-growth uncertainty, and bootstrap uncertainty in the behavioural response.}
+\caption{Illustrative stochastic sensitivity for incremental burden pass-through. The shock and growth distributions are chosen, not estimated, so the band is a percentile range of those assumed inputs and not a forecast or confidence interval.}
 \label{fig:scenario-fan}
 \end{figure}
 
@@ -458,6 +482,12 @@ effect has a median of \FanBurdenMedianHFive\ percent of GDP, with a
 The wide band is not a failure of the kernel; it is the fiscal reality that the
 same repricing path can look quite different once the shock size and GDP
 denominator are allowed to vary.
+
+The band must not be read as a forecast interval. The shock and growth
+distributions are author-chosen rather than estimated or externally calibrated,
+so the 5--95 range describes the spread of those assumed inputs, not empirical
+uncertainty. It is an illustrative stochastic sensitivity; the deterministic
+envelopes above carry the substantive comparisons.
 
 \input{tables/sensitivity_checks.tex}
 
@@ -512,10 +542,15 @@ understanding of interest-cost pass-through.
 \section{Backtest}
 \label{sec:backtest}
 
-We freeze the specification, estimate to a cut date, and predict forward using
-only information available at that date, feeding in realised issuance yields so
-that kernel error is isolated from yield-path error. The realised effective rate
-is imported from the companion paper.
+We freeze the specification, reconstruct the portfolio state as it stood at
+each cut date, and predict forward from that state. The rate fed forward is the
+realised \emph{ten-year benchmark} yield, so that kernel error is isolated from
+yield-path error. It is not an issuance-weighted funding rate: the securities
+repricing in a given year are not all ten-year, so the exercise measures the
+timing kernel against a common reference path rather than reproducing actual
+issuance cost. Repricing is accumulated by cohort, so debt that repriced in an
+earlier year carries the yield it repriced at rather than being revalued at the
+latest one. The realised effective rate is imported from the companion paper.
 
 \input{tables/backtest_summary.tex}
 
@@ -525,7 +560,12 @@ The estimated kernel does not beat the benchmark in a way that would justify
 forecasting claims. It wins narrowly at two cut dates, loses at one, and every
 margin is small relative to the error levels. The 2021 cut places the entire
 tightening episode out of sample, which is where a behaviourally responsive
-kernel should have won most clearly. The honest reading is that the kernel is
+kernel would have the best chance of separating itself; it does not. That
+comparison is only meaningful because the behavioural channel is live in the
+backtest --- an earlier implementation built the kernel at zero shock, which
+silences the channel whatever response is supplied, so the same sentence was
+previously unsupported by the code that produced the table. The honest reading
+is that the kernel is
 useful for decomposing timing, not for promising lower forecast errors in a
 short annual backtest.
 

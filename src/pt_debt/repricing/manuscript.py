@@ -63,8 +63,19 @@ def _as_int(value: object) -> int:
     return int(_as_float(value))
 
 
-def _kernel_inputs_from_panel(panel: pd.DataFrame) -> KernelInputs:
-    latest = panel.loc[panel["period"].eq(panel["period"].max())]
+def _kernel_inputs_from_panel(
+    panel: pd.DataFrame, as_of: pd.Timestamp | None = None
+) -> KernelInputs:
+    """Portfolio state at ``as_of``, defaulting to the end of the panel.
+
+    A backtest must reconstruct the state as it stood at its cut date. Passing
+    the latest observation into a prediction that starts years earlier is
+    look-ahead, so ``as_of`` is not optional at those call sites.
+    """
+    window = panel if as_of is None else panel.loc[panel["period"].le(as_of)]
+    if window.empty:
+        raise ValidationError(f"panel has no observations at or before {as_of}")
+    latest = window.loc[window["period"].eq(window["period"].max())]
     return KernelInputs(
         average_residual_maturity_years=float(
             latest["average_residual_term_years"].iloc[0]
@@ -75,8 +86,16 @@ def _kernel_inputs_from_panel(panel: pd.DataFrame) -> KernelInputs:
 
 
 def _simulation_inputs(paths: pd.DataFrame) -> dict[str, float]:
+    """Recover the time-zero state the scenarios started from.
+
+    Read from the **zero-growth** path deliberately. Under zero growth the
+    denominator has not moved, so the horizon-one debt ratio and implied GDP
+    are still the time-zero values. Taking them from the central-growth path
+    instead returned a denominator that had already been grown one year, and
+    the fan chart then grew it again from there.
+    """
     row = paths.loc[
-        paths["growth_path"].eq("central")
+        paths["growth_path"].eq("zero_growth")
         & paths["shock_bps"].eq(100)
         & paths["horizon_years"].eq(1)
     ].iloc[0]
