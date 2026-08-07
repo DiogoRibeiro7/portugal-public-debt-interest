@@ -167,7 +167,9 @@ reconstructed_debt_ratio_change =
 
 8. **Source-vintage and observation-status reporting is incomplete.** Row-level provenance exists, but headline report text and tables do not consistently mark provisional source flags or data vintages.
 
-9. **Replication metadata is incomplete.** No tracked lock file, no generated replication metadata, no report commit hash, no dirty-tree status, and no PDF/source checksum appendix.
+9. **Replication metadata is incomplete.** At the baseline audit date there was
+no tracked lock file, no generated replication metadata, no report commit hash,
+no dirty-tree status, and no PDF/source checksum appendix.
 
 10. **Publication quality issues remain.** Figure generation now includes vector PDF output, mixed-axis charts have been replaced by stacked-panel figures, LaTeX layout warnings have been cleared, analytical tables are generated from processed data, and recurring paper headline values are generated as LaTeX macros.
 
@@ -280,7 +282,9 @@ Status note: citation metadata, README citation guidance, and resolver
 documentation are now present. The remaining reproducibility item is any CI
 expansion that requires cached analytical fixtures or LaTeX availability.
 
-- Completed: clearly document the supported resolver in `docs/reproducibility.md`.
+- Completed: commit `poetry.lock` and make it the documented resolver in
+  `docs/reproducibility.md`.
+- Completed: switch CI quality checks to install from `poetry.lock`.
 - Completed: add replication metadata generation:
   - project version;
   - Git commit;

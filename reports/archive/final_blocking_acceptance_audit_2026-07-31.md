@@ -1,4 +1,8 @@
-# Final blocking acceptance audit
+# Historical blocking acceptance audit
+
+This file is archived for provenance. It describes the repository state audited
+on 2026-07-31 and is superseded by `../final_audit.md` for the current release
+state.
 
 Adversarial rebuild and item-by-item evaluation of the eight blocking
 correction prompts.

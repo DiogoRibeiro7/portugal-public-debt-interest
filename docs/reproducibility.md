@@ -2,24 +2,26 @@
 
 ## Dependency resolution
 
-This project does not currently track a lock file. The supported resolver is the
-PEP 621 dependency set declared in `pyproject.toml`, installed with:
-
-```bash
-python -m pip install -e ".[dev]"
-```
-
-Poetry may also be used as a frontend:
+This project tracks `poetry.lock`. The supported locked install is:
 
 ```bash
 poetry install --with dev
 ```
 
-When Poetry is used, `poetry.lock` is a local resolver artifact unless it is
-created and intentionally committed in a future release. Until then, the
-auditable dependency contract is the bounded version ranges in `pyproject.toml`,
-the Python version matrix in `.github/workflows/ci.yml`, and the recorded
-runtime metadata in `reports/reproducibility.json`.
+If Poetry is not already installed, install the same major version used to write
+the lock file and then install from the lock:
+
+```bash
+python -m pip install "poetry>=2.2,<3.0"
+poetry install --with dev
+```
+
+For quick local work, `python -m pip install -e ".[dev]"` remains usable, but it
+resolves within the bounded ranges in `pyproject.toml` and is not the locked
+publication environment. The auditable dependency contract is the combination
+of `pyproject.toml`, `poetry.lock`, the Python version matrix in
+`.github/workflows/ci.yml`, and the recorded runtime metadata in
+`reports/reproducibility.json`.
 
 ## Analytical regeneration
 

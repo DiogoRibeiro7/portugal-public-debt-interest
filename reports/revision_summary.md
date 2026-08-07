@@ -20,17 +20,23 @@
 - Replaced recurring manually typed headline values with generated LaTeX macros.
 - Added citation metadata for software reuse.
 - Documented the supported dependency resolver and live regeneration workflow.
+- Added a committed Poetry lockfile and switched CI to install from it.
+- Added provisional-year robustness for the 2025 headline results.
+- Clarified that euro-area average-debt-rate comparisons are descriptive rather
+  than directly comparable funding-cost rankings.
+- Archived the obsolete July blocking audit and refreshed the root final audit
+  with the current verification run.
 
 ## Current Outputs
 
 - Final PDF: `paper/portugal_public_debt_interest_report.pdf`.
 - LaTeX source: `paper/portugal_public_debt_interest_report.tex`.
-- Annual table: `data/processed/portugal_debt_interest.csv`.
-- SQLite database: `data/processed/portugal_debt_interest.sqlite`.
-- Comparator panel: `data/processed/eurostat_panel_metrics.csv`.
-- Validation report: `reports/validation.json`.
-- Source coverage: `reports/source_coverage.csv`.
-- Reproducibility metadata: `reports/reproducibility.json`.
+- Annual table: generated locally at `data/processed/portugal_debt_interest.csv`.
+- SQLite database: generated locally at `data/processed/portugal_debt_interest.sqlite`.
+- Comparator panel: generated locally at `data/processed/eurostat_panel_metrics.csv`.
+- Validation report: generated locally at `reports/validation.json`.
+- Source coverage: generated locally at `reports/source_coverage.csv`.
+- Reproducibility metadata: generated locally at `reports/reproducibility.json`.
 - Figures: `reports/figures/` as PNG, SVG, and PDF files.
 - LaTeX table fragments: `reports/tables/`.
 - Headline macro fragment: `reports/tables/paper_headlines.tex`.
@@ -39,4 +45,8 @@
 
 ## Final State
 
-The repository passes tests, linting, typing, full pipeline generation, and LaTeX compilation. The main empirical sample is now clearly the harmonised Eurostat ESA 2010 period, 1995-2025, with no incomplete pre-1995 rows represented as observations.
+The repository passes tests, linting, typing, table generation, and LaTeX
+compilation in the current environment. The main empirical sample is now clearly
+the harmonised Eurostat ESA 2010 period, 1995-2025, with no incomplete pre-1995
+rows represented as observations. Substantive raw, interim, and processed data
+files are regenerated locally and remain outside the committed source archive.

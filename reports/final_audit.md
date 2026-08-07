@@ -2,57 +2,80 @@
 
 ## Verification Run
 
-Date: 2026-07-28
+Date: 2026-08-07
 
-Commands completed successfully:
+Audit subject: package version 0.3.2, source commit
+`19e5259d5543cca102be0793e971fb9e52fd6a71` plus the audit-document update in
+this working tree.
 
-- `pytest`: 147 passed, 5 warnings.
+Commands completed successfully in the current environment:
+
+- `pytest`: 328 passed, 4 warnings.
 - `ruff check .`: passed.
-- `mypy src`: passed.
-- `pt-debt all --config config/default.yaml`: completed.
-- `pt-debt tables --config config/default.yaml`: completed.
-- `latexmk -pdf -interaction=nonstopmode -halt-on-error portugal_public_debt_interest_report.tex`: completed.
+- `mypy src`: passed, no issues in 35 source files.
+- `poetry check --lock`: completed; Poetry reported warnings about duplicated
+  legacy `[tool.poetry]` metadata and static PEP 621 metadata.
+- `poetry install --with dev --no-interaction`: completed from `poetry.lock`.
+- `poetry run pytest tests/test_release_metadata.py`: 10 passed.
+- `python -m pt_debt_interest.cli tables`: completed.
+- `pdflatex -interaction=nonstopmode -halt-on-error portugal_public_debt_interest_report.tex`: completed.
 
-## Data Checks
+The live source-acquisition workflow was not rerun during this audit pass. The
+committed release artefacts remain guarded by the burden-paper checksum baseline,
+and live regeneration remains documented in `docs/reproducibility.md`.
 
-- Annual analytical table: 31 rows, 1995-2025.
-- Annual analytical columns: 114.
-- Total government expenditure fields: present in euro millions, euros, official percent of GDP, calculated percent of GDP, and preferred percent of GDP.
-- Total government revenue fields: present in euro millions, euros, official percent of GDP, calculated percent of GDP, and preferred percent of GDP.
-- Generic implicit-rate output column: absent.
-- Euro-area comparator panel: 682 rows, 22 geographies.
-- Non-aggregate 2025 comparator countries: 20.
-- Portugal 2025 interest-burden rank: 6.
-- Validation result: passed.
-- Figure generation emits PNG, SVG, and vector PDF outputs; the LaTeX report embeds the PDF figures.
-- Debt/rate, expenditure, and revenue charts use stacked panels rather than mixed axes.
-- Main analytical paper tables are generated as tracked LaTeX fragments from processed outputs.
-- Recurring paper headline values are generated as LaTeX macros from processed outputs.
-- Citation metadata is available in `CITATION.cff`.
-- Dependency-resolution policy and regeneration commands are documented in `docs/reproducibility.md`.
+## Release Artefacts
 
-## Methodological Corrections Verified
+- Main PDF: `paper/portugal_public_debt_interest_report.pdf`.
+- Main PDF page count: 27.
+- Main PDF SHA-256:
+  `77760ab76bb66a289fded1783c657d23b7aae6ea68ab7c1b48748366c5f052ca`.
+- Main LaTeX source: `paper/portugal_public_debt_interest_report.tex`.
+- Generated paper tables: `reports/tables/`.
+- Generated paper figures: committed PDF figures under `reports/figures/`.
+- Repricing manuscript: `paper/repricing/repricing_kernel.tex` and
+  `paper/repricing/repricing_kernel.pdf`.
+- Release metadata: `CITATION.cff`, `.zenodo.json`, `pyproject.toml`, and
+  `CHANGELOG.md`.
 
-- Interest-rate concepts are separated into debt-dynamics and average-debt definitions.
-- General-government total expenditure is included as both a nominal value and percent of GDP.
-- General-government total revenue is included as both a nominal value and percent of GDP.
-- Debt-dynamics contributions reconstruct observed debt-ratio changes within tolerance.
-- Interest-burden changes are decomposed exactly into rate, average-debt-ratio, and interaction effects.
-- Empty pre-1995 linked rows are excluded from the main analytical table.
-- Comparator design uses the euro-area country universe, with aggregates excluded from country ranks.
-- Refinancing scenarios now expose full-pass-through, cumulative repricing, remaining unrepriced share, and pass-through gap columns.
-- Source provenance includes source database, source table or series, vintage, retrieval timestamp, and checksum fields where available.
-- Reproducibility metadata records package version, Python version, platform, git revision, config hash, and project settings.
-- The paper imports generated tables for summary statistics, regime averages, recent dynamics, European comparisons, static sensitivities, and the annual appendix table.
-- The paper imports generated headline macros for recurring abstract, introduction, interpretation, comparison, and sensitivity values.
-- The main paper no longer uses the previous level-correlation table as evidence.
+The repository intentionally does not commit substantive files under `data/raw`,
+`data/interim`, or `data/processed`; only `.gitkeep` placeholders are tracked in
+those directories. Local ignored data may exist in a working copy, but they are
+not part of the submitted source archive.
+
+## Data and Method Checks
+
+- The main burden paper uses the 1995-2025 Eurostat ESA 2010 sample for
+  historical empirical figures, tables, and decompositions.
+- Portugal's 2024 and 2025 comparison rows are isolated in the provisional-year
+  robustness appendix.
+- The 1997-1998 debt-ratio discrepancy is reported as a bounded measurement
+  issue and is not left as an uninterpreted warning.
+- Euro-area ranks use the comparison-year membership universe, exclude
+  aggregates, disclose provisional status, and use competition ranking.
+- Cross-country average-debt-rate language is descriptive and no longer treats
+  the measure as a directly comparable funding-cost ranking.
+- The main burden paper no longer imports the companion repricing paper's former
+  10.90 percentage-point or EUR 300 million point claims.
+- Refinancing scenarios are labelled as stylised deterministic scenarios and
+  disclose that the central path uses the IGCP 2024 average-maturity statistic.
+- The repricing manuscript now frames weighted average maturity as an
+  incomplete timing statistic and presents uncertainty rather than a single
+  identified behavioural correction.
 
 ## Remaining Warnings
 
-- The validation report retains a warning for debt-ratio reconciliation in 1997 and 1998. This is a warning, not a failed check.
-- The LaTeX PDF builds successfully with vector figure inputs and no overfull, underfull, or warning entries in the build log.
-- The current AMECO archive did not yield complete pre-1995 analytical rows under the configured selectors; the generated main table therefore begins in 1995.
+- The validation report retains a warning for the debt-ratio reconciliation in
+  1997 and 1998. The paper now reports and interprets that warning.
+- The main LaTeX build reports one small overfull line in the research-question
+  paragraph, about 1.43 pt. The PDF builds successfully.
+- Dependency resolution is locked by `poetry.lock`. Platform-specific wheel
+  resolution should still be recorded through `pip freeze` in CI and release
+  logs.
+- A clean-room container rebuild was not performed in this audit pass.
 
-## Exclusion Check
+## Archived Audits
 
-The protected folder was not staged or committed during this audit cycle.
+The earlier July blocking audit has been moved to
+`reports/archive/final_blocking_acceptance_audit_2026-07-31.md`. It is retained
+as history only and should not be read as the current release audit.

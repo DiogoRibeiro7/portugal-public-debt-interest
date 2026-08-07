@@ -24,6 +24,11 @@ PYPROJECT = REPO_ROOT / "pyproject.toml"
 CITATION = REPO_ROOT / "CITATION.cff"
 ZENODO = REPO_ROOT / ".zenodo.json"
 CHANGELOG = REPO_ROOT / "CHANGELOG.md"
+LOCKFILE = REPO_ROOT / "poetry.lock"
+REPRODUCIBILITY = REPO_ROOT / "docs" / "reproducibility.md"
+CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+REPORTS = REPO_ROOT / "reports"
+FINAL_AUDIT = REPORTS / "final_audit.md"
 
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -61,7 +66,7 @@ def _declared_dates() -> dict[str, str]:
 
 def test_every_metadata_file_exists() -> None:
     """If one is renamed or removed, fail loudly rather than skip it."""
-    for path in (PYPROJECT, CITATION, ZENODO, CHANGELOG):
+    for path in (PYPROJECT, CITATION, ZENODO, CHANGELOG, LOCKFILE):
         assert path.is_file(), f"release metadata missing: {path.name}"
 
 
@@ -105,3 +110,30 @@ def test_zenodo_metadata_is_complete() -> None:
     for field in ("title", "creators", "version", "publication_date", "license", "upload_type"):
         assert data.get(field), f".zenodo.json is missing {field}"
     assert data["creators"], ".zenodo.json declares no creators"
+
+
+def test_final_audit_matches_current_release_metadata() -> None:
+    """The root final audit must not carry stale release numbers."""
+    version = next(iter(set(_declared_versions().values())))
+    content = FINAL_AUDIT.read_text(encoding="utf-8")
+    assert f"package version {version}" in content
+    for obsolete in ("147 passed", "232 passed", "0.1.2", "24 pages"):
+        assert obsolete not in content
+
+
+def test_obsolete_final_audit_is_archived() -> None:
+    assert not (REPORTS / "final_blocking_acceptance_audit.md").exists()
+    assert (REPORTS / "archive" / "final_blocking_acceptance_audit_2026-07-31.md").is_file()
+
+
+def test_dependency_lockfile_is_the_documented_install_path() -> None:
+    lock = LOCKFILE.read_text(encoding="utf-8")
+    assert "lock-version" in lock
+
+    guide = REPRODUCIBILITY.read_text(encoding="utf-8")
+    assert "poetry install --with dev" in guide
+    assert "does not currently track a lock file" not in guide
+
+    workflow = CI_WORKFLOW.read_text(encoding="utf-8")
+    assert "poetry.lock" in workflow
+    assert "poetry install --with dev" in workflow
