@@ -138,6 +138,13 @@ def test_debt_ratio_discrepancy_is_interpreted() -> None:
     assert "No headline turning point or ranking result depends" in source
 
 
+def test_average_debt_rate_comparison_is_descriptive() -> None:
+    source = " ".join(_paper().split())
+    assert "not a ranking of directly comparable funding costs" in source
+    assert "cash buffers, instrument mix, consolidation, indexation" in source
+    assert "gross Maastricht debt" in source
+
+
 def test_annual_appendix_is_split_for_portrait_layout() -> None:
     content = _table("annual_portugal_table.tex")
     assert "burden and stock" in content
