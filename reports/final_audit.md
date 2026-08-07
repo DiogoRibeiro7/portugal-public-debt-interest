@@ -4,13 +4,13 @@
 
 Date: 2026-08-07
 
-Audit subject: package version 0.3.2, source commit
-`19e5259d5543cca102be0793e971fb9e52fd6a71` plus the audit-document update in
-this working tree.
+Audit subject: package version 0.4.0, source commit
+`afecce0b885d053f1d151e165fdc0775170165f3` plus the release bump in this
+working tree.
 
 Commands completed successfully in the current environment:
 
-- `pytest`: 331 passed, 4 warnings.
+- `pytest`: 344 passed, 4 warnings.
 - `ruff check .`: passed.
 - `mypy src`: passed, no issues in 35 source files.
 - `poetry check --lock`: completed; Poetry reported warnings about duplicated

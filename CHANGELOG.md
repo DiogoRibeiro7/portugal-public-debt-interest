@@ -1,5 +1,79 @@
 # Changelog
 
+## v0.4.0 - 2026-08-07
+
+A published result changed. Read the first section before citing the previous
+release.
+
+### Corrected results
+
+- **The out-of-sample backtest now favours the benchmark at every cut date.**
+  Mean absolute error, estimated kernel against the constant-hazard proxy:
+  46.91 vs 43.24 at 2014, 13.79 vs 12.92 at 2018, 11.14 vs 9.81 at 2021. The
+  previous release reported the kernel winning two of three cuts. That ranking
+  was an artefact of three defects, all fixed here. The contribution of the
+  repricing paper is unaffected: it is that weighted average maturity does not
+  determine a unique repricing path, not that this kernel forecasts better.
+
+### Fixed
+
+- **The backtest silenced its own behavioural channel.** `build_kernel` derives
+  the behavioural contribution from the shock, so building it at `shock_bps=0`
+  zeroed that track whatever response was passed. The manuscript nevertheless
+  discussed where "a behaviourally responsive kernel should have won". It was
+  not testing one.
+- **The backtest was not vintage-consistent.** Each year's yield was applied to
+  the whole cumulative repriced share, so debt that repriced in year one was
+  revalued at the year-two yield when scoring horizon two. Repricing is now
+  accumulated by cohort, `r_h = (1-K_h) r_0 + sum_{j<=h} dK_j y_j`. The two
+  formulations agree only on a flat yield path.
+- **The backtest used the end-of-sample portfolio state at every cut**, so a
+  2014 prediction was built from a 2026 portfolio. State is now reconstructed
+  per cut and the observation it came from is recorded.
+- **The fan chart shifted its denominator origin**, reconstructing time-zero GDP
+  and the debt ratio from a horizon-one central-growth row and then growing them
+  again from there.
+
+### Added
+
+- **`pt-debt repricing all`.** The repricing artefacts were previously produced
+  by scripts that were never committed, so a clean clone could rebuild the
+  manuscript only from artefacts that happened to be in the tree. One command
+  now runs estimation, bootstrap, kernels, fiscal translation, scenarios,
+  cut-date backtests, and the manuscript inputs. Verified by deleting every
+  artefact and regenerating; the estimation reproduces bit-identically.
+- `tests/test_repricing_simulate.py`, which asserts the simulation and backtest
+  equations rather than the existence of their output files. The suite was
+  dense around parsing and empty here, which is why the defects above survived
+  a large test count.
+- A provisional-year robustness appendix, repricing uncertainty analysis, and a
+  locked-dependency reproducibility path.
+
+### Changed
+
+Wording corrected wherever it outran the evidence: a ten-year benchmark is not
+an issuance yield; a null placebo is no evidence of one contamination channel
+rather than proof that identification is clean; the shape component is imposed
+rather than identified; net-outflow months do enter the regression as zeros and
+that zero is a bound, not an observation; the fan chart's band comes from chosen
+distributions and is not a forecast interval; and reset timing is separated from
+shock loading.
+
+### Known limitations
+
+The repricing panel is ordered by instrument class then period, so the HAC
+estimator and the moving-block bootstrap run over a sequence in which calendar
+time jumps backwards at the class boundary. The regression also carries no
+class effects and weights each class-month equally. Both require changing the
+estimand, and are not addressed in this release.
+
+### Verification
+
+- `pytest`: 344 tests passed.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+- Both manuscripts compile: burden paper 27 pages, repricing paper 14 pages,
+  no undefined references.
+
 ## v0.3.2 - 2026-08-06
 
 Second-round referee layout and membership fixes.
