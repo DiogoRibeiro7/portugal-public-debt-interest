@@ -15,7 +15,7 @@ import yaml
 
 from pt_debt_interest.exceptions import SourceError
 
-from . import manuscript
+from . import estimate, kernel, manuscript, simulate
 from . import panel as panel_module
 from .acquire import ecb, igcp
 
@@ -243,3 +243,91 @@ def paper_command(
             typer.echo(f"  - {literal}")
         raise typer.Exit(code=1)
     typer.echo(f"{tex_path}: no hand-typed results")
+
+
+@app.command("all")
+def all_command(
+    config: Path = DEFAULT_CONFIG,
+    burden_dataset: Path = DEFAULT_BURDEN_DATASET,
+    paper_dir: Path = Path("paper/repricing"),
+) -> None:
+    """Run the whole repricing study: panel, estimates, kernels, scenarios, paper.
+
+    Every artefact the manuscript reads was previously produced by ad-hoc
+    scripts that were never committed, so a clean clone could build the paper
+    only from artefacts that happened to be in the tree. This is the executable
+    path from panel to manuscript.
+    """
+    settings = load_config(config)
+    processed = Path(settings["paths"]["processed"])
+    panel_path = processed / "repricing_panel.csv"
+    if not panel_path.is_file():
+        raise typer.BadParameter(
+            f"{panel_path} is absent; run `pt-debt repricing build-panel` first"
+        )
+    if not burden_dataset.is_file():
+        raise typer.BadParameter(
+            f"{burden_dataset} is absent; run `pt-debt all` for the burden paper first"
+        )
+
+    frame = pd.read_csv(panel_path)
+    frame["period"] = pd.to_datetime(frame["period"])
+    burden = pd.read_csv(burden_dataset)
+
+    # --- estimation
+    estimates = processed / "estimates"
+    estimates.mkdir(parents=True, exist_ok=True)
+    fitted = estimate.fit(frame)
+    fitted.coefficients.to_csv(estimates / "s1_coefficients.csv", index=False)
+    fitted.replicates.to_csv(estimates / "s1_bootstrap_replicates.csv", index=False)
+    estimate.placebo(frame).to_csv(estimates / "s1_placebo.csv", index=False)
+    estimate.regime_stability(frame).to_csv(
+        estimates / "s1_regime_stability.csv", index=False
+    )
+    typer.echo(f"estimation: n={fitted.observations}, R2={fitted.r_squared:.3f}")
+
+    # --- portfolio state and kernels
+    inputs = manuscript._kernel_inputs_from_panel(frame)
+    latest = burden.dropna(subset=["debt_pct_gdp", "nominal_gdp_mio_eur"]).iloc[-1]
+    debt_pct_gdp = float(latest["debt_pct_gdp"])
+    nominal_gdp = float(latest["nominal_gdp_mio_eur"])
+    initial_rate = float(latest["average_debt_interest_rate_pct"])
+
+    widening = fitted.replicates["spread_widening_pp"].dropna().astype(float)
+    low, high = float(widening.quantile(0.025)), float(widening.quantile(0.975))
+
+    kernels = processed / "kernels"
+    kernels.mkdir(parents=True, exist_ok=True)
+    for shock in (-100, 0, 100):
+        kernel.build_kernel(inputs, shock, 0.0).to_csv(
+            kernels / f"kernel_shock_{shock:+d}bps.csv", index=False
+        )
+    bias = kernel.bias_table(
+        inputs, 100, 0.0, min(0.0, low), max(0.0, high)
+    )
+    bias.to_csv(kernels / "kernel_bias.csv", index=False)
+    kernel.fiscal_translation(bias, debt_pct_gdp, 100, nominal_gdp).to_csv(
+        kernels / "kernel_bias_fiscal.csv", index=False
+    )
+
+    # --- scenarios and backtest
+    scenarios = processed / "scenarios"
+    scenarios.mkdir(parents=True, exist_ok=True)
+    paths = simulate.simulate_paths(inputs, initial_rate, debt_pct_gdp, nominal_gdp)
+    paths.to_csv(scenarios / "pass_through_paths.csv", index=False)
+    simulate.half_life(paths).to_csv(scenarios / "half_life.csv", index=False)
+
+    scores = simulate.backtest_across_cuts(
+        burden,
+        frame,
+        lambda as_of: manuscript._kernel_inputs_from_panel(frame, as_of),
+        cut_years=(2014, 2018, 2021),
+    )
+    scores.to_csv(scenarios / "backtest_scores.csv", index=False)
+    simulate.backtest_summary(scores).to_csv(
+        scenarios / "backtest_summary.csv", index=False
+    )
+
+    # --- manuscript inputs
+    paper_command(config=config, paper_dir=paper_dir)
+    typer.echo("repricing pipeline completed")

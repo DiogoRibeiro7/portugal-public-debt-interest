@@ -20,9 +20,11 @@ measured null. It is not a forecast.
 
 from __future__ import annotations
 
-from typing import Final
+from collections.abc import Callable, Sequence
+from typing import Any, Final
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from pt_debt_interest.exceptions import ValidationError
@@ -141,6 +143,34 @@ def half_life(paths: pd.DataFrame, growth_path: str = "central") -> pd.DataFrame
     return pd.DataFrame(rows)
 
 
+def _vintage_rate(
+    anchor: float,
+    kernel: npt.NDArray[Any],
+    yields: npt.NDArray[Any],
+    index: int,
+) -> float:
+    """Effective rate at a horizon, respecting when each cohort repriced.
+
+    Debt that repriced in year one carries the year-one yield thereafter. The
+    earlier formulation applied the current year's yield to the whole
+    cumulative repriced share, which silently rewrote every earlier cohort at
+    the latest yield:
+
+        r_h = anchor + K_h * (y_h - anchor)          # wrong
+
+    Repricing in each year is a distinct cohort of size ``dK_j``, so
+
+        r_h = (1 - K_h) * anchor + sum_{j<=h} dK_j * y_j
+
+    with ``K_0 = 0``. The two agree only when the yield path is flat, which is
+    the invariant the tests assert.
+    """
+    cumulative = kernel[: index + 1]
+    increments = np.diff(cumulative, prepend=0.0)
+    repriced = float(np.sum(increments * yields[: index + 1]))
+    return float((1.0 - cumulative[index]) * anchor + repriced)
+
+
 def backtest(
     burden_frame: pd.DataFrame,
     inputs: KernelInputs,
@@ -151,6 +181,15 @@ def backtest(
 
     The realised effective rate is **imported** from the burden paper, not
     recomputed, so the two papers cannot drift apart.
+
+    ``inputs`` must describe the portfolio as it stood at ``cut_year``. Passing
+    the end-of-sample state would be look-ahead; the caller is responsible for
+    reconstructing the state, and :func:`backtest_across_cuts` does it.
+
+    The rate fed forward is the **realised ten-year benchmark yield**, not an
+    issuance-weighted funding rate. The securities repricing in a given year
+    are not all ten-year, so this is a reference path that isolates kernel
+    error from yield-path error -- not a claim about actual issuance cost.
 
     Benchmarks: the weighted-average-maturity constant hazard, immediate full
     pass-through, and a random walk in the effective rate.
@@ -169,23 +208,29 @@ def backtest(
 
     anchor = float(history["average_debt_interest_rate_pct"].iloc[-1])
     horizons = tuple(range(1, len(future) + 1))
+    benchmark = future["ten_year_yield_pct"].astype(float).to_numpy()
 
-    estimated = build_kernel(inputs, 0, behavioural_response, horizons)[
-        "repriced_share"
-    ].to_numpy()
+    # The behavioural track responds to a spread, so a kernel built at zero
+    # shock has no behavioural content at all whatever response is passed. The
+    # realised deviation of the benchmark yield from the anchor is fed in for
+    # the same reason the realised yield path is: to isolate kernel error from
+    # yield-path error. It is an input to the test, not a forecast.
+    realised_shock_bps = float(np.mean(benchmark - anchor) * 100.0)
+
+    estimated = build_kernel(
+        inputs, realised_shock_bps, behavioural_response, horizons
+    )["repriced_share"].to_numpy()
     wam = geometric_kernel(
         np.asarray(horizons, dtype=float), inputs.average_residual_maturity_years
     )
 
     rows: list[dict[str, object]] = []
     for index, row in enumerate(future.itertuples()):
-        # Realised issuance yields are fed in, so kernel error is isolable.
-        issuance = float(str(row.ten_year_yield_pct))
         realised = float(str(row.average_debt_interest_rate_pct))
         predictions = {
-            "estimated_kernel": anchor + estimated[index] * (issuance - anchor),
-            "wam_benchmark": anchor + wam[index] * (issuance - anchor),
-            "immediate_full_pass_through": issuance,
+            "estimated_kernel": _vintage_rate(anchor, estimated, benchmark, index),
+            "wam_benchmark": _vintage_rate(anchor, wam, benchmark, index),
+            "immediate_full_pass_through": float(benchmark[index]),
             "random_walk": anchor,
         }
         for model, predicted in predictions.items():
@@ -202,6 +247,41 @@ def backtest(
                 }
             )
     return pd.DataFrame(rows)
+
+
+def backtest_across_cuts(
+    burden_frame: pd.DataFrame,
+    panel: pd.DataFrame,
+    state_at: Callable[[pd.Timestamp], KernelInputs],
+    cut_years: Sequence[int],
+    behavioural_response: float = 0.0,
+) -> pd.DataFrame:
+    """Run :func:`backtest` at each cut with that cut's portfolio state.
+
+    The manuscript claims predictions use only information available at the
+    cut date. Previously the same end-of-sample portfolio state was passed to
+    every cut, so a 2014 prediction was built from a 2026 portfolio. This
+    reconstructs the state per cut and records which observation it came from,
+    so the claim is checkable rather than asserted.
+    """
+    if "period" not in panel.columns:
+        raise ValidationError("panel must carry a period column")
+
+    frames: list[pd.DataFrame] = []
+    for cut_year in cut_years:
+        as_of = pd.Timestamp(year=int(cut_year), month=12, day=31)
+        available = panel.loc[panel["period"].le(as_of)]
+        if available.empty:
+            raise ValidationError(f"panel has no observations at or before {cut_year}")
+        scores = backtest(
+            burden_frame,
+            state_at(as_of),
+            cut_year=int(cut_year),
+            behavioural_response=behavioural_response,
+        )
+        scores["state_as_of"] = available["period"].max().date().isoformat()
+        frames.append(scores)
+    return pd.concat(frames, ignore_index=True)
 
 
 def backtest_summary(scores: pd.DataFrame) -> pd.DataFrame:
