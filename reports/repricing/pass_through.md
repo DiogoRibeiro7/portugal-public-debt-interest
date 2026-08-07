@@ -40,10 +40,10 @@ realised yields. What differs between them is shape, and shape matters most in
 the first year — which a four-observation backtest barely sees.
 
 So the bias result in `reports/repricing/kernel.md` and this null are
-consistent: the standard proxy is biased at short horizons by roughly 10.9
-percentage points of the stock, and that bias is too small relative to
-effective-rate volatility to show up as predictive gain over four annual
-observations.
+consistent: the standard proxy differs materially from the composition-sensitive
+kernel at short horizons, but the sign is not stable across the reported
+horizons and the difference is too small relative to effective-rate volatility
+to show up as predictive gain over four annual observations.
 
 ## An artefact that must not be reported as a finding
 
@@ -63,11 +63,11 @@ The estimated asymmetry was a null with a 95 percent interval of
 [−0.020, +0.044]. Any asymmetry in these paths is an artefact of the clip and is
 reported here only so that it is not mistaken for evidence.
 
-## Nominal growth: the burden paper's flaw, fixed
+## Nominal growth as a denominator sensitivity
 
-The burden paper holds GDP and the debt ratio fixed for ten years, contradicting
-its own finding that the denominator did most of the work in 2022-2025. Growth
-paths are explicit here.
+The burden paper holds GDP and the debt ratio fixed for ten years to isolate
+refinancing arithmetic. Growth paths are explicit here so the size of that
+denominator convention is visible.
 
 At +100 bps, horizon five years:
 
@@ -77,9 +77,9 @@ At +100 bps, horizon five years:
 | Low, 2 percent | 0.431 |
 | Central, 4 percent | 0.391 |
 
-**Realistic nominal growth removes about 18 percent of the measured shock
-effect at five years.** Holding GDP fixed overstates the burden impact by that
-much, which is a material correction to the earlier paper's scenario section.
+The central nominal-growth path reduces the measured shock effect by about 18
+percent at five years. This follows from the assumed denominator path and should
+be read as a scenario sensitivity, not as an estimated correction.
 
 The euro interest amount is invariant to the growth path by construction: with
 the debt stock fixed in euro, nominal growth changes the denominator but not the
@@ -89,8 +89,8 @@ is why the cumulative euro column is identical across paths.
 ## What to take from this section
 
 1. The estimated kernel does not beat the standard benchmark out of sample.
-2. The bias in the standard proxy is nonetheless real and measurable, and it is
-   concentrated at short horizons where this backtest has least power.
+2. The standard proxy and the composition-sensitive kernel differ most at short
+   horizons where this backtest has least power.
 3. The apparent asymmetry in half-lives is a modelling artefact.
-4. Fixing the fixed-GDP assumption cuts the five-year shock effect by 18
-   percent, which stands on its own as a correction to the companion paper.
+4. Replacing fixed GDP with an illustrative central growth path cuts the
+   five-year burden ratio by 18 percent mechanically through the denominator.

@@ -10,7 +10,7 @@ this working tree.
 
 Commands completed successfully in the current environment:
 
-- `pytest`: 328 passed, 4 warnings.
+- `pytest`: 331 passed, 4 warnings.
 - `ruff check .`: passed.
 - `mypy src`: passed, no issues in 35 source files.
 - `poetry check --lock`: completed; Poetry reported warnings about duplicated
@@ -62,6 +62,9 @@ not part of the submitted source archive.
 - The repricing manuscript now frames weighted average maturity as an
   incomplete timing statistic and presents uncertainty rather than a single
   identified behavioural correction.
+- Current repricing support reports no longer repeat the superseded 10.90
+  percentage-point or EUR 300 million claims, and the manuscript states that
+  the central bias changes sign after the one-year horizon.
 
 ## Remaining Warnings
 

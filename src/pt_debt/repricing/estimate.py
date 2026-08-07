@@ -76,7 +76,7 @@ def _moving_block_indices(
     """Draw a moving-block resample of a serially dependent series."""
     if length <= block:
         return generator.integers(0, length, size=length)
-    starts = generator.integers(0, length - block, size=(length // block) + 1)
+    starts = generator.integers(0, length - block + 1, size=(length // block) + 1)
     drawn = np.concatenate([np.arange(start, start + block) for start in starts])
     return drawn[:length]
 

@@ -20,39 +20,42 @@ test that injects a literal to confirm the guard is not passing vacuously.
 
 ## What the study establishes
 
-### 1. The weighted-average-maturity proxy understates repricing speed
+### 1. Weighted-average maturity does not identify repricing speed
 
-At a 100 basis-point shock the proxy understates the repriced share of the stock
-by **10.90 percentage points at one year**, 8.78 at three, 4.43 at five, and
-2.86 at ten. In fiscal terms the one-year gap is **0.098 percent of GDP, about
-EUR 300 million**.
+At a 100 basis-point shock, the central zero-behaviour kernel is 6.60
+percentage points above the WAM proxy at one year, but 3.52, 8.29, and 4.75
+percentage points below it at three, five, and ten years. In fiscal terms the
+one-year gap is 0.059 percent of GDP, about EUR 181 million, under the paper's
+scaling convention.
 
 Artefacts: `data/processed/repricing/kernels/kernel_bias.csv` and
 `kernel_bias_fiscal.csv`.
 
-### 2. The bias is compositional, not behavioural
+### 2. The central bias is compositional, not behavioural
 
-Of the 10.90pp at one year, **7.44pp is shape** and requires no behavioural
-assumption: 14.2 percent of the stock is floating-rate or inflation-linked and
-reprices within a year on its own cycle. A maturity-calibrated hazard cannot
-represent this, because in a maturity model repricing and exit are the same
-event, and for these instruments they are not.
+The one-year central difference is entirely the shape term in the current
+zero-behaviour specification. The portfolio contains reset-linked exposure that
+a maturity-calibrated hazard cannot represent, because in a maturity model
+repricing and exit are the same event, and for these instruments they are not.
 
-This is the result that survives everything below.
+This is the result that survives everything below: WAM is incomplete as a timing
+statistic, not a sufficient statistic for near-term pass-through.
 
 ### 3. The shape component is not monotone in the horizon
 
-It is **+7.44pp at one year but negative at three and five** (−1.59, −5.85).
-Beyond the reset window the memoryless tail retires more stock than a profile
-that has already retired its fast component. The convenient summary "the
-geometric kernel is too slow" is true early and false later, and the study says
-so rather than reporting the one-year number alone.
+It is +6.60pp at one year but negative at three, five, and ten years (-3.52,
+-8.29, and -4.75). Beyond the reset window the memoryless tail retires more
+stock than a profile that has already retired its fast component. The convenient
+summary "the geometric kernel is too slow" is true early and false later, and
+the study says so rather than reporting the one-year number alone.
 
-### 4. Holding nominal GDP fixed overstates the burden of a shock
+### 4. Nominal GDP growth is a denominator sensitivity
 
 At +100bps and five years the incremental burden is 0.475 percent of GDP under
 the companion paper's frozen-GDP assumption and 0.391 under central nominal
-growth — realistic growth removes **about 18 percent** of the measured effect.
+growth. The roughly 18 percent reduction follows mechanically from the assumed
+growth path and is reported as a denominator sensitivity, not as an empirical
+correction.
 
 Artefact: `data/processed/repricing/scenarios/pass_through_paths.csv`.
 
@@ -154,7 +157,7 @@ The measurement layer is imported, not copied. The burden paper's outputs are
 unchanged by any of this work, and
 `tests/test_burden_paper_regression.py` asserts it against a checksum baseline.
 
-The repricing study contradicts one of the burden paper's assumptions — that
-weighted average maturity times pass-through correctly — and corrects another —
-that nominal GDP can be held fixed over a ten-year horizon. Both corrections are
-quantified above.
+The repricing study relaxes one of the burden paper's assumptions: that weighted
+average maturity alone can time gradual pass-through. It also shows how fixed
+nominal GDP and growing nominal GDP scenarios differ. Both are quantified above
+as sensitivity exercises, not as empirical corrections to the burden paper.

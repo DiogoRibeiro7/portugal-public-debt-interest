@@ -26,6 +26,9 @@
   than directly comparable funding-cost rankings.
 - Archived the obsolete July blocking audit and refreshed the root final audit
   with the current verification run.
+- Corrected the repricing paper and support reports so the kernel-bias sign
+  pattern matches the generated table, and fixed the moving-block bootstrap
+  sampler's final valid block-start position.
 
 ## Current Outputs
 

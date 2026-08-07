@@ -21,6 +21,7 @@ from pt_debt_interest.exceptions import ValidationError
 PAPER_DIR = Path("paper/repricing")
 TEX_PATH = PAPER_DIR / "repricing_kernel.tex"
 MACRO_PATH = PAPER_DIR / MACRO_FILENAME
+REPORT_DIR = Path("reports/repricing")
 
 
 def test_manuscript_body_contains_no_hand_typed_results() -> None:
@@ -113,3 +114,28 @@ def test_repricing_paper_does_not_headline_the_old_point_estimate() -> None:
     assert r"\BiasInterestMioHOne" not in abstract
     assert r"\BiasTotalHOne" not in conclusion
     assert "bounded sensitivity" in abstract
+
+
+def test_repricing_paper_states_the_current_bias_sign_pattern() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    assert "positive at one year" in source
+    assert "negative at the longer reported horizons" in source
+    assert "positive at the reported horizons" not in source
+
+
+def test_current_repricing_reports_do_not_repeat_superseded_claims() -> None:
+    combined = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(REPORT_DIR.glob("*.md"))
+    )
+    for stale in (
+        "10.90",
+        "10.9",
+        "EUR 300 million",
+        "about 300 million",
+        "positive at every horizon",
+        "The sign is stable",
+        "burden paper's flaw",
+        "material correction to the earlier paper",
+    ):
+        assert stale not in combined
