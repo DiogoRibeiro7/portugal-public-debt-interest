@@ -85,13 +85,25 @@ Mean absolute error on the effective rate, basis points:
 
 | Cut | Estimated kernel | Proxy benchmark |
 | --- | --- | --- |
-| 2014 | 52.44 | 55.69 |
-| 2018 | 47.81 | **45.16** |
-| 2021 | 14.24 | 14.66 |
+| 2014 | 46.91 | **43.24** |
+| 2018 | 13.79 | **12.92** |
+| 2021 | 11.14 | **9.81** |
 
-Two narrow wins, one loss, every margin noise. The 2021 cut places the whole
-tightening episode out of sample, which is where a behaviourally responsive
-kernel should have won most clearly. It did not.
+**The benchmark wins at every cut date.** Margins stay small relative to the
+error levels, so this is not evidence that the constant hazard is right — but
+it is no longer possible to claim the kernel forecasts better.
+
+An earlier version of this table reported the kernel winning two of three cuts
+(52.44/55.69, 47.81/45.16, 14.24/14.66). That ranking was an artefact of three
+defects since fixed: the backtest applied each year's yield to the whole
+cumulative repriced share rather than to the cohort that actually repriced; it
+built the kernel at zero shock, which silences the behavioural channel whatever
+response is supplied; and it used the end-of-sample portfolio state at every
+cut, so a 2014 prediction was built from a 2026 portfolio.
+
+The 2021 cut places the whole tightening episode out of sample, which is where
+a behaviourally responsive kernel would have the best chance of separating
+itself. It does not.
 
 Artefact: `data/processed/repricing/scenarios/backtest_summary.csv`.
 

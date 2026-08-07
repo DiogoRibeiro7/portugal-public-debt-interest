@@ -556,9 +556,13 @@ latest one. The realised effective rate is imported from the companion paper.
 
 \input{tables/model_comparison.tex}
 
-The estimated kernel does not beat the benchmark in a way that would justify
-forecasting claims. It wins narrowly at two cut dates, loses at one, and every
-margin is small relative to the error levels. The 2021 cut places the entire
+The estimated kernel does not beat the benchmark. Once the backtest is
+vintage-consistent and built from each cut date's own portfolio state, the
+constant-hazard benchmark has the lower mean absolute error at \emph{every}
+cut date, though the margins remain small relative to the error levels. An
+earlier version of this exercise reported the kernel winning at two of three
+cuts; that ranking was an artefact of applying each year's yield to the whole
+cumulative repriced share. The 2021 cut places the entire
 tightening episode out of sample, which is where a behaviourally responsive
 kernel would have the best chance of separating itself; it does not. That
 comparison is only meaningful because the behavioural channel is live in the

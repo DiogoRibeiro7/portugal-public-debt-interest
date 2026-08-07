@@ -48,3 +48,25 @@ The paper imports generated figure PDFs and table fragments under `reports/`.
 ```bash
 latexmk -pdf -interaction=nonstopmode -halt-on-error portugal_public_debt_interest_report.tex
 ```
+
+## Repricing study: end-to-end
+
+The repricing artefacts were previously produced by scripts that were never
+committed, so a clean clone could rebuild the manuscript only from artefacts
+that happened to be in the tree. There is now one command:
+
+```bash
+pt-debt all --config config/default.yaml                 # burden paper first
+pt-debt repricing acquire --config config/repricing.yaml
+pt-debt repricing build-panel --config config/repricing.yaml
+pt-debt repricing all --config config/repricing.yaml
+```
+
+`repricing all` runs estimation, the bootstrap, the kernels and their fiscal
+translation, the pass-through scenarios, the cut-date backtests, and then the
+manuscript macros, tables and figures. It depends on the burden paper's
+processed dataset, from which it takes the debt ratio, nominal GDP, and the
+realised effective rate, so the burden pipeline must run first.
+
+The estimation is seeded and reproduces bit-identically. The scenario and
+backtest artefacts follow deterministically from it.
