@@ -14,7 +14,7 @@ from typing import Final
 import matplotlib
 import pandas as pd
 
-from pt_debt.repricing.estimate import OUTCOME, REGRESSORS
+from pt_debt.repricing.estimate import OUTCOME, REGRESSORS, monthly_retail_series
 from pt_debt.repricing.kernel import KernelInputs, bias_table, fiscal_translation
 from pt_debt.repricing.simulate import (
     kernel_bootstrap_band,
@@ -263,7 +263,10 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
         _macro("SpreadWideningP", f"{widening['p_value']:.2f}"),
         _macro(
             "EstimationObservations",
-            f"{len(panel.dropna(subset=[OUTCOME, *REGRESSORS])):,}",
+            # The estimator aggregates to a monthly series, so the stacked
+            # class-month count would overstate the sample by a factor of
+            # roughly the number of classes.
+            f"{len(monthly_retail_series(panel).dropna(subset=[OUTCOME, *REGRESSORS])):,}",
         ),
     ]
     difference = replicates["spread_widening_pp"] - replicates["spread_narrowing_pp"]

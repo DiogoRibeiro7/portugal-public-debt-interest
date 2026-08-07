@@ -31,6 +31,69 @@ REGRESSORS: Final[tuple[str, ...]] = (
 
 OUTCOME: Final[str] = "repriced_share"
 
+#: Columns summed across instrument classes when aggregating to one series.
+_MONETARY: Final[tuple[str, ...]] = (
+    "repriced_lower_bound_mio_eur",
+    "opening_outstanding_mio_eur",
+    "outstanding_mio_eur",
+    "net_flow_mio_eur",
+    "net_outflow_mio_eur",
+)
+
+
+def monthly_retail_series(panel: pd.DataFrame) -> pd.DataFrame:
+    """Collapse the class-month panel to one monthly retail series.
+
+    Two problems are fixed at once, and both were structural rather than
+    numerical.
+
+    *Ordering.* The panel is sorted by instrument class and then period, so
+    every savings-certificate month precedes every Treasury-certificate month.
+    Newey-West and a moving-block bootstrap applied to that row order treat it
+    as one sequence, but calendar time jumps backwards at the class boundary: a
+    twelve-month block can straddle a join between 2026 and 2010. Aggregating
+    to a single series indexed by month restores a real time series, so the lag
+    structure and the blocks mean what they claim.
+
+    *Weighting.* Each class-month previously carried equal OLS weight after
+    normalisation by its own opening stock, so a small class moved the
+    coefficient as much as a large one. The fiscal object is a monetary
+    repricing amount, so the aggregate share is formed from summed euros --
+    total repriced over total opening stock -- which weights each class by its
+    actual exposure and removes the need for class effects.
+
+    Covariates are common to both classes because the panel maps them from the
+    period, so taking the first value per month is exact rather than an
+    approximation. That is asserted below.
+    """
+    if "period" not in panel.columns:
+        raise ValidationError("aggregation requires a period column")
+
+    present = [name for name in _MONETARY if name in panel.columns]
+    grouped = panel.groupby("period", as_index=False)
+    aggregated = grouped[present].sum()
+
+    shared = [
+        name
+        for name in (*REGRESSORS, "share_fixed_rate_pct", "competing_return_spread_pp")
+        if name in panel.columns
+    ]
+    for name in shared:
+        spread = panel.groupby("period")[name].nunique(dropna=True)
+        if (spread > 1).any():
+            raise ValidationError(
+                f"{name} differs across instrument classes within a month; "
+                "it cannot be aggregated by taking the first value"
+            )
+    first = grouped[shared].first()
+    merged = aggregated.merge(first, on="period", validate="one_to_one")
+
+    opening = merged["opening_outstanding_mio_eur"]
+    merged[OUTCOME] = np.where(
+        opening > 0, merged["repriced_lower_bound_mio_eur"] / opening, np.nan
+    )
+    return merged.sort_values("period").reset_index(drop=True)
+
 #: Newey-West lag length. Twelve months allows a full year of autocorrelation
 #: in a monthly series.
 HAC_LAGS: Final[int] = 12
@@ -61,7 +124,10 @@ def _design(panel: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     if missing:
         raise ValidationError(f"estimation requires columns: {sorted(missing)}")
 
-    usable = panel.dropna(subset=[OUTCOME, *REGRESSORS]).copy()
+    # Estimated on the aggregated monthly series, not the stacked class-month
+    # panel: see monthly_retail_series for why the stacked ordering breaks both
+    # the HAC lag structure and the bootstrap blocks.
+    usable = monthly_retail_series(panel).dropna(subset=[OUTCOME, *REGRESSORS]).copy()
     if usable.empty:
         raise ValidationError("no usable rows after dropping missing covariates")
 
@@ -177,7 +243,11 @@ def placebo(panel: pd.DataFrame) -> pd.DataFrame:
     """
     if "share_fixed_rate_pct" not in panel.columns:
         raise ValidationError("placebo requires share_fixed_rate_pct")
-    working = panel.dropna(subset=[OUTCOME, *REGRESSORS, "share_fixed_rate_pct"]).copy()
+    working = (
+        monthly_retail_series(panel)
+        .dropna(subset=[OUTCOME, *REGRESSORS, "share_fixed_rate_pct"])
+        .copy()
+    )
     exog = sm.add_constant(
         working[[*REGRESSORS, "share_fixed_rate_pct"]].astype(float)
     )
