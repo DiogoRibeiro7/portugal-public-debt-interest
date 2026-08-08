@@ -92,12 +92,25 @@ on the effective rate, basis points:
 
 | Cut | Estimated kernel | WAM benchmark |
 | --- | --- | --- |
-| 2014 | 52.44 | 55.69 |
-| 2018 | 47.81 | **45.16** |
-| 2021 | 14.24 | 14.66 |
+| 2014 | 46.91 | **43.24** |
+| 2018 | 13.79 | **12.92** |
+| 2021 | **9.24** | 9.81 |
 
-The estimated kernel does not beat the benchmark. It wins narrowly at two cuts
-and loses at one, by margins that are noise against the error levels. Reported
-in `reports/repricing/pass_through.md` as a negative result.
+The estimated kernel does not systematically beat the benchmark. It wins at
+2021 — the cut that places the whole tightening episode out of sample, and
+therefore the only one where a behavioural channel has anything to do — and
+loses at 2014 and 2018, by margins that are small against the error levels.
+Reported in `reports/repricing/pass_through.md` as a negative result.
+
+These figures have been revised twice since this log was first written, and the
+specification was not touched either time. The original table
+(52.44/55.69, 47.81/45.16, 14.24/14.66) came from a backtest that applied each
+year's yield to the entire cumulative repriced share rather than to the cohort
+that repriced, built its kernel at zero shock — which silences the behavioural
+channel whatever response is supplied — and used the end-of-sample portfolio
+state at every cut. The second revision followed from feeding the model named
+after the estimate the fitted response instead of zero. Both were
+implementation defects, not specification changes, which is why the count below
+still reads one.
 
 **Total specifications estimated: one.**

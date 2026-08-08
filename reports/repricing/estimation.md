@@ -8,23 +8,38 @@ no alternative specification was estimated.
 
 | Term | Coefficient | HAC s.e. | t | p |
 | --- | --- | --- | --- | --- |
-| const | −0.0107 | 0.0181 | −0.59 | 0.56 |
-| `spread_widening_pp` | **+0.0187** | 0.0148 | 1.27 | 0.20 |
-| `spread_narrowing_pp` | +0.0077 | 0.0060 | 1.28 | 0.20 |
-| `post_policy_break` | **−0.0213** | 0.0160 | −1.33 | 0.18 |
-| `average_residual_term_years` | +0.0024 | 0.0029 | 0.82 | 0.41 |
+| const | −0.0130 | 0.0056 | −2.31 | 0.02 |
+| `spread_widening_pp` | **+0.0214** | 0.0061 | 3.51 | 0.0004 |
+| `spread_narrowing_pp` | −0.0007 | 0.0016 | −0.44 | 0.66 |
+| `post_policy_break` | **−0.0250** | 0.0079 | −3.16 | 0.002 |
+| `average_residual_term_years` | +0.0031 | 0.0010 | 3.25 | 0.001 |
 
-Observations 494. R² 0.041. Newey–West standard errors, 12 monthly lags.
+Observations 304. R² 0.343. Newey–West standard errors, 12 monthly lags.
 
-**No coefficient is distinguishable from zero at conventional levels.**
+**These numbers changed when the estimator was corrected.** The fit previously
+ran on the stacked class-month panel, which is sorted by instrument class then
+period: every month of one class preceded every month of the other, so calendar
+time jumped backwards at the boundary. A twelve-month bootstrap block could
+straddle a fifteen-year gap and the Newey–West lag structure did not correspond
+to month-to-month dependence. Each class-month also carried equal weight
+regardless of the euros behind it. Estimation now runs on the two retail classes
+aggregated to one euro-weighted monthly series. The previous table read +0.0187
+(se 0.0148, p = 0.20) on 494 rows with R² 0.041, and concluded that no
+coefficient was distinguishable from zero.
+
+**The spread-widening coefficient is now statistically detectable. It is still
+not identified.** The falsification test no longer passes cleanly — see below —
+so the coefficient is reported as an association in the observable lower-bound
+process, not as a behavioural response. Nothing downstream treats it as
+identified: the kernel's central behavioural effect stays at zero.
 
 ## The three pre-registered predictions
 
-**1. Widening draws subscriptions — direction right, precision absent.**
+**1. Widening draws subscriptions — direction right, and now precise.**
 The coefficient is positive, as predicted, and it is the largest in the
-specification. It is not significant. A one percentage point wider spread is
-associated with 1.9 percent more of the opening stock repriced per month, with
-a standard error nearly as large as the estimate.
+specification. A one percentage point wider spread is associated with 2.1
+percent more of the opening stock repriced per month (se 0.6). Precision is no
+longer the binding problem; identification is.
 
 **2. Asymmetry — not detectable.**
 
@@ -39,8 +54,8 @@ The point estimate has the predicted sign. The interval covers zero comfortably
 and is wide relative to the estimate. **This is the paper's sharpest prediction
 and the data does not support it.**
 
-**3. The policy break — direction right, precision absent.**
-Negative and the second-largest term, as predicted, at p = 0.18.
+**3. The policy break — direction right, and precise.**
+Negative and the second-largest term, as predicted, at p = 0.002.
 
 ## Falsification
 
@@ -49,25 +64,35 @@ does not observe and has no reason to respond to. It should not load.
 
 | Term | Coefficient | p |
 | --- | --- | --- |
-| `share_fixed_rate_pct` | −0.00019 | 0.86 |
+| `share_fixed_rate_pct` | −0.00051 | 0.07 |
 
-It does not load, and adding it leaves the other coefficients essentially
-unchanged. **This provides no evidence of that particular contamination
-channel.** Failing to reject a placebo does not establish that the identifying
-variation is valid; it is a diagnostic, not a validation. There is simply no
-detectable signal at this precision.
+**It now loads, marginally, and that is the most important number in this
+report.** Under the previous stacked-panel estimator it sat at −0.00019 with
+p = 0.86 and was read as reassurance. On the corrected monthly series it is
+close enough to conventional significance to be a warning instead.
+
+A statistic no household observes should carry no weight. That it does — at the
+same time as the main coefficient became significant — is the signature of
+common time variation the specification cannot separate from the spread. Both
+terms are picking up something that moves with the calendar.
+
+This is why the spread coefficient is reported as descriptive rather than
+identified, and why the kernel's central behavioural effect stays at zero. A
+placebo cannot validate identification in any case; it can only fail to reject
+one contamination channel. Here it does not even do that.
 
 ## Regime stability
 
-| Term | Pre-tightening (n=386) | Full sample (n=494) |
+| Term | Pre-tightening (n=250) | Full sample (n=304) |
 | --- | --- | --- |
-| `spread_widening_pp` | +0.0324 | +0.0187 |
-| `spread_narrowing_pp` | +0.0089 | +0.0077 |
+| `spread_widening_pp` | +0.0237 | +0.0214 |
+| `spread_narrowing_pp` | +0.0003 | −0.0007 |
 
-The widening coefficient is larger before 2022 than over the full sample. Both
-are imprecise, so the difference should not be read as regime dependence; it is
-reported because a fixed-kernel assumption depends on it and a reader is
-entitled to see it.
+The widening coefficient is slightly larger before 2022 than over the full
+sample, and the gap is much smaller than the stacked-panel fit suggested
+(+0.0324 against +0.0187). The difference should not be read as regime
+dependence; it is reported because a fixed-kernel assumption depends on it and
+a reader is entitled to see it.
 
 ## What this means, stated plainly
 
