@@ -4,8 +4,8 @@
 
 Date: 2026-08-08
 
-Audit subject: package version 0.5.2, source commit
-`ee97567` plus the release bump in this
+Audit subject: package version 0.6.0, source commit
+`1c3021c` plus the release bump in this
 working tree.
 
 ### Test status depends on the environment, and both are recorded
@@ -18,15 +18,15 @@ that need a git worktree. Those skips are expected, not failures.
 
 | Environment | Result |
 | --- | --- |
-| Author's populated working tree | 353 passed, 0 skipped |
-| Clean checkout, no pipeline run | 337 passed, 16 skipped |
+| Author's populated working tree | 364 passed, 0 skipped |
+| Clean checkout, no pipeline run | 348 passed, 16 skipped |
 
-Both runs collect 353 tests and report zero failures. A reviewer wanting
+Both runs collect 364 tests and report zero failures. A reviewer wanting
 the full suite should run `pt-debt all` and `pt-debt repricing all` first.
 
 Commands completed successfully in the author's environment:
 
-- `pytest`: 353 passed, 4 warnings.
+- `pytest`: 364 passed, 4 warnings.
 - `ruff check .`: passed.
 - `mypy src`: passed, no issues in 35 source files.
 - `poetry check --lock`: completed; Poetry reported warnings about duplicated
