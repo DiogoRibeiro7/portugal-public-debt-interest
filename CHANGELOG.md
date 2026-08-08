@@ -1,5 +1,66 @@
 # Changelog
 
+## v0.5.0 - 2026-08-08
+
+**This release supersedes v0.4.0, whose release notes misstate two results.**
+v0.4.0 reported the backtest favouring the benchmark at every cut date and the
+behavioural estimation as a null. Both were artefacts of defects fixed here.
+Cite this release rather than v0.4.0.
+
+### Corrected results
+
+- **The behavioural estimation was run on a mis-ordered panel.** The repricing
+  panel is sorted by instrument class then period, so every month of one class
+  preceded every month of the other and calendar time jumped backwards at the
+  boundary: a twelve-month bootstrap block could straddle a fifteen-year gap,
+  and the Newey-West lag structure did not correspond to month-to-month
+  dependence. Each class-month also carried equal weight regardless of the
+  euros behind it. Estimation now runs on the two retail classes aggregated to
+  one euro-weighted monthly series. The spread-widening term moves from +0.0187
+  (se 0.0148, p = 0.20) on 494 stacked rows to **+0.0214 (se 0.0061,
+  p < 0.001)** on 304 months, and R-squared from 0.041 to 0.343.
+- **That is still not a finding.** The asymmetry the design turns on remains
+  inside [-0.016, +0.046], and the placebo no longer passes cleanly: the
+  fixed-rate share, which no household observes, now loads at **p = 0.07**
+  against 0.86 before. That points to common time variation the specification
+  cannot separate from the spread, so the coefficient is reported as
+  descriptive rather than identified. The kernel's central behavioural effect
+  stays at zero.
+- **The backtest changed again.** The model labelled "estimated kernel" now
+  receives the fitted response instead of zero; previously the model carrying
+  the name of the estimate was not using it. It wins at the 2021 cut, **9.24
+  against 9.81 basis points**, and loses at 2014 and 2018. That is the cut
+  containing the tightening episode, the only place a behavioural channel has
+  anything to do, and it rests on four annual observations.
+
+### Added
+
+- **Shock loading is a parameter, separate from reset timing.** The kernel put
+  the whole non-fixed residual on a one-year, one-for-one reset track, bundling
+  how often a coupon refreshes with how much of a shock it passes through. The
+  kernel now reports a physical repriced share and a shock-weighted share,
+  which coincide at unit loading; the default is unit loading, so no existing
+  number moved. Varying loading alone moves the one-year bias from +6.60 to
+  -0.50 percentage points at half loading and -4.05 at quarter loading, so it
+  is as first-order as timing. This sharpens the paper's argument: a published
+  maturity statistic constrains neither, so it cannot pin down the sign of the
+  one-year correction.
+
+### Documentation
+
+- **The reproducibility regime is stated rather than left to inference.** This
+  repository provides live-source reproducibility. Guaranteed: determinism
+  given fixed inputs, drift detection through a 30-artefact checksum baseline,
+  per-payload provenance, and a recorded retrieval vintage per release. Not
+  guaranteed: that a later run reproduces published figures to the last
+  decimal, because the providers revise their series.
+
+### Verification
+
+- `pytest`: 353 tests passed.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+- Burden paper 27 pages, repricing paper 14 pages, no undefined references.
+
 ## v0.4.0 - 2026-08-07
 
 A published result changed. Read the first section before citing the previous
