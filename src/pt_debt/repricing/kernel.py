@@ -38,6 +38,17 @@ DEFAULT_HORIZONS: Final[tuple[int, ...]] = (1, 3, 5, 10)
 #: annual. Faster than any maturity-driven exit.
 RESET_CYCLE_YEARS: Final[float] = 1.0
 
+#: How much of a given rate shock the reset block absorbs, per unit of shock.
+#:
+#: Reset *timing* and shock *loading* are different assumptions and the kernel
+#: keeps them separate. One says how often a coupon is refreshed; the other
+#: says how much of a policy or market-rate shock that refresh passes through.
+#: An inflation-linked coupon can reset annually and still respond to a
+#: policy-rate shock quite differently from a Euribor-linked one. The default
+#: of one for one is a scenario choice, not an estimate, and the sensitivity
+#: grid varies it.
+RESET_SHOCK_LOADING: Final[float] = 1.0
+
 
 @dataclass(frozen=True)
 class KernelInputs:
@@ -89,6 +100,7 @@ def build_kernel(
     horizons: tuple[int, ...] = DEFAULT_HORIZONS,
     use_shape_profile: bool = True,
     reset_cycle_years: float = RESET_CYCLE_YEARS,
+    reset_shock_loading: float = RESET_SHOCK_LOADING,
 ) -> pd.DataFrame:
     """Repriced share by horizon, decomposed into its three components.
 
@@ -125,6 +137,17 @@ def build_kernel(
     )
 
     total = np.clip(contractual + reset + behavioural, 0.0, 1.0)
+
+    # Physical repricing and shock transmission are not the same quantity. A
+    # reset instrument reprices on schedule whatever the loading, but it only
+    # passes through the part of the shock its formula tracks. `repriced_share`
+    # answers "how much of the stock has a new rate"; `shock_weighted_share`
+    # answers "how much of the shock has reached the stock", and a rate
+    # translation wants the second. They coincide at unit loading, which is the
+    # default, so this column changes no existing result.
+    shock_weighted = np.clip(
+        contractual + reset * reset_shock_loading + behavioural, 0.0, 1.0
+    )
     return pd.DataFrame(
         {
             "horizon_years": grid.astype(int),
@@ -133,6 +156,7 @@ def build_kernel(
             "reset_share": reset,
             "behavioural_share": behavioural,
             "repriced_share": total,
+            "shock_weighted_share": shock_weighted,
         }
     )
 

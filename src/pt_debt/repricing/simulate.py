@@ -330,19 +330,29 @@ def sensitivity_grid(
     horizons: tuple[int, ...] = (1, 5),
 ) -> pd.DataFrame:
     """Vary the principal modelling assumptions around the central kernel."""
-    scenarios: list[tuple[str, float, bool, float]] = [
-        ("central", behavioural_response, True, 1.0),
-        ("slow_reset", behavioural_response, True, 2.0),
-        ("fast_reset", behavioural_response, True, 0.5),
-        ("memoryless_contractual_shape", behavioural_response, False, 1.0),
-        ("behaviour_off", 0.0, True, 1.0),
-        ("behaviour_lower_bound", behavioural_low, True, 1.0),
-        ("behaviour_upper_bound", behavioural_high, True, 1.0),
+    # Reset timing and shock loading are varied separately: the first says how
+    # often the coupon refreshes, the second how much of the shock it carries.
+    scenarios: list[tuple[str, float, bool, float, float]] = [
+        ("central", behavioural_response, True, 1.0, 1.0),
+        ("slow_reset", behavioural_response, True, 2.0, 1.0),
+        ("fast_reset", behavioural_response, True, 0.5, 1.0),
+        ("partial_reset_loading", behavioural_response, True, 1.0, 0.5),
+        ("weak_reset_loading", behavioural_response, True, 1.0, 0.25),
+        ("memoryless_contractual_shape", behavioural_response, False, 1.0, 1.0),
+        ("behaviour_off", 0.0, True, 1.0, 1.0),
+        ("behaviour_lower_bound", behavioural_low, True, 1.0, 1.0),
+        ("behaviour_upper_bound", behavioural_high, True, 1.0, 1.0),
     ]
     benchmark = wam_implied_kernel(inputs, horizons)["repriced_share"].to_numpy()
     shock_rate = shock_bps / 10_000.0
     rows: list[dict[str, object]] = []
-    for scenario, response, use_shape_profile, reset_cycle_years in scenarios:
+    for (
+        scenario,
+        response,
+        use_shape_profile,
+        reset_cycle_years,
+        reset_shock_loading,
+    ) in scenarios:
         kernel = build_kernel(
             inputs,
             shock_bps=shock_bps,
@@ -350,8 +360,11 @@ def sensitivity_grid(
             horizons=horizons,
             use_shape_profile=use_shape_profile,
             reset_cycle_years=reset_cycle_years,
+            reset_shock_loading=reset_shock_loading,
         )
-        repriced = kernel["repriced_share"].to_numpy()
+        # The burden translation uses the shock-weighted share, which differs
+        # from the physical repriced share only when loading is not one.
+        repriced = kernel["shock_weighted_share"].to_numpy()
         for index, horizon in enumerate(horizons):
             rows.append(
                 {
