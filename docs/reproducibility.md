@@ -1,5 +1,45 @@
 # Reproducibility
 
+## What kind of reproducibility this is
+
+**This repository provides live-source reproducibility, not frozen-source
+reproducibility.** The distinction matters and is stated here rather than left
+for a reader to infer.
+
+The code, the dependency lock, the manuscripts and every generated table and
+figure are versioned. The *inputs* are not: `data/raw/` and `data/processed/`
+are excluded from version control, and the pipeline re-downloads from Eurostat,
+the ECB Data Portal and IGCP on each run. Running it today and running it in a
+year will therefore not necessarily produce identical numbers, because those
+providers revise their series. That is a property of the sources, not a defect
+in the pipeline, and the burden paper's revision log exists to make such
+movements visible rather than silent.
+
+What is guaranteed:
+
+- **Determinism given fixed inputs.** The estimation is seeded and reproduces
+  bit-identically; every downstream artefact follows deterministically from it.
+- **Detection of drift.** `tests/test_burden_paper_regression.py` checksums 30
+  generated artefacts against a committed baseline, so any change in the
+  burden paper's outputs fails the build and has to be regenerated
+  deliberately.
+- **Provenance on every fetch.** Raw payloads carry a sidecar recording source
+  URL, retrieval timestamp, byte size and SHA-256.
+- **A recorded vintage.** Each release states the retrieval window for the data
+  behind it, so the archived record identifies *which* vintage produced the
+  reported figures even though the raw files are not redistributed.
+
+What is not guaranteed: that a reader running the pipeline at a later date
+reproduces the published figures to the last decimal. A reader needing that
+should work from the archived release for the version cited, and treat the
+committed tables and figures — which *are* versioned — as the record of what
+the paper reported.
+
+Raw payloads are not redistributed because the providers' licensing and
+volume make redistribution the wrong default. A frozen input bundle could be
+added if a venue requires one; the provenance sidecars already carry the
+checksums such a bundle would need to be verified against.
+
 ## Dependency resolution
 
 This project tracks `poetry.lock`. The supported locked install is:

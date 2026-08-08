@@ -466,8 +466,10 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     )
     labels = {
         "central": "Central kernel",
-        "slow_reset": "Slow reset",
-        "fast_reset": "Fast reset",
+        "slow_reset": "Slow reset (two-year cycle)",
+        "fast_reset": "Fast reset (six-month cycle)",
+        "partial_reset_loading": "Reset loading 0.5",
+        "weak_reset_loading": "Reset loading 0.25",
         "memoryless_contractual_shape": "Memoryless contractual shape",
         "behaviour_off": "Behaviour off",
         "behaviour_lower_bound": "Behaviour lower bound",

@@ -99,3 +99,40 @@ def test_invalid_inputs_are_refused() -> None:
         KernelInputs(0.0, 0.8, 0.1)
     with pytest.raises(ValidationError):
         KernelInputs(7.5, 1.2, 0.1)
+
+
+class TestResetShockLoading:
+    """Reset timing and shock loading are separate assumptions."""
+
+    INPUTS = KernelInputs(
+        average_residual_maturity_years=7.2,
+        fixed_rate_share=0.86,
+        retail_share_of_stock=0.15,
+    )
+
+    def test_unit_loading_leaves_the_two_shares_equal(self) -> None:
+        """The default must change no existing result."""
+        kernel = build_kernel(self.INPUTS, 100.0, 0.0)
+        assert (kernel["repriced_share"] == kernel["shock_weighted_share"]).all()
+
+    def test_partial_loading_reduces_shock_transmission(self) -> None:
+        full = build_kernel(self.INPUTS, 100.0, 0.0)
+        partial = build_kernel(self.INPUTS, 100.0, 0.0, reset_shock_loading=0.5)
+        assert (
+            partial["shock_weighted_share"] <= full["shock_weighted_share"]
+        ).all()
+        assert not partial["shock_weighted_share"].equals(full["shock_weighted_share"])
+
+    def test_loading_does_not_move_physical_repricing(self) -> None:
+        """A coupon still refreshes on schedule whatever it passes through."""
+        full = build_kernel(self.INPUTS, 100.0, 0.0)
+        partial = build_kernel(self.INPUTS, 100.0, 0.0, reset_shock_loading=0.25)
+        assert (partial["repriced_share"] == full["repriced_share"]).all()
+
+    def test_timing_and_loading_are_independent_levers(self) -> None:
+        slower = build_kernel(self.INPUTS, 100.0, 0.0, reset_cycle_years=2.0)
+        weaker = build_kernel(self.INPUTS, 100.0, 0.0, reset_shock_loading=0.5)
+        # Slowing the clock moves the physical share; weakening loading does not.
+        base = build_kernel(self.INPUTS, 100.0, 0.0)
+        assert not slower["repriced_share"].equals(base["repriced_share"])
+        assert weaker["repriced_share"].equals(base["repriced_share"])
