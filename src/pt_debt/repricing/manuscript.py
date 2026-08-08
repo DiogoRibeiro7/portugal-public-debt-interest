@@ -15,7 +15,13 @@ import matplotlib
 import pandas as pd
 
 from pt_debt.repricing.estimate import OUTCOME, REGRESSORS, monthly_retail_series
-from pt_debt.repricing.kernel import KernelInputs, bias_table, fiscal_translation
+from pt_debt.repricing.kernel import (
+    REFIXING_PROFILE_PATH,
+    KernelInputs,
+    bias_table,
+    fiscal_translation,
+    refixing_comparison,
+)
 from pt_debt.repricing.simulate import (
     kernel_bootstrap_band,
     model_comparison,
@@ -208,6 +214,24 @@ def _row(frame: pd.DataFrame, column: str, value: str | int) -> pd.Series:
     if match.empty:
         raise ValidationError(f"no row with {column} == {value!r}")
     return match.iloc[0]
+
+
+def _refixing_rows(profile: pd.DataFrame, inputs: KernelInputs) -> list[list[str]]:
+    comparison = refixing_comparison(profile, inputs)
+    rows: list[list[str]] = []
+    for row in comparison.itertuples():
+        lower = _as_float(row.bracket_lower_years)
+        upper = _as_float(row.bracket_upper_years)
+        label = f"{_fmt(lower, 0)}-{_fmt(upper, 0)}"
+        rows.append(
+            [
+                label,
+                _fmt(100.0 * _as_float(row.published_share), 1),
+                _fmt(100.0 * _as_float(row.kernel_implied_share), 1),
+                _fmt(row.difference_pp, 1),
+            ]
+        )
+    return rows
 
 
 def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
@@ -474,6 +498,33 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
         encoding="utf-8",
     )
     paths.append(path)
+
+    refixing_path = Path(REFIXING_PROFILE_PATH)
+    if refixing_path.is_file():
+        profile = pd.read_csv(refixing_path)
+        reference = str(profile["reference_date"].iloc[0])
+        path = table_dir / "refixing_comparison.tex"
+        path.write_text(
+            _table(
+                caption="Official ESDM refixing benchmark and scenario kernel",
+                label="tab:refixing-comparison",
+                columns="lrrr",
+                header=[
+                    "Window, years",
+                    "ESDM share (\\%)",
+                    "Scenario share (\\%)",
+                    "Difference (pp)",
+                ],
+                rows=_refixing_rows(profile, inputs),
+                notes=(
+                    "Official shares are Portugal's ESDM refixing-risk "
+                    f"windows at {reference}, as published by IGCP. The "
+                    "comparison uses the same cumulative windows."
+                ),
+            ),
+            encoding="utf-8",
+        )
+        paths.append(path)
 
     _, behavioural_low, behavioural_high = _behavioural_sensitivity_bounds(replicates)
     sensitivity = sensitivity_grid(

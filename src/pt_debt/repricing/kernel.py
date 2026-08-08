@@ -354,10 +354,9 @@ def refixing_comparison(
     published object to what this kernel constructs.
 
     The profile may come from labelled official brackets or from a digitised
-    chart; ``docs/manual_ingest.md`` specifies the file. This function exists
-    so the comparison runs the moment that file appears rather than waiting on
-    further code, and so the absence of the comparison is a missing input
-    rather than a missing method.
+    chart; ``docs/manual_ingest.md`` specifies the file. This function keeps
+    the comparison executable and rejects ambiguous bracket definitions rather
+    than silently substituting different horizons.
 
     Returns one row per bracket with the published share, the share this
     kernel implies over the same bracket, and the difference in percentage

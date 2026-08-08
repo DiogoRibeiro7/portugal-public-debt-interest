@@ -33,6 +33,16 @@ The behavioural central effect is set to zero because the retail stock-value
 association is not identified as a household response. Behavioural upside is
 retained as a sensitivity band, not as the central result.
 
+## ESDM refixing benchmark
+
+IGCP's May 2026 investor presentation reports Portugal's ESDM refixing-risk
+windows at end-March 2026. The official windows are now recorded in
+`data/raw/manual/igcp_refixing_profile.csv` and included in the manuscript as a
+generated comparison table. The benchmark is coarser than the model: it checks
+cumulative one-year and five-year refixing windows, but it does not supply
+instrument-level reset dates, reference-index loadings or retail gross-flow
+decomposition.
+
 ## Fiscal translation
 
 At a 100 basis-point shock, the current central one-year bias translates to

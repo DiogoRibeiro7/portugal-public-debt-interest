@@ -76,23 +76,22 @@ glossed. The burden paper's remaining asks are closed.
   refixing explicitly, and that profile is a closer comparator to this kernel
   than weighted average maturity.
 
-### Not done
+### Refixing benchmark
 
-**The refixing comparison has not been performed.** The profile is published as
-a chart rather than a table and requires manual digitisation; entering values
-read off its appearance would be worse than leaving the comparison undone. The
-file and schema are specified in `docs/manual_ingest.md`, the comparison runs
-as soon as a digitised profile is supplied, and a test asserts no placeholder
-file is shipped. Until then the imposed shapes are validated against a mean and
-a composition split, not against the debt manager's own refixing view.
+The refixing comparison now uses a tracked official manual input:
+`data/raw/manual/igcp_refixing_profile.csv`. The file records Portugal's
+labelled ESDM one-year and five-year refixing-risk windows from IGCP's May 2026
+investor presentation, reference date end-March 2026. The repricing manuscript
+includes the generated comparison table and no longer treats the refixing
+profile as absent.
 
 ### Verification
 
-- `pytest`: 369 passed in a populated tree after revision-6 fixes; reviewer
+- `pytest`: 371 passed in a populated tree after the refixing benchmark fix; reviewer
   clean-checkout audit of the prior revision-6 archive reported 345 passed and
   19 skipped, with zero failures.
 - `ruff check .`: passed. `mypy src`: passed, 35 modules.
-- Burden paper 27 pages, repricing paper 15 pages, no undefined references.
+- Burden paper 27 pages, repricing paper 16 pages, no undefined references.
 
 ## v0.5.2 - 2026-08-08
 

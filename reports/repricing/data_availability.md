@@ -36,6 +36,12 @@ the same frequency as everything else rather than interpolated.
 The share of fixed-rate debt gives the floating and inflation-linked residual,
 which the framework carries on the separate reset track.
 
+### Manually added official benchmark
+
+| Item | Status |
+| --- | --- |
+| **ESDM refixing-risk windows** | **Obtained.** `data/raw/manual/igcp_refixing_profile.csv` records the labelled Portugal one-year and five-year refixing-risk windows from IGCP's May 2026 investor presentation, slide 32, reference date end-March 2026. |
+
 ### Not obtained
 
 | Item | Status |
@@ -47,8 +53,9 @@ which the framework carries on the separate reset track.
 | BT (Bilhetes do Tesouro) stock, separately | Not in these workbooks. |
 | EFSF/ESM tranche-level amortisation and early repayments | Only aggregate programme-loan stock. |
 
-Each has a manual-ingest specification in `docs/manual_ingest.md` with the
-exact source, expected filename, and expected schema.
+Each unavailable item has a manual-ingest specification in
+`docs/manual_ingest.md` with the exact source, expected filename, and expected
+schema.
 
 ---
 

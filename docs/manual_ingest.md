@@ -136,28 +136,25 @@ indicators; tranche-level detail is not.
 
 **Why it matters.** The kernel's contractual and reset shapes are *imposed*: a
 linear retirement profile at the published weighted average maturity, an annual
-wholesale reset cycle, and a quarterly retail reset cycle. Nothing in the
-repository validates those shapes against the debt manager's own view.
+wholesale reset cycle, and a quarterly retail reset cycle. The ESDM refixing
+risk windows provide an external benchmark against the debt manager's own view.
 
-IGCP does publish that view. Its risk framework monitors interest-rate refixing
-risk explicitly, and the Annual Report carries a **refixing profile**: the
-fraction of the adjusted portfolio due to be refixed or to mature within
-maturity brackets. That is the closest published object to the kernel this
-paper constructs, and it is a stronger comparator than weighted average
-maturity alone.
+IGCP publishes that view in its investor presentation. Its risk framework
+monitors interest-rate refixing explicitly, and the presentation reports ESDM
+refixing-risk windows: the fraction of outstanding debt due to be refixed or
+to mature within a stated horizon. That is the closest published object to the
+kernel this paper constructs, and it is a stronger comparator than weighted
+average maturity alone.
 
-Obtaining it would also sharpen the paper's central claim. At present the claim
-is that a scalar maturity statistic does not identify a repricing path. With
-the refixing profile in hand the claim can be tested one level up: whether even
-a coarse published refixing profile is sufficient to identify shock-weighted
-pass-through without instrument-level reset dates, reference indices, loadings
-and subscription flows.
+The current CSV records the two labelled Portugal values from the May 2026
+presentation: the one-year window and the cumulative five-year window. It does
+not provide a dated instrument-level schedule.
 
-- **Source**: IGCP, *Annual Report*, refixing-profile chart in the risk section.
-- **Reference**: <https://www.igcp.pt/en/publicacoes/relatorio-anual>
-- **What is needed**: for each maturity bracket, the share of the adjusted
-  portfolio refixing or maturing within it, at a stated reference date.
-- **Expected file**: `data/raw/manual/igcp_refixing_profile.csv`
+- **Source**: IGCP, *Investor Presentation*, May 2026, slide 32.
+- **Reference**: <https://www.igcp.pt/sites/default/files/2026-05/IGCP_Investor_Presentation.pdf>
+- **What is needed**: for each published window, the share of outstanding debt
+  refixing or maturing within it, at a stated reference date.
+- **Provided file**: `data/raw/manual/igcp_refixing_profile.csv`
 - **Accepted sources**: labelled official bracket values, if published, or a
   genuine digitisation of the official refixing-profile chart. Do not infer
   values from the visual appearance of a chart without recording the
@@ -166,16 +163,15 @@ and subscription flows.
 
   | column | type | notes |
   | --- | --- | --- |
-  | `as_of_date` | date | reference date of the profile |
+  | `reference_date` | date | reference date of the profile |
   | `bracket_lower_years` | float | inclusive lower edge of the bracket |
-  | `bracket_upper_years` | float | exclusive upper edge; blank for the tail |
-  | `share_of_portfolio` | float | fraction refixing in the bracket, 0--1 |
-  | `portfolio_basis` | str | e.g. `adjusted_direct_debt` |
-  | `source_page` | str | document page or chart reference |
+  | `bracket_upper_years` | float | upper edge of the cumulative window |
+  | `share_of_portfolio` | float | fraction refixing within the window, 0--1 |
+  | `source_title` | str | source document |
+  | `source_url` | str | stable source URL |
+  | `source_detail` | str | slide and chart detail |
 
-**Status**: not obtained. Published as a chart rather than a table, so it needs
-manual digitisation. The comparison is implemented and runs automatically once
-the file is present; see `refixing_comparison` in
-`src/pt_debt/repricing/kernel.py`. **No values have been entered, and none
-should be invented from the chart's appearance without recording the
-digitisation method in `source_page`.**
+**Status**: obtained for the two official ESDM windows. The comparison is
+implemented in `refixing_comparison` in `src/pt_debt/repricing/kernel.py` and
+is included in the generated manuscript tables. Gross retail subscriptions and
+redemptions remain unavailable.

@@ -17,7 +17,7 @@ that need a git worktree. Those skips are expected, not failures.
 
 | Environment | Result |
 | --- | --- |
-| Author's populated working tree after revision-6 fixes | 369 passed, 0 skipped |
+| Author's populated working tree after refixing benchmark fix | 371 passed, 0 skipped |
 | Reviewer clean checkout of the prior revision-6 archive, no pipeline run | 345 passed, 19 skipped |
 
 Both runs reported zero failures. The clean-checkout row is retained because it
@@ -27,7 +27,7 @@ A reviewer wanting the full local suite should run `pt-debt all` and
 
 Commands completed successfully in the author's environment:
 
-- `pytest`: 369 passed, 4 warnings.
+- `pytest`: 371 passed, 4 warnings.
 - `ruff check .`: passed.
 - `mypy src`: passed, no issues in 35 source files.
 - `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py`: 70 passed.

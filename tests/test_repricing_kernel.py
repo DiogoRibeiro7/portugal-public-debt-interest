@@ -264,9 +264,32 @@ class TestRefixingComparison:
         with pytest.raises(ValidationError, match="integer-year edges"):
             refixing_comparison(profile, self.INPUTS)
 
-    def test_the_profile_is_not_shipped_with_invented_numbers(self) -> None:
-        """The chart is not digitised; nothing may stand in for it."""
-        assert not Path(REFIXING_PROFILE_PATH).exists(), (
-            "a refixing profile is present -- it must be a genuine digitisation "
-            "with source_page recorded, not placeholder values"
+    def test_the_official_profile_is_shipped_with_source_metadata(self) -> None:
+        profile_path = Path(REFIXING_PROFILE_PATH)
+        assert profile_path.is_file()
+
+        profile = pd.read_csv(profile_path)
+        assert set(_REFIXING_COLUMNS_FOR_TEST) <= set(profile.columns)
+        assert profile["reference_date"].nunique() == 1
+        assert profile["reference_date"].iloc[0] == "2026-03-31"
+        assert profile["share_of_portfolio"].to_list() == pytest.approx(
+            [0.252, 0.509]
         )
+        assert profile["source_url"].str.contains("igcp.pt").all()
+
+    def test_the_official_profile_runs_through_the_comparison(self) -> None:
+        profile = pd.read_csv(REFIXING_PROFILE_PATH)
+        result = refixing_comparison(profile, self.INPUTS)
+        assert len(result) == 2
+        assert result["published_share"].to_list() == pytest.approx([0.252, 0.509])
+
+
+_REFIXING_COLUMNS_FOR_TEST = {
+    "reference_date",
+    "bracket_lower_years",
+    "bracket_upper_years",
+    "share_of_portfolio",
+    "source_title",
+    "source_url",
+    "source_detail",
+}

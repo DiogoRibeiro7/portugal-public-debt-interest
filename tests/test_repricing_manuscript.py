@@ -88,6 +88,7 @@ def test_repricing_paper_uses_generated_tables_and_figures() -> None:
         "tables/portfolio_inputs.tex",
         "tables/estimation_coefficients.tex",
         "tables/kernel_bias.tex",
+        "tables/refixing_comparison.tex",
         "tables/half_life.tex",
         "tables/backtest_summary.tex",
         "tables/sensitivity_checks.tex",
@@ -151,6 +152,19 @@ def test_repricing_terms_do_not_revert_to_old_bias_language() -> None:
     assert "Conditional historical validation errors" in combined
     assert "statistically precise" in TEX_PATH.read_text(encoding="utf-8")
     assert "precision is not identification" in TEX_PATH.read_text(encoding="utf-8")
+
+
+def test_repricing_paper_includes_the_official_refixing_benchmark() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    table = (PAPER_DIR / "tables" / "refixing_comparison.tex").read_text(
+        encoding="utf-8"
+    )
+    assert r"\input{tables/refixing_comparison.tex}" in source
+    assert "Official ESDM refixing benchmark" in table
+    assert "25.2" in table
+    assert "50.9" in table
+    assert "none has been performed" not in source
+    assert "not against the debt manager's own refixing view" not in source
 
 
 def test_backtest_prose_matches_current_winner_pattern() -> None:

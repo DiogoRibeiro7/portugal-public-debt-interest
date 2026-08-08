@@ -308,22 +308,23 @@ published comparator to the object constructed here than a scalar maturity
 statistic, and the imposed contractual and reset shapes should be checked
 against it.
 
-They have not been. The profile is published as a chart rather than a table, so
-it requires manual digitisation, and none has been performed; inventing values
-from a chart's appearance would be worse than leaving the comparison undone. The
-comparison itself is implemented and runs as soon as a digitised profile is
-supplied, and the required file and schema are specified alongside the study's
-other unobtained inputs. Until then the imposed shapes are validated against a
-mean and a composition split, not against the debt manager's own refixing view,
-and the reader should weight the shape results accordingly.
+That check is now included. IGCP's investor presentation reports the ESDM
+refixing-risk windows for Portugal, and Table
+\ref{tab:refixing-comparison} compares those published windows with the
+scenario kernel. This is a benchmark, not a full calibration. The ESDM chart is
+cumulative and coarse, while the model still has to impose reset timing,
+contractual shape and shock loading. The comparison is useful precisely because
+it asks whether the scenario kernel is in the neighbourhood of the debt
+manager's own refixing view before the paper turns to the WAM benchmark.
 
-Doing that comparison would also sharpen the claim rather than merely support
-it. The present result is that a scalar maturity statistic does not identify a
-repricing path. With the profile in hand the same question can be asked one
-level up: whether even a coarse published refixing profile identifies
-shock-weighted pass-through without instrument-level reset dates, reference
-indices, loadings and subscription flows. We expect it does not, and we do not
-claim it here.
+\input{tables/refixing_comparison.tex}
+
+The result sharpens rather than removes the paper's caution. A scalar maturity
+statistic does not identify a repricing path, and even a coarse refixing-risk
+profile does not identify shock-weighted pass-through without instrument-level
+reset dates, reference indices, loadings and subscription flows. The published
+ESDM windows are therefore used as an external check on the imposed shape, not
+as a substitute for the missing instrument-level schedule.
 
 The benchmark against which we measure is the standard proxy,
 \begin{equation}

@@ -10,6 +10,9 @@ __pycache__/
 htmlcov/
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/manual/
+data/raw/manual/*
+!data/raw/manual/igcp_refixing_profile.csv
 data/interim/*
 !data/interim/.gitkeep
 data/processed/*
