@@ -4,8 +4,8 @@
 
 Date: 2026-08-07
 
-Audit subject: package version 0.5.1, source commit
-`c30a847` plus the release bump in this
+Audit subject: package version 0.5.2, source commit
+`ee97567` plus the release bump in this
 working tree.
 
 Commands completed successfully in the current environment:

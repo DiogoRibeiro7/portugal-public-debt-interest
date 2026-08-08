@@ -1,5 +1,39 @@
 # Changelog
 
+## v0.5.2 - 2026-08-08
+
+Support documentation only. No code, results or manuscript text change.
+
+### Fixed
+
+- **`reports/repricing/estimation.md` still printed the stacked-panel fit.**
+  494 observations, R-squared 0.041, spread widening +0.0187 at p = 0.20, and
+  the standing conclusion that no coefficient is distinguishable from zero. All
+  superseded by the corrected monthly estimator in v0.5.0: 304 observations,
+  R-squared 0.343, +0.0214 at p = 0.0004.
+- **Its falsification section read the wrong way round.** It reported the
+  placebo at p = 0.86 as reassurance. On the corrected estimator the fixed-rate
+  share loads at p = 0.07 — a statistic no household observes gaining weight at
+  the same time as the main coefficient became significant, which is the
+  signature of common time variation the specification cannot separate from the
+  spread. That is now the report's headline rather than a footnote, and it is
+  the stated reason the coefficient is descriptive rather than identified.
+- **`docs/specification_log.md` carried the original backtest table**, two
+  generations out of date, alongside the claim that the kernel wins narrowly at
+  two cuts. It now shows the current figures and records why they moved twice
+  while the specification did not: both revisions were implementation defects,
+  so "Total specifications estimated: one" still stands.
+
+Regime stability and the two pre-registered predictions that turned on
+precision are updated alongside.
+
+### Verification
+
+- `pytest`: 353 tests passed.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+- No prose file states a superseded figure except where explicitly describing
+  what changed.
+
 ## v0.5.1 - 2026-08-08
 
 Archive metadata only. No code, results or manuscript text change.
