@@ -272,13 +272,58 @@ year. The second is \emph{shock loading}: how much of a given shock each
 instrument absorbs, taken here as one for one. Neither is estimated, and they
 are not the same object --- an inflation-linked coupon does not respond to a
 policy or market-rate shock the way a Euribor-linked coupon does, and the two
-need not reset on the same schedule. Treating the whole non-fixed residual as a
-single one-year, one-for-one reset block is therefore a scenario choice, and
-the sensitivity table varies the timing leg of it. The
-behavioural component is different again: retail money can arrive on the
-prevailing rate, and that arrival can depend on the shock. The empirical test
+need not reset on the same schedule. Treating a reset block as a single
+one-year, one-for-one block is therefore a scenario choice, and the sensitivity
+table varies both legs of it separately.
+
+These components have to be defined on \emph{mutually exclusive} shares of the
+opening stock, which is less obvious than it sounds. Retail and rate type cut
+across each other in the Portuguese portfolio: Savings Certificates are retail
+\emph{and} variable-rate, with Series F indexed to three-month Euribor, while
+Treasury Certificates are retail and carry a guaranteed fixed schedule. An
+earlier version of this paper subtracted the whole retail block from the
+fixed-rate track while simultaneously treating the whole non-fixed residual as
+a reset block, which removed Savings Certificates from a track they were never
+on and counted them on another. The stock is now partitioned into four classes
+that sum to one --- wholesale fixed, retail fixed, retail variable, wholesale
+floating --- each with its own repricing law, and the construction refuses to
+run if the shares imply a negative class.
+
+The correction matters less for the total than for the decomposition. At annual
+horizons the repriced share is unchanged, because the retail block was being
+given the same contractual profile either way; what changes is that it was
+being reported in the behavioural column. The behavioural component is now
+purely a flow: retail money arriving on the prevailing rate, additive to the
+partition rather than carved out of it. The empirical test
 below is deliberately modest; it asks only whether the subscription margin
 carries a detectable response to the competing-return spread.
+
+One qualification about the benchmark belongs here rather than in a limitations
+list. Weighted average maturity is the proxy this paper tests, and it is the one
+the companion study uses, but it is not the only thing Portugal's debt manager
+publishes. IGCP's risk framework monitors interest-rate refixing explicitly, and
+its Annual Report carries a refixing profile: the share of the adjusted
+portfolio due to refix or mature inside each maturity bracket. That is a closer
+published comparator to the object constructed here than a scalar maturity
+statistic, and the imposed contractual and reset shapes should be checked
+against it.
+
+They have not been. The profile is published as a chart rather than a table, so
+it requires manual digitisation, and none has been performed; inventing values
+from a chart's appearance would be worse than leaving the comparison undone. The
+comparison itself is implemented and runs as soon as a digitised profile is
+supplied, and the required file and schema are specified alongside the study's
+other unobtained inputs. Until then the imposed shapes are validated against a
+mean and a composition split, not against the debt manager's own refixing view,
+and the reader should weight the shape results accordingly.
+
+Doing that comparison would also sharpen the claim rather than merely support
+it. The present result is that a scalar maturity statistic does not identify a
+repricing path. With the profile in hand the same question can be asked one
+level up: whether even a coarse published refixing profile identifies
+shock-weighted pass-through without instrument-level reset dates, reference
+indices, loadings and subscription flows. We expect it does not, and we do not
+claim it here.
 
 The benchmark against which we measure is the standard proxy,
 \begin{equation}

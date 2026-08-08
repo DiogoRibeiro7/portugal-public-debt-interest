@@ -76,12 +76,22 @@ def _kernel_inputs_from_panel(
     if window.empty:
         raise ValidationError(f"panel has no observations at or before {as_of}")
     latest = window.loc[window["period"].eq(window["period"].max())]
+
+    def _class_share(name: str) -> float:
+        rows = latest.loc[latest["instrument_class"].eq(name), "share_of_total_debt"]
+        return float(rows.iloc[0]) if not rows.empty else 0.0
+
+    # Savings Certificates are variable-rate (Series F tracks three-month
+    # Euribor); Treasury Certificates carry a guaranteed fixed schedule. The
+    # kernel needs them apart to build a partition that does not overlap.
     return KernelInputs(
         average_residual_maturity_years=float(
             latest["average_residual_term_years"].iloc[0]
         ),
         fixed_rate_share=float(latest["share_fixed_rate_pct"].iloc[0]) / 100.0,
         retail_share_of_stock=float(latest["share_of_total_debt"].sum()),
+        retail_variable_share=_class_share("savings_certificates"),
+        retail_fixed_share=_class_share("treasury_certificates"),
     )
 
 

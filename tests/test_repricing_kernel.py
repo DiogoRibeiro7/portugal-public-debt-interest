@@ -2,20 +2,26 @@
 
 The kernel's headline is a bias with a sign. These tests pin the two mechanisms
 apart and pin the behavioural band open at zero, because the estimate behind it
-is a null and a kernel reported without that band would be self-refuting.
+is not identified and a kernel reported without that band would be
+self-refuting.
 """
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 
 from pt_debt.repricing.kernel import (
+    REFIXING_PROFILE_PATH,
     KernelInputs,
     bias_table,
     build_kernel,
     fiscal_translation,
     geometric_kernel,
+    refixing_comparison,
     wam_implied_kernel,
 )
 from pt_debt_interest.exceptions import ValidationError
@@ -136,3 +142,110 @@ class TestResetShockLoading:
         base = build_kernel(self.INPUTS, 100.0, 0.0)
         assert not slower["repriced_share"].equals(base["repriced_share"])
         assert weaker["repriced_share"].equals(base["repriced_share"])
+
+
+class TestPortfolioPartition:
+    """Opening-stock classes must be mutually exclusive and sum to one.
+
+    The earlier construction subtracted *all* retail debt from the fixed-rate
+    track while treating the *entire* non-fixed residual as a wholesale reset
+    block. Savings Certificates are retail and variable-rate, so they were
+    removed from a track they were never in and counted in another.
+    """
+
+    SPLIT = KernelInputs(
+        average_residual_maturity_years=7.52,
+        fixed_rate_share=0.858,
+        retail_share_of_stock=0.154,
+        retail_variable_share=0.1336,
+        retail_fixed_share=0.0203,
+    )
+
+    def test_classes_sum_to_one(self) -> None:
+        assert sum(self.SPLIT.partition().values()) == pytest.approx(1.0)
+
+    def test_no_class_is_negative(self) -> None:
+        assert all(value >= 0.0 for value in self.SPLIT.partition().values())
+
+    def test_variable_retail_is_not_taken_from_the_fixed_track(self) -> None:
+        """The specific double count that motivated the partition."""
+        classes = self.SPLIT.partition()
+        # Only the *fixed* retail block comes out of the fixed-rate share.
+        assert classes["wholesale_fixed"] == pytest.approx(0.858 - 0.0203)
+        # Variable retail comes out of the non-fixed residual instead.
+        assert classes["wholesale_floating"] == pytest.approx(
+            (1.0 - 0.858) - 0.1336, abs=1e-9
+        )
+
+    def test_an_inconsistent_split_is_rejected(self) -> None:
+        """More fixed retail than fixed debt cannot be partitioned."""
+        bad = KernelInputs(
+            average_residual_maturity_years=7.0,
+            fixed_rate_share=0.10,
+            retail_share_of_stock=0.50,
+            retail_fixed_share=0.50,
+        )
+        with pytest.raises(ValidationError, match="negative classes"):
+            bad.partition()
+
+    def test_behaviour_column_is_flow_only(self) -> None:
+        """It previously carried a contractual base that was not behavioural."""
+        kernel = build_kernel(self.SPLIT, 100.0, 0.0)
+        assert (kernel["behavioural_share"] == 0.0).all()
+
+    def test_contractual_covers_both_fixed_classes(self) -> None:
+        classes = self.SPLIT.partition()
+        kernel = build_kernel(self.SPLIT, 100.0, 0.0, horizons=(1,))
+        expected = (classes["wholesale_fixed"] + classes["retail_fixed"]) / (
+            2.0 * 7.52
+        )
+        assert float(kernel["contractual_share"].iloc[0]) == pytest.approx(expected)
+
+    def test_retail_variable_resets_on_its_own_clock(self) -> None:
+        """Quarterly Euribor indexation, not the general wholesale cycle."""
+        slow = build_kernel(
+            self.SPLIT, 100.0, 0.0, horizons=(1,), retail_reset_cycle_years=10.0
+        )
+        fast = build_kernel(self.SPLIT, 100.0, 0.0, horizons=(1,))
+        assert float(slow["reset_share"].iloc[0]) < float(fast["reset_share"].iloc[0])
+
+
+class TestRefixingComparison:
+    """The imposed shape can be checked against IGCP's own refixing profile."""
+
+    INPUTS = KernelInputs(
+        average_residual_maturity_years=7.52,
+        fixed_rate_share=0.858,
+        retail_share_of_stock=0.154,
+        retail_variable_share=0.1336,
+        retail_fixed_share=0.0203,
+    )
+
+    @staticmethod
+    def _profile() -> pd.DataFrame:
+        return pd.DataFrame(
+            {
+                "bracket_lower_years": [0.0, 1.0, 3.0],
+                "bracket_upper_years": [1.0, 3.0, 5.0],
+                "share_of_portfolio": [0.20, 0.15, 0.12],
+            }
+        )
+
+    def test_it_reports_one_row_per_bracket(self) -> None:
+        result = refixing_comparison(self._profile(), self.INPUTS)
+        assert len(result) == 3
+        assert {"published_share", "kernel_implied_share", "difference_pp"} <= set(
+            result.columns
+        )
+
+    def test_missing_columns_are_rejected(self) -> None:
+        """A half-digitised chart must fail loudly, not compare against nothing."""
+        with pytest.raises(ValidationError, match="missing columns"):
+            refixing_comparison(pd.DataFrame({"bracket_lower_years": [0.0]}), self.INPUTS)
+
+    def test_the_profile_is_not_shipped_with_invented_numbers(self) -> None:
+        """The chart is not digitised; nothing may stand in for it."""
+        assert not Path(REFIXING_PROFILE_PATH).exists(), (
+            "a refixing profile is present -- it must be a genuine digitisation "
+            "with source_page recorded, not placeholder values"
+        )
