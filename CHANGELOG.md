@@ -1,5 +1,98 @@
 # Changelog
 
+## v0.6.0 - 2026-08-08
+
+Fourth-round review. Five of six mandatory items on the repricing paper are
+closed; the sixth is blocked on an input and is named below rather than
+glossed. The burden paper's remaining asks are closed.
+
+### Corrected
+
+- **The behavioural coefficient was applied to the wrong variable.** It is
+  estimated against the lagged competing-return spread, but the historical
+  validation drove it with the gap between the ten-year benchmark and the
+  cut-date effective rate: a response in repriced share per point of
+  competing-return spread applied to something closer to a term premium. It is
+  now driven by the realised competing-return spread, and where that variable
+  is unavailable the behavioural track is left at zero rather than fed a
+  stand-in.
+- **The portfolio partition overlapped.** Retail and rate type cut across each
+  other in this portfolio: Savings Certificates are retail *and* variable-rate,
+  Series F indexed to three-month Euribor, while Treasury Certificates are
+  retail and carry a guaranteed fixed schedule. The kernel subtracted the whole
+  retail block from the fixed-rate track and simultaneously treated the whole
+  non-fixed residual as a reset block, so Savings Certificates were removed
+  from a track they were never on and counted on another. The opening stock is
+  now partitioned into four mutually exclusive classes summing to one, each
+  with its own repricing law, and the construction raises rather than clipping
+  if the shares imply a negative class.
+
+  The correction does not move the headline. At annual horizons the repriced
+  share is unchanged, because the retail block received the same contractual
+  profile either way. What changes is that it was reported in the behavioural
+  column, which overstated behaviour and understated contractual repricing.
+  Behaviour is now purely a flow, zero at the central case. Since the paper's
+  shape-versus-behaviour split rests on that decomposition, the fix matters
+  even though the total does not.
+
+  One consequence is visible only once the classes separate: wholesale floating
+  is 0.8 percent of the stock. Nearly all non-fixed debt is retail.
+
+- **The retail outcome is no longer described as a lower bound on
+  subscriptions.** The published series is outstanding value, which for Savings
+  Certificates is subscription principal plus capitalised interest. Series F
+  capitalises, so the accrual term is positive by construction and can create a
+  positive change with no new household money; IGCP's 2024 accounts put the
+  year's increase at EUR 684 million, of which 63 was subscription value and
+  622 accrued interest. Because capitalisation tracks a Euribor-indexed
+  formula, the outcome can move with rates through pure accounting, in the same
+  direction as the behavioural channel under test. **This is disclosed, not
+  removed:** the regression still runs on that series, and its coefficient is
+  reported as descriptive rather than identified.
+
+### Changed
+
+- The central object is renamed a **composition-sensitive scenario kernel**.
+  Its contractual profile, reset cycle and shock loading are imposed and its
+  behavioural centre is zero, so "estimated kernel" claimed more than it
+  delivered.
+- The historical exercise is renamed **conditional historical validation**.
+  Realised rate paths are fed in deliberately, and a forecast would not have
+  them. Its ordering has now changed four times across four implementation
+  corrections without the specification changing once, and the paper reports
+  that instability rather than the current ordering.
+- Stale conclusions purged. The specification log recorded S1 as a null with a
+  placebo that does not load, the estimation report was titled "a well-measured
+  null" above a table of significant coefficients, and the manuscript and two
+  module docstrings agreed. All now state that several associations are
+  precisely estimated while the behavioural interpretation is not identified.
+- The audit records both test environments. "353 passed" was true of a
+  populated tree and not of what a reviewer receives.
+
+### Added
+
+- `refixing_comparison`, which checks the imposed kernel shape against IGCP's
+  published refixing profile. IGCP's risk framework monitors interest-rate
+  refixing explicitly, and that profile is a closer comparator to this kernel
+  than weighted average maturity.
+
+### Not done
+
+**The refixing comparison has not been performed.** The profile is published as
+a chart rather than a table and requires manual digitisation; entering values
+read off its appearance would be worse than leaving the comparison undone. The
+file and schema are specified in `docs/manual_ingest.md`, the comparison runs
+as soon as a digitised profile is supplied, and a test asserts no placeholder
+file is shipped. Until then the imposed shapes are validated against a mean and
+a composition split, not against the debt manager's own refixing view.
+
+### Verification
+
+- `pytest`: 364 passed in a populated tree; 348 passed and 16 skipped on a
+  clean checkout, 364 collected, zero failures in both.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+- Burden paper 27 pages, repricing paper 15 pages, no undefined references.
+
 ## v0.5.2 - 2026-08-08
 
 Support documentation only. No code, results or manuscript text change.
