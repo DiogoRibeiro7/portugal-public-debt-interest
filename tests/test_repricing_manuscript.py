@@ -136,6 +136,9 @@ def test_repricing_terms_do_not_revert_to_old_bias_language() -> None:
     )
     for stale in (
         "Scenario bias",
+        "scenario bias",
+        "central bias",
+        "one-year bias",
         "Estimated share",
         "Total bias (pp)",
         "Out-of-sample backtest errors",
@@ -195,6 +198,9 @@ def test_current_repricing_reports_do_not_repeat_superseded_claims() -> None:
         "material correction to the earlier paper",
         "observable lower-bound",
         "Scenario bias",
+        "scenario bias",
+        "central bias",
+        "bias result",
         "Estimated share",
     ):
         assert stale not in combined

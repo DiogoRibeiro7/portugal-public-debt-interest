@@ -45,11 +45,12 @@ decomposition.
 
 ## Fiscal translation
 
-At a 100 basis-point shock, the current central one-year bias translates to
-about 0.059 percent of GDP, or EUR 181 million, using the paper's fiscal scaling
-convention. This is a scale sensitivity, not an identified forecast, and it
-inherits the mismatch between IGCP State direct debt composition and Maastricht
-general-government debt used in the burden denominator.
+At a 100 basis-point shock, the current central one-year scenario-minus-WAM
+difference translates to about 0.059 percent of GDP, or EUR 181 million, using
+the paper's fiscal scaling convention. This is a scale sensitivity, not an
+identified forecast, and it inherits the mismatch between IGCP State direct
+debt composition and Maastricht general-government debt used in the burden
+denominator.
 
 ## Supported claim
 

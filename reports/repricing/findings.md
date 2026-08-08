@@ -31,7 +31,7 @@ scaling convention.
 Artefacts: `data/processed/repricing/kernels/kernel_bias.csv` and
 `kernel_bias_fiscal.csv`.
 
-### 2. The central bias is compositional, not behavioural
+### 2. The central difference is compositional, not behavioural
 
 The one-year central difference is entirely the shape term in the current
 zero-behaviour specification. The portfolio contains reset-linked exposure that

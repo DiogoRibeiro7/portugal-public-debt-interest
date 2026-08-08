@@ -91,7 +91,7 @@ profile as absent.
   clean-checkout audit of the prior revision-6 archive reported 345 passed and
   19 skipped, with zero failures.
 - `ruff check .`: passed. `mypy src`: passed, 35 modules.
-- Burden paper 27 pages, repricing paper 16 pages, no undefined references.
+- Burden paper 27 pages, repricing paper 15 pages, no undefined references.
 
 ## v0.5.2 - 2026-08-08
 
@@ -203,11 +203,11 @@ Cite this release rather than v0.4.0.
   how often a coupon refreshes with how much of a shock it passes through. The
   kernel now reports a physical repriced share and a shock-weighted share,
   which coincide at unit loading; the default is unit loading, so no existing
-  number moved. Varying loading alone moves the one-year bias from +6.60 to
-  -0.50 percentage points at half loading and -4.05 at quarter loading, so it
-  is as first-order as timing. This sharpens the paper's argument: a published
-  maturity statistic constrains neither, so it cannot pin down the sign of the
-  one-year correction.
+  number moved. Varying loading alone moves the one-year difference from +6.60
+  to -0.50 percentage points at half loading and -4.05 at quarter loading, so
+  it is as first-order as timing. This sharpens the paper's argument: a
+  published maturity statistic constrains neither, so it cannot pin down the
+  sign of the one-year correction.
 
 ### Documentation
 

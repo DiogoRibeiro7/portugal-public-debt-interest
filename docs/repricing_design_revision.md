@@ -88,7 +88,7 @@ is a far cleaner identification lever than a smoothly estimated hazard.
   one large widening episode and the estimate will be correspondingly fragile.
 - *A policy-break natural experiment.* The June 2023 terms change is a discrete
   intervention with a large pre/post contrast, dateable to the month.
-- *The WAM bias result.* Untouched by any of this. It needs the average
+- *The WAM comparison result.* Untouched by any of this. It needs the average
   residual maturity series, which was acquired monthly for 2000-12 to 2026-06,
   and the composition split, which was also acquired.
 
@@ -110,7 +110,7 @@ data actually observes.
 - The behavioural component becomes a descriptive stock-value response
   estimated on positive outstanding-value change against the competing-return
   spread, with the June 2023 break entering as a dated policy intervention.
-- The headline result remains the WAM bias, decomposed into shape and
+- The headline result remains the WAM comparison difference, decomposed into shape and
   behavioural components exactly as planned.
 - The asymmetry section reports what the data supports: a strong, well-measured
   response in the widening direction, and honest silence about the narrowing
@@ -123,9 +123,9 @@ decomposition is missing.
 **What it gives up:** the competing-risks machinery, the redemption hazard, and
 the survival-analysis framing.
 
-### Option B — WAM bias only
+### Option B — WAM comparison only
 
-Drop the behavioural component entirely. Quantify the bias in the
+Drop the behavioural component entirely. Quantify the difference in the
 weighted-average-maturity approximation using the shape argument alone: a
 memoryless hazard with the same mean maturity retires far less of the stock over
 a decade than a realistic profile does.

@@ -39,7 +39,7 @@ both kernels are anchored to the same published maturity and fed the same
 realised yields. What differs between them is shape, and shape matters most in
 the first year — which a four-observation backtest barely sees.
 
-So the bias result in `reports/repricing/kernel.md` and this null are
+So the comparison result in `reports/repricing/kernel.md` and this null are
 consistent: the standard proxy differs materially from the composition-sensitive
 kernel at short horizons, but the sign is not stable across the reported
 horizons and the difference is too small relative to effective-rate volatility
@@ -54,7 +54,7 @@ The simulated half-lives differ by direction:
 | +50, +100, +200 bps | 2 years |
 | −50, −100, −200 bps | 3 years |
 
-**This asymmetry is mechanical, not estimated.** The behavioural track clips its
+This asymmetry is mechanical, not estimated. The behavioural track clips its
 response at zero, so a rate fall cannot produce a negative behavioural
 contribution. The clip is a modelling choice, and it manufactures exactly the
 asymmetry the original design predicted.

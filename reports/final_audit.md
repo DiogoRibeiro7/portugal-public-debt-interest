@@ -80,7 +80,8 @@ not part of the submitted source archive.
   identified behavioural correction.
 - Current repricing support reports no longer repeat the superseded 10.90
   percentage-point or EUR 300 million claims, and the manuscript states that
-  the central bias changes sign after the one-year horizon.
+  the central scenario-minus-WAM difference changes sign after the one-year
+  horizon.
 
 ## Remaining Warnings
 

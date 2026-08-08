@@ -348,8 +348,8 @@ The scenario kernel is
   \label{eq:kernel}
 \end{equation}
 where $K^{C}$ is contractual repricing, $K^{R}$ is reset repricing, and
-$K^{B}$ is behavioural repricing under shock $\Delta$. The bias relative to the
-maturity proxy is then
+$K^{B}$ is behavioural repricing under shock $\Delta$. The difference relative
+to the maturity proxy is then
 \begin{equation}
   B(h,\Delta) = K(h,\Delta) - K^{\mathrm{WAM}}(h).
   \label{eq:bias}
@@ -361,12 +361,11 @@ retirement track and an \emph{imposed} reset cycle, because the dated
 redemption schedule is not published; the paper shows below that a two-year
 reset assumption reverses the sign at one year. The behavioural component uses
 a subscription response that is precisely estimated but not identified. Both
-are therefore
-model-based sensitivities. The claim this paper defends is not that the bias
-equals a particular number, but that weighted average maturity and a mean do
-not determine a unique repricing path: plausible composition and timing
-assumptions generate materially different paths, of different signs relative to
-the constant-hazard benchmark.
+are therefore model-based sensitivities. The claim this paper defends is not
+that the difference equals a particular number, but that weighted average
+maturity and a mean do not determine a unique repricing path: plausible
+composition and timing assumptions generate materially different paths, of
+different signs relative to the constant-hazard benchmark.
 
 \section{Estimation}
 \label{sec:estimation}
@@ -432,15 +431,16 @@ mean those coefficients should not carry a structural household-behaviour
 interpretation. The behavioural component can be carried through the kernel as
 a sensitivity, not as the centrepiece of the paper.
 
-\section{The kernel and the bias}
+\section{The kernel and the WAM comparison}
 \label{sec:kernel}
 
-Table \ref{tab:bias} reports the scenario bias at a 100 basis-point shock with
-the central behavioural effect set to zero. The sign is positive at one year
-and negative at the longer reported horizons, so the table should be read as a
-bounded model exercise rather than as an identified empirical correction in one
-direction. The bias is a combination of an early reset effect, a stylised
-contractual-shape effect, and behavioural bounds reported separately.
+Table \ref{tab:bias} reports the scenario-minus-WAM difference at a 100
+basis-point shock with the central behavioural effect set to zero. The sign is
+positive at one year and negative at the longer reported horizons, so the table
+should be read as a bounded model exercise rather than as an identified
+empirical correction in one direction. The difference combines an early reset
+effect, a stylised contractual-shape effect, and behavioural bounds reported
+separately.
 
 \input{tables/kernel_bias.tex}
 
@@ -569,7 +569,7 @@ envelopes above carry the substantive comparisons.
 
 Table \ref{tab:sensitivity} asks a different question. Instead of randomising
 the macro environment, it moves the main modelling assumptions one at a time.
-The one-year bias range across those checks is \SensitivityRangeHOne\
+The one-year difference range across those checks is \SensitivityRangeHOne\
 percentage points. Two rows matter most because they attack the compositional
 claim directly, and they do so through different assumptions. If reset
 instruments are assumed to take longer to receive the new rate, the first-year
@@ -675,7 +675,7 @@ to implementation is not a ranking a reader should rely on, and we would rather
 say so than present the current ordering as a result.
 
 This is consistent with the rest of the paper rather than in tension with it.
-The compositional bias is concentrated in the first year, and a backtest over
+The compositional difference is concentrated in the first year, and a backtest over
 the available annual observations has little power to detect it against
 effective-rate volatility. The backtest is still necessary because it prevents
 the kernel from being sold as a superior forecasting model when its strongest

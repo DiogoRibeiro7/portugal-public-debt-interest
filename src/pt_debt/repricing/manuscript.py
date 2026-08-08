@@ -564,7 +564,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
             columns="lrrr",
             header=[
                 "Scenario",
-                "One-year bias (pp)",
+                "One-year difference (pp)",
                 "Five-year repriced share (\\%)",
                 "Five-year burden (\\% GDP)",
             ],
