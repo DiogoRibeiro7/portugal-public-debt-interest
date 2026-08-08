@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this project, please cite it using the metadata below."
 type: software
-title: "Portugal Public-Debt Interest Burden"
+title: "Portugal's Public-Debt Interest Burden and Repricing: Pipeline, Data and Two Papers"
 authors:
   - family-names: "Ribeiro"
     given-names: "Diogo"
@@ -16,7 +16,7 @@ identifiers:
   - type: doi
     value: "10.5281/zenodo.21722700"
     description: "Concept DOI: cites all versions of this work."
-abstract: "Reproducible analysis of Portugal's general-government public-debt interest burden using harmonised Eurostat ESA 2010 data, AMECO-linked historical context, validation checks, figures, and a publication-oriented LaTeX report."
+abstract: "Reproducible measurement of Portugal's general-government interest burden from the harmonised Eurostat ESA 2010 record for 1995-2025, and of how quickly a rate shock reaches it. Keeps national-accounts interest expense, the GDP-normalised burden, the average financing cost of the stock, the debt-dynamics rate and the benchmark yield on new debt as distinct quantities; publishes an exact two-factor decomposition of the burden change and a euro-area comparison with a stated eligibility rule. A companion study asks what weighted average maturity does and does not determine about pass-through speed. Contains the pipeline, the generated tables and figures, and two working papers built from them."
 keywords:
   - "Portugal"
   - "public debt"
@@ -25,6 +25,12 @@ keywords:
   - "debt dynamics"
   - "Eurostat"
   - "ESA 2010"
+  - "euro area"
+  - "debt management"
+  - "weighted average maturity"
+  - "interest-rate pass-through"
+  - "debt repricing"
+  - "reproducible research"
 license: "MIT"
-version: "0.5.0"
+version: "0.5.1"
 date-released: "2026-08-08"
