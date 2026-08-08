@@ -1,5 +1,41 @@
 # Changelog
 
+## v0.5.1 - 2026-08-08
+
+Archive metadata only. No code, results or manuscript text change.
+
+### Fixed
+
+- **The archive description claimed an input the build does not use.** It
+  advertised "AMECO-linked historical context"; the extension is configured but
+  contributes no rows, the built dataset carries Eurostat as its only source
+  family, and neither paper cites AMECO. Removed from `.zenodo.json` and
+  `CITATION.cff`, with the sources each paper actually uses named instead.
+- **The title described one paper when the archive holds two.** "Portugal
+  Public-Debt Interest Burden" now reads "Portugal's Public-Debt Interest
+  Burden and Repricing: Pipeline, Data and Two Papers".
+
+### Changed
+
+- The archive description now says what each paper establishes, rather than
+  listing pipeline features. Someone landing on the Zenodo record from a
+  citation can tell what the two studies claim without opening them.
+- `notes` records the reproducibility regime on the archive record itself:
+  live-source rather than frozen-source, what is guaranteed, and what is not.
+  Previously that distinction existed only in the repository.
+- Keywords extended from seven to fifteen so the repricing study is
+  discoverable: weighted average maturity, interest-rate pass-through, debt
+  repricing, sovereign debt maturity, retail government debt, euro area, debt
+  management, reproducible research.
+- `related_identifiers` links the record to the source repository.
+- `CITATION.cff` carries the same title, abstract and keywords, so the
+  reference-manager entry and the archive record no longer disagree.
+
+### Verification
+
+- `pytest`: 353 tests passed.
+- `ruff check .`: passed. `mypy src`: passed, 35 modules.
+
 ## v0.5.0 - 2026-08-08
 
 **This release supersedes v0.4.0, whose release notes misstate two results.**
