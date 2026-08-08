@@ -104,34 +104,38 @@ Artefacts: `data/processed/repricing/estimates/s1_coefficients.csv`,
 
 Mean absolute error on the effective rate, basis points:
 
-| Cut | Estimated kernel | Proxy benchmark |
+| Cut | Scenario kernel | Proxy benchmark |
 | --- | --- | --- |
-| 2014 | 46.91 | **43.24** |
-| 2018 | 13.79 | **12.92** |
-| 2021 | **9.24** | 9.81 |
+| 2014 | **42.48** | 43.24 |
+| 2018 | **12.79** | 12.92 |
+| 2021 | **9.52** | 9.81 |
 
-**The benchmark wins at two of three cut dates.** The kernel wins only at 2021 —
-the cut that places the whole tightening episode out of sample, and therefore
-the one where a behavioural channel has anything to do. That is suggestive on
-four annual observations at a single cut date, and it is not evidence of
-forecasting skill. Margins are small relative to the error levels throughout.
+**The scenario kernel is marginally ahead at all three cuts, by margins too
+small to mean anything** — under a basis point at 2018 and 2021, against error
+levels an order of magnitude larger. This is not evidence of forecasting skill,
+and the exercise is not a forecast: realised rate paths are fed in so that
+timing error can be separated from yield-path error, which is why it is now
+called conditional historical validation.
 
-This table has changed twice. The 2021 row moved from 11.14 to 9.24 once the
-fitted spread response was actually passed to the model labelled "estimated
-kernel" — before that the pipeline passed zero, so the model carrying the name
-of the estimate was not using it.
+**This ordering has changed four times, and that is the finding.** Kernel wins
+two of three; then loses all three; then wins one; now wins three. Each move
+followed an implementation correction, not a change of specification:
 
-An earlier version of this table reported the kernel winning two of three cuts
-(52.44/55.69, 47.81/45.16, 14.24/14.66). That ranking was an artefact of three
-defects since fixed: the backtest applied each year's yield to the whole
-cumulative repriced share rather than to the cohort that actually repriced; it
-built the kernel at zero shock, which silences the behavioural channel whatever
-response is supplied; and it used the end-of-sample portfolio state at every
-cut, so a 2014 prediction was built from a 2026 portfolio.
+1. the kernel was built at zero shock, silencing the behavioural channel
+   whatever response was supplied;
+2. each year's yield was applied to the whole cumulative repriced share instead
+   of to the cohort that repriced;
+3. the portfolio state came from the end of the sample rather than the cut date;
+4. the behavioural coefficient was driven by the gap between the ten-year
+   benchmark and the effective rate, when it had been estimated against the
+   competing-return spread — a different object in different units.
 
-The 2021 cut places the whole tightening episode out of sample, which is where
-a behaviourally responsive kernel would have the best chance of separating
-itself. It is also the only cut where it does.
+A ranking this sensitive to implementation is not one to rely on. It is
+reported because it bounds what the exercise can support, which is: the timing
+assumptions are not distinguishable at this sample size.
+
+The original figures, for the record, were 52.44/55.69, 47.81/45.16 and
+14.24/14.66.
 
 Artefact: `data/processed/repricing/scenarios/backtest_summary.csv`.
 

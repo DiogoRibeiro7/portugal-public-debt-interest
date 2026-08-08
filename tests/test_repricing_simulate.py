@@ -97,12 +97,30 @@ class TestBehaviouralChannelIsLive:
         assert (responsive >= flat).all() and not responsive.equals(flat)
 
     def test_backtest_predictions_move_with_the_response(self) -> None:
-        """The end-to-end version of the defect."""
+        """The end-to-end version of the defect, with the right driver."""
+        frame = _burden_frame(range(2015, 2025), [3.0 + 0.2 * i for i in range(10)])
+        common = {"cut_year": 2020, "realised_spread_pp": 1.5}
+        flat = backtest(frame, INPUTS, behavioural_response=0.0, **common)
+        responsive = backtest(frame, INPUTS, behavioural_response=0.8, **common)
+        estimated = flat["model"].eq("estimated_kernel")
+        assert not np.allclose(
+            flat.loc[estimated, "predicted_rate_pct"].to_numpy(),
+            responsive.loc[estimated, "predicted_rate_pct"].to_numpy(),
+        )
+
+    def test_no_spread_leaves_the_behavioural_track_at_zero(self) -> None:
+        """A wrong driver is worse than none, so none is the default.
+
+        The coefficient is per point of competing-return spread. Without that
+        variable there is nothing it can legitimately be applied to, and an
+        earlier version substituted the gap between the ten-year benchmark and
+        the effective rate -- a different object in different units.
+        """
         frame = _burden_frame(range(2015, 2025), [3.0 + 0.2 * i for i in range(10)])
         flat = backtest(frame, INPUTS, cut_year=2020, behavioural_response=0.0)
         responsive = backtest(frame, INPUTS, cut_year=2020, behavioural_response=0.8)
         estimated = flat["model"].eq("estimated_kernel")
-        assert not np.allclose(
+        assert np.allclose(
             flat.loc[estimated, "predicted_rate_pct"].to_numpy(),
             responsive.loc[estimated, "predicted_rate_pct"].to_numpy(),
         )

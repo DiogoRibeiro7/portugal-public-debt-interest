@@ -290,7 +290,7 @@ the discrete annual constant-hazard formula used in the companion burden paper.
 It is memoryless: it implies a long right tail, leaving a substantial share
 unrepriced after a decade.
 
-The estimated kernel is
+The scenario kernel is
 \begin{equation}
   K(h,\Delta)
   =
@@ -314,7 +314,8 @@ combines observed portfolio composition with an \emph{imposed} linear
 retirement track and an \emph{imposed} reset cycle, because the dated
 redemption schedule is not published; the paper shows below that a two-year
 reset assumption reverses the sign at one year. The behavioural component uses
-a subscription response whose estimate is a null. Both are therefore
+a subscription response that is precisely estimated but not identified. Both
+are therefore
 model-based sensitivities. The claim this paper defends is not that the bias
 equals a particular number, but that weighted average maturity and a mean do
 not determine a unique repricing path: plausible composition and timing
@@ -398,7 +399,7 @@ contractual-shape effect, and behavioural bounds reported separately.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/kernel_comparison.pdf}
-\caption{Weighted-average-maturity proxy and estimated repricing kernel. The interval is the generated behavioural interval around the estimated kernel.}
+\caption{Weighted-average-maturity proxy and the composition-sensitive scenario kernel. The interval is the generated behavioural interval around that kernel. The kernel is model-implied under explicit portfolio assumptions, not estimated: its contractual profile, reset cycle and shock loading are imposed.}
 \label{fig:kernel-comparison}
 \end{figure}
 
@@ -453,7 +454,7 @@ thin-data behavioural estimate.
 \section{Pass-through}
 \label{sec:passthrough}
 
-Simulating forward under the estimated kernel also clarifies the denominator
+Simulating forward under the scenario kernel also clarifies the denominator
 problem. The companion paper holds nominal GDP fixed across the ten-year
 horizon to isolate refinancing arithmetic. That convention is transparent, but
 it is a scenario, not a forecast. At a 100 basis-point shock and a five-year
@@ -573,11 +574,18 @@ The paper therefore has a data-policy conclusion as well as a modelling one:
 routine publication of gross retail flows would materially improve public
 understanding of interest-cost pass-through.
 
-\section{Backtest}
+\section{Conditional historical validation}
 \label{sec:backtest}
 
+This exercise is deliberately not called a backtest or an out-of-sample
+forecast. Realised future rate paths are fed into it on purpose, so that kernel
+timing error can be separated from yield-path error, and a forecast would not
+have them. What it can answer is narrower and still worth asking: given what
+rates actually did, did this kernel time the pass-through better than the
+maturity proxy?
+
 We freeze the specification, reconstruct the portfolio state as it stood at
-each cut date, and predict forward from that state. The rate fed forward is the
+each cut date, and roll forward from that state. The rate fed forward is the
 realised \emph{ten-year benchmark} yield, so that kernel error is isolated from
 yield-path error. It is not an issuance-weighted funding rate: the securities
 repricing in a given year are not all ten-year, so the exercise measures the
@@ -586,28 +594,37 @@ issuance cost. Repricing is accumulated by cohort, so debt that repriced in an
 earlier year carries the yield it repriced at rather than being revalued at the
 latest one. The realised effective rate is imported from the companion paper.
 
+The behavioural track is driven by the realised competing-return spread, which
+is the variable the coefficient was estimated against. That correspondence is
+not cosmetic. An earlier version drove it with the gap between the ten-year
+benchmark and the cut-date effective rate, which is a different object in
+different units: a coefficient expressed in repriced share per point of
+competing-return spread was being applied to something closer to a term
+premium. Where the spread is unavailable the behavioural track is set to zero
+rather than driven by a stand-in.
+
 \input{tables/backtest_summary.tex}
 
 \input{tables/model_comparison.tex}
 
-The estimated kernel does not systematically beat the benchmark. It has the
-lower mean absolute error at one of the three cut dates and the higher error at
-the other two, and every margin is small relative to the error levels. The one
-it wins is \BacktestEstTwentyOne\ against \BacktestWamTwentyOne\ basis points
-at the 2021 cut --- the cut that places the entire tightening episode out of
-sample, and therefore the one where a behavioural channel has something to do.
-That is suggestive and it is a single cut date with four annual observations;
-it is not evidence of forecasting skill.
+The scenario kernel has the lower mean absolute error at all three cut dates,
+by \emph{very} small margins: under a basis point at 2018 and 2021 and under a
+single basis point at 2014, against error levels an order of magnitude larger.
+That ordering should not be read as forecasting skill. Three cut dates with
+between four and eleven annual observations each, separated by margins this
+size, cannot distinguish two timing assumptions.
 
-That comparison is only meaningful because the behavioural channel is live in
-the backtest. An earlier implementation built the kernel at zero shock, which
-silences the channel whatever response is supplied, and applied each year's
-yield to the whole cumulative repriced share rather than to the cohort that
-repriced. Both are corrected here, and the correction moved the ranking: the
-earlier version reported the kernel winning at two cut dates for reasons that
-had nothing to do with its economics. The honest reading is that the kernel is
-useful for decomposing timing, not for promising lower forecast errors in a
-short annual backtest.
+The ordering has also moved every time an implementation defect was corrected,
+which is itself the most useful thing this section reports. Earlier versions
+had the kernel winning two of three, then losing all three, then winning one,
+before arriving here --- successively because the kernel was built at zero
+shock, which silences the behavioural channel whatever response is supplied;
+because each year's yield was applied to the whole cumulative repriced share
+rather than to the cohort that repriced; because the portfolio state came from
+the end of the sample rather than the cut; and because the behavioural
+coefficient was driven by the wrong variable. A ranking that is this sensitive
+to implementation is not a ranking a reader should rely on, and we would rather
+say so than present the current ordering as a result.
 
 This is consistent with the rest of the paper rather than in tension with it.
 The compositional bias is concentrated in the first year, and a backtest over

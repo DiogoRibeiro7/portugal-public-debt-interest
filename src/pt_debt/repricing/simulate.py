@@ -14,8 +14,10 @@ collapsed to an aggregate hazard at the last step.
 Everything is reported as a difference against the zero-shock baseline. Plotting
 total burden paths would confound the shock with the starting level.
 
-This is a simulation under an estimated kernel whose behavioural component is a
-measured null. It is not a forecast.
+This is a simulation under a composition-sensitive scenario kernel, not an
+estimated one: its contractual profile, reset cycle and shock loading are all
+imposed, and its behavioural component is set to zero centrally because that
+coefficient is precisely estimated but not identified. It is not a forecast.
 """
 
 from __future__ import annotations
@@ -176,8 +178,9 @@ def backtest(
     inputs: KernelInputs,
     cut_year: int = 2021,
     behavioural_response: float = 0.0,
+    realised_spread_pp: float | None = None,
 ) -> pd.DataFrame:
-    """Predict the effective rate after a cut date and score against realised.
+    """Score a repricing kernel against the realised effective rate after a cut.
 
     The realised effective rate is **imported** from the burden paper, not
     recomputed, so the two papers cannot drift apart.
@@ -210,15 +213,22 @@ def backtest(
     horizons = tuple(range(1, len(future) + 1))
     benchmark = future["ten_year_yield_pct"].astype(float).to_numpy()
 
-    # The behavioural track responds to a spread, so a kernel built at zero
-    # shock has no behavioural content at all whatever response is passed. The
-    # realised deviation of the benchmark yield from the anchor is fed in for
-    # the same reason the realised yield path is: to isolate kernel error from
-    # yield-path error. It is an input to the test, not a forecast.
-    realised_shock_bps = float(np.mean(benchmark - anchor) * 100.0)
+    # The behavioural coefficient was estimated against the lagged
+    # competing-return spread, so the behavioural track has to be driven by
+    # that same variable. An earlier version fed it the mean gap between the
+    # ten-year benchmark and the cut-date effective rate, which is a different
+    # object in different units: a coefficient in repriced share per point of
+    # competing-return spread was being applied to a term-premium-like gap.
+    #
+    # When no realised spread is supplied the behavioural track is left at zero
+    # rather than driven by a stand-in, because a wrong driver is worse than
+    # none.
+    behavioural_shock_bps = (
+        0.0 if realised_spread_pp is None else float(realised_spread_pp) * 100.0
+    )
 
     estimated = build_kernel(
-        inputs, realised_shock_bps, behavioural_response, horizons
+        inputs, behavioural_shock_bps, behavioural_response, horizons
     )["repriced_share"].to_numpy()
     wam = geometric_kernel(
         np.asarray(horizons, dtype=float), inputs.average_residual_maturity_years
@@ -249,6 +259,23 @@ def backtest(
     return pd.DataFrame(rows)
 
 
+def _realised_spread(panel: pd.DataFrame, as_of: pd.Timestamp) -> float | None:
+    """Mean widening of the competing-return spread after the cut date.
+
+    The behavioural coefficient is per percentage point of *this* variable, so
+    this is the only quantity it can legitimately be applied to. Returns None
+    when the panel does not carry it, which leaves the behavioural track at
+    zero rather than substituting a different driver.
+    """
+    column = "spread_widening_pp"
+    if column not in panel.columns:
+        return None
+    future = panel.loc[panel["period"].gt(as_of), column].dropna()
+    if future.empty:
+        return None
+    return float(future.mean())
+
+
 def backtest_across_cuts(
     burden_frame: pd.DataFrame,
     panel: pd.DataFrame,
@@ -258,11 +285,18 @@ def backtest_across_cuts(
 ) -> pd.DataFrame:
     """Run :func:`backtest` at each cut with that cut's portfolio state.
 
-    The manuscript claims predictions use only information available at the
-    cut date. Previously the same end-of-sample portfolio state was passed to
-    every cut, so a 2014 prediction was built from a 2026 portfolio. This
-    reconstructs the state per cut and records which observation it came from,
-    so the claim is checkable rather than asserted.
+    This is **conditional historical validation**, not an out-of-sample
+    forecast. Realised future rate paths are fed in deliberately so that kernel
+    timing error is isolated from yield-path error; a forecast would not have
+    them. The name matters because the exercise cannot answer "would this have
+    predicted the future", only "given what rates did, did this kernel time the
+    pass-through better than the maturity proxy".
+
+    Portfolio state is reconstructed at each cut and the observation it came
+    from is recorded, so the no-look-ahead claim about *state* is checkable.
+    The behavioural driver is the realised competing-return spread after the
+    cut -- the same variable the coefficient was estimated on, which is what
+    makes applying that coefficient meaningful at all.
     """
     if "period" not in panel.columns:
         raise ValidationError("panel must carry a period column")
@@ -278,6 +312,7 @@ def backtest_across_cuts(
             state_at(as_of),
             cut_year=int(cut_year),
             behavioural_response=behavioural_response,
+            realised_spread_pp=_realised_spread(panel, as_of),
         )
         scores["state_as_of"] = available["period"].max().date().isoformat()
         frames.append(scores)

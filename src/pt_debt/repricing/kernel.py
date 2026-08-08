@@ -6,7 +6,8 @@ Three components, combined rather than conflated:
 2. **Reset.** Floating-rate and inflation-linked debt reprices without exiting.
    Not a survival event; carried on its own track.
 3. **Behavioural.** Retail subscriptions onto the prevailing rate. Estimated,
-   and the estimate is a null, so its band includes zero by construction.
+   and the estimate is not identified, so its central value is set to zero
+   and its band is reported as a sensitivity.
 
 The kernel is a *function of the shock*, not a scalar. That is the whole point:
 the burden paper's kernel is a constant hazard calibrated to published weighted
@@ -105,8 +106,9 @@ def build_kernel(
     """Repriced share by horizon, decomposed into its three components.
 
     ``behavioural_response`` is the monthly repricing response per percentage
-    point of spread, from the estimation step. Its estimate is a null, so a
-    caller propagating uncertainty will pass values spanning zero.
+    point of spread, from the estimation step. The estimate is precise but not
+    identified -- the placebo loads -- so the central value used here is zero
+    and callers propagating uncertainty pass values spanning it.
     """
     if reset_cycle_years <= 0.0:
         raise ValidationError("reset cycle must be positive")

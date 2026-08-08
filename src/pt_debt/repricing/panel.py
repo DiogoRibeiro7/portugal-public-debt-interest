@@ -89,10 +89,34 @@ def build_repricing_panel(
                 "net_flow_mio_eur": net_flow.to_numpy(),
             }
         )
-        # The lower bound on money repriced onto the prevailing rate. Negative
-        # net flow is carried separately rather than being treated as zero
-        # repricing: it is a net outflow, which is a different event.
-        panel["repriced_lower_bound_mio_eur"] = panel["net_flow_mio_eur"].clip(lower=0.0)
+        # The positive part of the change in outstanding value.
+        #
+        # This is NOT a lower bound on gross household subscriptions, and an
+        # earlier version of this file said it was. The published series is
+        # outstanding *value*, which for Savings Certificates decomposes into
+        # subscription principal and capitalised interest:
+        #
+        #     R_t = P_t + A_t   so   dR_t = dP_t + dA_t
+        #
+        # Series F pays quarterly and capitalises matured interest, so dA_t is
+        # positive by construction and can create or enlarge a positive dR_t
+        # with no new household money at all. IGCP's 2024 accounts make the
+        # scale plain: the balance rose 684 million euro over the year, of
+        # which subscription value contributed 63 and accrued interest 622.
+        #
+        # Worse for the estimation, capitalisation tracks the remuneration
+        # formula, which for Series F is indexed to three-month Euribor. The
+        # outcome can therefore move with rates through pure accounting, which
+        # is a mechanical channel running in the same direction as the
+        # behavioural one being tested. The name records what the quantity is.
+        panel["outstanding_value_increase_mio_eur"] = panel["net_flow_mio_eur"].clip(
+            lower=0.0
+        )
+        # Retained under the old name so downstream code and archived artefacts
+        # keep working; both columns carry the same values and the same caveat.
+        panel["repriced_lower_bound_mio_eur"] = panel[
+            "outstanding_value_increase_mio_eur"
+        ]
         panel["net_outflow_mio_eur"] = (-panel["net_flow_mio_eur"]).clip(lower=0.0)
         frames.append(panel)
 

@@ -641,7 +641,7 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     fig, ax = plt.subplots(figsize=(7.2, 4.4))
     x = bias["horizon_years"].astype(float)
     ax.plot(x, 100.0 * bias["wam_implied_share"], marker="o", label="WAM proxy")
-    ax.plot(x, 100.0 * bias["estimated_share"], marker="o", label="Estimated kernel")
+    ax.plot(x, 100.0 * bias["estimated_share"], marker="o", label="Scenario kernel")
     ax.fill_between(
         x,
         100.0 * bias["estimated_share_low"],
