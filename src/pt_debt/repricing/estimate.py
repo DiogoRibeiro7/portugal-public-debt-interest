@@ -1,13 +1,15 @@
-"""Estimation of the subscription-response function.
+"""Estimation of the retail stock-value response function.
 
 Specification S1, frozen in ``docs/specification_log.md`` before any fitting.
 Nothing here may be tuned toward the hypothesis: the pre-registered predictions
 are reported whether or not they hold, and the sign of the first one is the
 reverse of the original design's expectation.
 
-The outcome is a one-sided bound, so every coefficient describes the response
-of the *observable lower bound* on repricing, not of gross subscriptions. That
-distinction belongs in every sentence that interprets these numbers.
+The outcome is the positive part of the monthly outstanding-value change,
+scaled by opening stock. It is not a lower bound on gross household
+subscriptions: Savings Certificate balances can rise through capitalised
+interest as well as new principal. Coefficients are therefore descriptive
+associations in an observed stock-value process.
 """
 
 from __future__ import annotations
@@ -29,16 +31,34 @@ REGRESSORS: Final[tuple[str, ...]] = (
     "average_residual_term_years",
 )
 
-OUTCOME: Final[str] = "repriced_share"
+OUTCOME: Final[str] = "positive_outstanding_value_change_share"
 
 #: Columns summed across instrument classes when aggregating to one series.
 _MONETARY: Final[tuple[str, ...]] = (
-    "repriced_lower_bound_mio_eur",
+    "outstanding_value_increase_mio_eur",
     "opening_outstanding_mio_eur",
     "outstanding_mio_eur",
     "net_flow_mio_eur",
     "net_outflow_mio_eur",
 )
+
+
+def _with_outcome_aliases(panel: pd.DataFrame) -> pd.DataFrame:
+    """Return a panel with the current stock-value outcome columns available."""
+    output = panel.copy()
+    if (
+        "outstanding_value_increase_mio_eur" not in output.columns
+        and "repriced_lower_bound_mio_eur" in output.columns
+    ):
+        output["outstanding_value_increase_mio_eur"] = output[
+            "repriced_lower_bound_mio_eur"
+        ]
+    if (
+        OUTCOME not in output.columns
+        and "repriced_share" in output.columns
+    ):
+        output[OUTCOME] = output["repriced_share"]
+    return output
 
 
 def monthly_retail_series(panel: pd.DataFrame) -> pd.DataFrame:
@@ -57,10 +77,11 @@ def monthly_retail_series(panel: pd.DataFrame) -> pd.DataFrame:
 
     *Weighting.* Each class-month previously carried equal OLS weight after
     normalisation by its own opening stock, so a small class moved the
-    coefficient as much as a large one. The fiscal object is a monetary
-    repricing amount, so the aggregate share is formed from summed euros --
-    total repriced over total opening stock -- which weights each class by its
-    actual exposure and removes the need for class effects.
+    coefficient as much as a large one. The observed object is monetary
+    stock-value growth, so the aggregate share is formed from summed euros --
+    total positive outstanding-value change over total opening stock -- which
+    weights each class by its actual exposure and removes the need for class
+    effects.
 
     Covariates are common to both classes because the panel maps them from the
     period, so taking the first value per month is exact rather than an
@@ -68,6 +89,12 @@ def monthly_retail_series(panel: pd.DataFrame) -> pd.DataFrame:
     """
     if "period" not in panel.columns:
         raise ValidationError("aggregation requires a period column")
+
+    panel = _with_outcome_aliases(panel)
+    if "outstanding_value_increase_mio_eur" not in panel.columns:
+        raise ValidationError(
+            "aggregation requires outstanding_value_increase_mio_eur"
+        )
 
     present = [name for name in _MONETARY if name in panel.columns]
     grouped = panel.groupby("period", as_index=False)
@@ -90,8 +117,9 @@ def monthly_retail_series(panel: pd.DataFrame) -> pd.DataFrame:
 
     opening = merged["opening_outstanding_mio_eur"]
     merged[OUTCOME] = np.where(
-        opening > 0, merged["repriced_lower_bound_mio_eur"] / opening, np.nan
+        opening > 0, merged["outstanding_value_increase_mio_eur"] / opening, np.nan
     )
+    merged["repriced_share"] = merged[OUTCOME]
     return merged.sort_values("period").reset_index(drop=True)
 
 #: Newey-West lag length. Twelve months allows a full year of autocorrelation
@@ -120,6 +148,7 @@ class EstimationResult:
 
 
 def _design(panel: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
+    panel = _with_outcome_aliases(panel)
     missing = {OUTCOME, *REGRESSORS}.difference(panel.columns)
     if missing:
         raise ValidationError(f"estimation requires columns: {sorted(missing)}")

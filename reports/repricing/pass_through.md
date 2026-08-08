@@ -1,31 +1,31 @@
-# Pass-through simulation and out-of-sample backtest
+# Pass-through simulation and conditional historical validation
 
-Simulation under an estimated kernel whose behavioural component is a measured
-null. **Not a forecast.**
+Simulation under a scenario kernel whose behavioural component is treated as a
+sensitivity. Not a forecast.
 
-## The headline: the estimated kernel does not beat the standard benchmark
+## The headline: the scenario kernel is not a forecast winner
 
 Mean absolute error on the realised effective rate, basis points. The realised
 series is imported from the burden paper, not recomputed. Realised issuance
 yields are fed in, so kernel error is isolated from yield-path error.
 
-| Cut | Estimated kernel | WAM benchmark | Immediate full | Random walk |
+| Cut | Scenario kernel | WAM benchmark | Immediate full | Random walk |
 | --- | --- | --- | --- | --- |
-| 2014 | **52.44** | 55.69 | 95.09 | 120.75 |
-| 2018 | 47.81 | **45.16** | 119.67 | 63.62 |
-| 2021 | **14.24** | 14.66 | 81.05 | 24.52 |
+| 2014 | **40.35** | 43.24 | 95.09 | 120.75 |
+| 2018 | **12.50** | 12.92 | 119.67 | 63.62 |
+| 2021 | 10.08 | **9.81** | 81.05 | 24.52 |
 
-The estimated kernel wins at 2014 by 3.3 bps and at 2021 by 0.4 bps, and
-**loses at 2018** by 2.7 bps. Against error levels of 14 to 52 bps these
-differences are noise.
+The scenario kernel wins at 2014 by 2.9 bps and at 2018 by 0.4 bps, and loses
+at 2021 by 0.3 bps. Against error levels of 10 to 43 bps these differences are
+noise.
 
-**Stated plainly: the estimated kernel does not outperform the
-weighted-average-maturity benchmark out of sample.** The paper's central
-predictive claim is not supported.
+Stated plainly: the scenario kernel does not outperform the
+weighted-average-maturity benchmark in any useful predictive sense. The paper's
+central contribution is a measurement decomposition, not a forecasting claim.
 
 The primary cut is 2021, which puts the entire tightening episode out of
 sample. That is where a behaviourally responsive kernel should have won most
-clearly, and it wins by 0.4 basis points.
+clearly, and it loses by 0.3 basis points.
 
 What the kernel does beat, decisively, is immediate full pass-through (81 bps
 at the 2021 cut) and a random walk (24.5 bps). Both are straw men. Beating them
@@ -88,7 +88,8 @@ is why the cumulative euro column is identical across paths.
 
 ## What to take from this section
 
-1. The estimated kernel does not beat the standard benchmark out of sample.
+1. The scenario kernel does not beat the standard benchmark in any meaningful
+   predictive sense.
 2. The standard proxy and the composition-sensitive kernel differ most at short
    horizons where this backtest has least power.
 3. The apparent asymmetry in half-lives is a modelling artefact.

@@ -223,17 +223,17 @@ that subscribe, redeem, roll over, or remain inactive within the month. The
 paper therefore avoids individual language. It is a portfolio-flow design, not
 a household microeconometric design.
 
-The other constraint is that only net stock is observed. Gross subscriptions
-and gross redemptions are not published in the source series. A flat month is
-consistent with no activity and with large offsetting flows, which means a
-redemption hazard is not identified. The empirical design estimates the
-subscription margin, where positive net flow bounds the repriced amount from
-below. Net outflow is retained as its own series, but the regression outcome is
-the lower bound $\max(\text{net flow}, 0)$, so in a month of net outflow the
-dependent variable is exactly zero. That zero is a valid \emph{bound} on gross
-subscription, not an observation that no repricing occurred. The coefficient is
-therefore an association in the observable lower-bound process, not a point
-estimate of the gross flow response, and it is not interpreted as one below.
+The other constraint is that only outstanding value is observed. Gross
+subscriptions and gross redemptions are not published in the source series. A
+flat month is consistent with no activity and with large offsetting flows, so a
+redemption hazard is not identified. A positive month is also not a pure
+subscription observation. For Savings Certificates the published stock combines
+subscription principal with capitalised interest, and the capitalisation term
+itself moves with the remuneration formula. The regression outcome is therefore
+the positive part of the outstanding-value change, divided by opening stock. It
+is an observed stock-value measure, not a lower bound on gross repricing, and
+the coefficient is interpreted only as a descriptive association in that
+process.
 
 This also means the behavioural block is not a clean opening-stock repricing
 kernel. Positive retail subscriptions are new financing flows, not euros from
@@ -403,31 +403,33 @@ enough to conventional significance to be a warning rather than a reassurance.
 The natural reading is that the monthly series carries common time variation
 which the specification cannot separate from the spread. The coefficient above
 should therefore be read as descriptive --- an association in the observable
-lower-bound process --- and not as an identified behavioural response. Nothing
-downstream in this paper treats it as identified: the kernel's central
-behavioural effect is set to zero and the fitted response enters only as a
-sensitivity band.
+positive outstanding-value change process --- and not as an identified
+behavioural response. Nothing downstream in this paper treats it as identified:
+the kernel's central behavioural effect is set to zero and the fitted response
+enters only as a sensitivity band.
 
 That fragility is not surprising. The sample contains one large widening
 episode, so
 its timing cannot be separated cleanly from everything else moving with it. The
 certificate's contractual remuneration rate is not published machine-readably,
 so a short-rate index stands in and attenuation of unknown size is expected.
-The outcome is also a one-sided bound: positive net flow gives a lower bound on
-newly repriced money, while net-outflow months tell us that money left but not
-how much gross subscription and redemption occurred underneath. A more flexible
-specification would make the table look more elaborate without creating the
-missing gross-flow data.
+The outcome also mixes accounting and behaviour. Positive outstanding-value
+change can reflect new principal, reissued money, or capitalised interest,
+while net-outflow months tell us that money left but not how much gross
+subscription and redemption occurred underneath. A more flexible specification
+would make the table look more elaborate without creating the missing
+gross-flow data or separating those accounting components.
 
 \input{tables/estimation_coefficients.tex}
 
 Table \ref{tab:repricing-estimation} is deliberately shown in full because a
 compressed ``behavioural response'' number would overstate what the data can
-support. The policy break has the expected negative sign, yet it is not precise
-enough to carry a structural interpretation. The maturity covariate is
-similarly weak. The result is still useful, but mainly as a restraint. The
-behavioural component can be carried through the kernel as a sensitivity, not
-as the centrepiece of the paper.
+support. The policy break and maturity covariate are statistically precise in
+this frozen descriptive specification, but precision is not identification.
+The observed stock-value outcome, the short-rate proxy and the placebo loading
+mean those coefficients should not carry a structural household-behaviour
+interpretation. The behavioural component can be carried through the kernel as
+a sensitivity, not as the centrepiece of the paper.
 
 \section{The kernel and the bias}
 \label{sec:kernel}
@@ -451,7 +453,7 @@ contractual-shape effect, and behavioural bounds reported separately.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/kernel_bootstrap_band.pdf}
-\caption{Bootstrap uncertainty in the estimated repricing kernel. The bands propagate the moving-block bootstrap draws for the behavioural response through the full kernel.}
+\caption{Bootstrap uncertainty around the scenario kernel. The contractual profile, reset timing and shock loading are imposed; the bands propagate only the moving-block bootstrap draws for the behavioural response.}
 \label{fig:kernel-bootstrap}
 \end{figure}
 
@@ -652,17 +654,17 @@ rather than driven by a stand-in.
 
 \input{tables/model_comparison.tex}
 
-The scenario kernel has the lower mean absolute error at all three cut dates,
-by \emph{very} small margins: under a basis point at 2018 and 2021 and under a
-single basis point at 2014, against error levels an order of magnitude larger.
-That ordering should not be read as forecasting skill. Three cut dates with
-between four and eleven annual observations each, separated by margins this
-size, cannot distinguish two timing assumptions.
+The scenario kernel has the lower mean absolute error at two of the three cut
+dates, by \emph{very} small margins: under a basis point at 2014 and 2018,
+while the WAM benchmark is better at 2021 by a similarly small amount. That
+ordering should not be read as forecasting skill. Three cut dates with between
+four and eleven annual observations each, separated by margins this size,
+cannot distinguish two timing assumptions.
 
 The ordering has also moved every time an implementation defect was corrected,
 which is itself the most useful thing this section reports. Earlier versions
 had the kernel winning two of three, then losing all three, then winning one,
-before arriving here --- successively because the kernel was built at zero
+before returning to two of three --- successively because the kernel was built at zero
 shock, which silences the behavioural channel whatever response is supplied;
 because each year's yield was applied to the whole cumulative repriced share
 rather than to the cohort that repriced; because the portfolio state came from

@@ -28,6 +28,8 @@ INPUTS = KernelInputs(
     average_residual_maturity_years=7.2,
     fixed_rate_share=0.86,
     retail_share_of_stock=0.15,
+    retail_variable_share=0.12,
+    retail_fixed_share=0.03,
 )
 
 

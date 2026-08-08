@@ -34,23 +34,28 @@ responding to contemporaneous conditions.
 | --- | --- |
 | `opening_outstanding_mio_eur` | Stock at the start of the month |
 | `outstanding_mio_eur` | Stock at the end of the month |
-| `net_flow_mio_eur` | Change over the month, subscriptions minus redemptions |
-| `repriced_lower_bound_mio_eur` | `max(net_flow, 0)` |
+| `net_flow_mio_eur` | Change over the month in outstanding value |
+| `outstanding_value_increase_mio_eur` | `max(net_flow, 0)` |
+| `repriced_lower_bound_mio_eur` | Legacy alias for `outstanding_value_increase_mio_eur`; retained for old artefacts, not interpreted as a lower bound |
 | `net_outflow_mio_eur` | `max(-net_flow, 0)`, carried separately |
-| `repriced_share` | Lower bound divided by opening stock |
+| `positive_outstanding_value_change_share` | Positive outstanding-value change divided by opening stock |
+| `repriced_share` | Legacy alias for `positive_outstanding_value_change_share` |
 
-### Why the lower bound is the estimable object
+### Why the stock-value outcome is descriptive
 
-Money arriving on the prevailing rate reprices the stock whether it comes from
-a new subscription or from a redemption and reissue. Only the net change is
-observed. When net flow is positive, gross subscriptions are at least that
-large, so the repriced amount is bounded below by an observable quantity.
+The public series reports outstanding value, not gross subscriptions and
+redemptions. For Savings Certificates that value includes subscription
+principal and capitalised interest. A positive monthly change can therefore
+come from new household money, from reissued money, from accrued interest, or
+from some combination of the three.
 
-The bound is one-sided and that asymmetry is deliberate. In a month of net
-outflow the repriced amount is **not** bounded — subscriptions and redemptions
-could both have been large — so those months are recorded as net outflow and
-are not treated as zero repricing. Any estimate that used them as zeros would
-be assuming exactly the thing the data cannot show.
+That accounting matters for interpretation. The positive part of the
+outstanding-value change is observable and fiscally relevant, but it is not a
+lower bound on gross repricing. In a month of net outflow, gross subscriptions
+and redemptions could both have been large. In a month of net inflow,
+capitalised interest can create part of the increase. The estimation is
+therefore a descriptive association in an observed stock-value process, not a
+household-level subscription or repricing model.
 
 ## Covariates
 
@@ -88,7 +93,7 @@ Run by `pt-debt repricing build-panel`; output in
 - Unique class-month keys.
 - Non-negative exposure.
 - Accounting closure: opening plus net flow equals closing, exactly.
-- Repriced share within `[0, 1]`.
+- Positive outstanding-value change share within `[0, 1]`.
 - Reconciliation to the burden paper's debt stock, reported per year.
 
 ### On that reconciliation

@@ -1,4 +1,4 @@
-"""Pass-through simulation and out-of-sample backtest.
+"""Pass-through simulation and conditional historical validation.
 
 Two fixes to the burden paper's scenario section are built in.
 

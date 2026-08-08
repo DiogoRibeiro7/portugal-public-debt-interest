@@ -29,7 +29,9 @@ from pt_debt_interest.exceptions import ValidationError
 INPUTS = KernelInputs(
     average_residual_maturity_years=7.52,
     fixed_rate_share=0.858,
-    retail_share_of_stock=0.154,
+    retail_share_of_stock=0.1539,
+    retail_variable_share=0.1336,
+    retail_fixed_share=0.0203,
 )
 
 
@@ -114,6 +116,8 @@ class TestResetShockLoading:
         average_residual_maturity_years=7.2,
         fixed_rate_share=0.86,
         retail_share_of_stock=0.15,
+        retail_variable_share=0.12,
+        retail_fixed_share=0.03,
     )
 
     def test_unit_loading_leaves_the_two_shares_equal(self) -> None:
@@ -163,6 +167,17 @@ class TestPortfolioPartition:
 
     def test_classes_sum_to_one(self) -> None:
         assert sum(self.SPLIT.partition().values()) == pytest.approx(1.0)
+
+    def test_retail_split_must_reconcile_to_total_retail_share(self) -> None:
+        bad = KernelInputs(
+            average_residual_maturity_years=7.52,
+            fixed_rate_share=0.858,
+            retail_share_of_stock=0.154,
+            retail_variable_share=0.10,
+            retail_fixed_share=0.02,
+        )
+        with pytest.raises(ValidationError, match="retail split must sum"):
+            bad.partition()
 
     def test_no_class_is_negative(self) -> None:
         assert all(value >= 0.0 for value in self.SPLIT.partition().values())
@@ -242,6 +257,12 @@ class TestRefixingComparison:
         """A half-digitised chart must fail loudly, not compare against nothing."""
         with pytest.raises(ValidationError, match="missing columns"):
             refixing_comparison(pd.DataFrame({"bracket_lower_years": [0.0]}), self.INPUTS)
+
+    def test_noninteger_bracket_edges_are_rejected(self) -> None:
+        profile = self._profile()
+        profile.loc[0, "bracket_upper_years"] = 1.5
+        with pytest.raises(ValidationError, match="integer-year edges"):
+            refixing_comparison(profile, self.INPUTS)
 
     def test_the_profile_is_not_shipped_with_invented_numbers(self) -> None:
         """The chart is not digitised; nothing may stand in for it."""

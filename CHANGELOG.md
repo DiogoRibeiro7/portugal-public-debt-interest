@@ -88,8 +88,9 @@ a composition split, not against the debt manager's own refixing view.
 
 ### Verification
 
-- `pytest`: 364 passed in a populated tree; 348 passed and 16 skipped on a
-  clean checkout, 364 collected, zero failures in both.
+- `pytest`: 369 passed in a populated tree after revision-6 fixes; reviewer
+  clean-checkout audit of the prior revision-6 archive reported 345 passed and
+  19 skipped, with zero failures.
 - `ruff check .`: passed. `mypy src`: passed, 35 modules.
 - Burden paper 27 pages, repricing paper 15 pages, no undefined references.
 

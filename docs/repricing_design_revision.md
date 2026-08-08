@@ -73,10 +73,11 @@ is a far cleaner identification lever than a smoothly estimated hazard.
 
 **Identifiable, and arguably better identified than the original design:**
 
-- *The subscription margin.* Gross subscriptions are bounded below by the net
-  flow, so in months of large positive net flow the repriced amount is bounded
-  below by an observable quantity. During Jun 2022 – May 2023 at least 19.6
-  billion euro of retail money moved onto contemporaneous rates.
+- *The positive stock-value margin.* The published stock is outstanding value,
+  so positive monthly changes mix principal flows and capitalised interest.
+  During Jun 2022-May 2023 the observed stock-value increase was large enough
+  to identify a retail episode, but not to decompose that episode into gross
+  subscriptions, redemptions, reissues and accrued interest.
 - *State dependence of the repricing kernel.* This is the paper's central
   claim, and it survives intact. Money moving onto the current rate reprices
   the stock exactly as effectively whether it arrives by redemption and
@@ -106,17 +107,19 @@ data actually observes.
   The contractual component is calibrated from the monthly average residual
   maturity series rather than read off a schedule, and that substitution is
   stated as a limitation rather than hidden.
-- The behavioural component becomes a *subscription-response* function
-  estimated on net retail flow against the competing-return spread, with the
-  June 2023 break entering as a dated policy intervention.
+- The behavioural component becomes a descriptive stock-value response
+  estimated on positive outstanding-value change against the competing-return
+  spread, with the June 2023 break entering as a dated policy intervention.
 - The headline result remains the WAM bias, decomposed into shape and
   behavioural components exactly as planned.
 - The asymmetry section reports what the data supports: a strong, well-measured
   response in the widening direction, and honest silence about the narrowing
   direction, which the sample does not contain.
 
-**What it claims:** the repricing kernel is endogenous to the rate path, shown
-on the subscription margin, with a policy break as corroboration.
+**What it claims:** the repricing kernel can be made sensitive to the rate path,
+and the retail episode is visible in aggregate stock-value data. The behavioural
+coefficient remains descriptive because the gross-flow and accounting
+decomposition is missing.
 **What it gives up:** the competing-risks machinery, the redemption hazard, and
 the survival-analysis framing.
 
@@ -142,13 +145,12 @@ specified; only the files are missing.
 
 ## Recommendation
 
-**Option A.** The finding that the retail channel ran opposite to the
-hypothesis is not a setback; it is the more interesting result, and it is
-firmly in the data rather than in a model. A paper that says "the standard
-proxy is biased, the behavioural channel is real and state-dependent, and it
-operates through the subscription margin in the direction opposite to the
-intuitive one" is a stronger contribution than the original design would have
-produced, and every claim in it is identified.
+**Option A.** The finding that the retail stock rose during tightening is not a
+setback; it is the more interesting empirical episode, and it is firmly in the
+data rather than in a model. A paper that says "the standard proxy is
+incomplete, the retail episode is visible, and the behavioural coefficient is
+descriptive rather than identified" is stronger than the original design would
+have produced.
 
 The original hypothesis should be stated in the paper and reported as
 contradicted. That is a result, and burying it would be the one genuinely

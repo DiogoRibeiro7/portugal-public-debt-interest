@@ -195,6 +195,14 @@ def _table(
     return "\n".join(lines) + "\n"
 
 
+MODEL_LABELS: Final[dict[str, str]] = {
+    "estimated_kernel": "Scenario kernel",
+    "wam_benchmark": "WAM benchmark",
+    "immediate_full_pass_through": "Immediate full pass-through",
+    "random_walk": "Random walk",
+}
+
+
 def _row(frame: pd.DataFrame, column: str, value: str | int) -> pd.Series:
     match = frame.loc[frame[column].eq(value)]
     if match.empty:
@@ -425,8 +433,9 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
             header=["Term", "Coefficient", "Newey--West s.e.", "$p$-value"],
             rows=coefficient_rows,
             notes=(
-                "Outcome: repriced lower-bound share of the opening class "
-                "stock. Source: author calculations from IGCP and ECB data."
+                "Outcome: positive outstanding-value change as a share of "
+                "opening class stock. Source: author calculations from IGCP "
+                "and ECB data."
             ),
         ),
         encoding="utf-8",
@@ -447,14 +456,14 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     path = table_dir / "kernel_bias.tex"
     path.write_text(
         _table(
-            caption="Scenario bias in the weighted-average-maturity proxy, +100 bps",
+            caption="Scenario-minus-WAM repricing differences, +100 bps",
             label="tab:bias",
             columns="rrrrrr",
             header=[
                 "Horizon",
                 "Proxy share (\\%)",
-                "Estimated share (\\%)",
-                "Total bias (pp)",
+                "Scenario share (\\%)",
+                "Difference (pp)",
                 "Shape (pp)",
                 "Behaviour (pp)",
             ],
@@ -482,8 +491,8 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
         "weak_reset_loading": "Reset loading 0.25",
         "memoryless_contractual_shape": "Memoryless contractual shape",
         "behaviour_off": "Behaviour off",
-        "behaviour_lower_bound": "Behaviour lower bound",
-        "behaviour_upper_bound": "Behaviour upper bound",
+        "behaviour_lower_bound": "Behaviour low case",
+        "behaviour_upper_bound": "Behaviour high case",
     }
     sensitivity_rows = []
     for scenario, group in sensitivity.groupby("scenario", sort=False):
@@ -547,7 +556,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     comparison = model_comparison(backtest)
     comparison_rows = [
         [
-            str(row.model).replace("_", r"\_"),
+            MODEL_LABELS.get(str(row.model), str(row.model).replace("_", r"\_")),
             _fmt(row.mean_abs_error_bps, 2),
             _fmt(row.worst_bps, 2),
             f"{_as_int(row.win_count)}",
@@ -558,7 +567,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     path = table_dir / "model_comparison.tex"
     path.write_text(
         _table(
-            caption="Model comparison across backtest cut years",
+            caption="Model comparison across validation cut years",
             label="tab:model-comparison",
             columns="lrrrr",
             header=[
@@ -582,7 +591,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     backtest_rows = [
         [
             str(_as_int(row.cut_year)),
-            str(row.model).replace("_", r"\_"),
+            MODEL_LABELS.get(str(row.model), str(row.model).replace("_", r"\_")),
             _fmt(row.mean_abs_error_bps, 2),
             _fmt(row.worst_bps, 2),
             str(_as_int(row.n)),
@@ -592,7 +601,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     path = table_dir / "backtest_summary.tex"
     path.write_text(
         _table(
-            caption="Out-of-sample backtest errors",
+            caption="Conditional historical validation errors",
             label="tab:backtest",
             columns="rlrrr",
             header=["Cut year", "Model", "Mean abs. error (bps)", "Worst error (bps)", "$N$"],

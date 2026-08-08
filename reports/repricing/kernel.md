@@ -7,9 +7,9 @@ The benchmark is the companion burden paper's discrete annual constant-hazard
 assumption, calibrated so expected repricing time equals published weighted
 average maturity.
 
-## Scenario bias at +100 bps
+## Scenario-minus-WAM differences at +100 bps
 
-| Horizon | WAM-implied share | Estimated share | Total bias | Shape | Behaviour |
+| Horizon | WAM-implied share | Scenario share | Difference | Shape | Behaviour |
 | --- | --- | --- | --- | --- | --- |
 | 1 year | 13.30% | 19.89% | +6.60 pp | +6.60 | 0.00 |
 | 3 years | 34.83% | 31.31% | -3.52 pp | -3.52 | 0.00 |
@@ -29,9 +29,9 @@ hazard cannot see. The longer-horizon negative terms come from the other side
 of the same modelling choice: once the reset component has already moved, the
 linear contractual profile can sit below the memoryless WAM tail.
 
-The behavioural central effect is set to zero because the estimated retail-flow
-response is not distinguishable from zero. Behavioural upside is retained as a
-sensitivity band, not as the central result.
+The behavioural central effect is set to zero because the retail stock-value
+association is not identified as a household response. Behavioural upside is
+retained as a sensitivity band, not as the central result.
 
 ## Fiscal translation
 

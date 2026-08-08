@@ -11,14 +11,13 @@ Retail certificate data is published as an aggregate stock, so the unit is a
 class-month cell. An aggregate cell is not an individual-level model and the
 manuscript must not describe it as one.
 
-The repriced flow
------------------
-Money arriving on the prevailing rate reprices the stock whether it comes from
-a new subscription or from a redemption and reissue. Only the net change is
-observed, and gross subscriptions are at least the net change when the net
-change is positive. So the repriced amount is **bounded below** by positive net
-flow. That bound is the estimable object; the redemption margin is not
-identified and is not modelled.
+The stock-value outcome
+-----------------------
+The public series reports outstanding value, not household-level subscriptions
+or redemptions. A positive monthly change therefore mixes new principal,
+redemptions, reissues and capitalised interest. The estimation outcome is the
+positive part of that outstanding-value change, scaled by opening stock. It is
+a descriptive stock-value measure, not a lower bound on gross repricing.
 
 Clock
 -----
@@ -123,10 +122,14 @@ def build_repricing_panel(
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.dropna(subset=["opening_outstanding_mio_eur"])
 
-    # Repricing intensity: the share of the opening stock repriced this month.
-    combined["repriced_share"] = (
-        combined["repriced_lower_bound_mio_eur"] / combined["opening_outstanding_mio_eur"]
+    # Stock-value growth intensity: positive outstanding-value change as a
+    # share of opening stock. The old name remains as a compatibility alias for
+    # archived artefacts and kernel code that still refers to repricing shares.
+    combined["positive_outstanding_value_change_share"] = (
+        combined["outstanding_value_increase_mio_eur"]
+        / combined["opening_outstanding_mio_eur"]
     )
+    combined["repriced_share"] = combined["positive_outstanding_value_change_share"]
 
     combined["total_debt_mio_eur"] = combined["period"].map(total)
     combined["average_residual_term_years"] = combined["period"].map(maturity)
@@ -203,11 +206,12 @@ def validate_panel(panel: pd.DataFrame, tolerance_mio_eur: float = 1.0) -> pd.Da
         f"largest opening-plus-flow residual {worst:.6f} EUR million",
     )
 
-    share = panel["repriced_share"].dropna()
+    share = panel["positive_outstanding_value_change_share"].dropna()
     record(
-        "repriced_share_in_range",
+        "positive_outstanding_value_change_share_in_range",
         bool(((share >= 0) & (share <= 1.0)).all()),
-        f"repriced share spans {share.min():.4f} to {share.max():.4f}",
+        "positive outstanding-value change share spans "
+        f"{share.min():.4f} to {share.max():.4f}",
         severity="warning",
     )
 

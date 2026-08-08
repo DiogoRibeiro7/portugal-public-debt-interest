@@ -88,10 +88,11 @@ That is *not* a finding, for two reasons:
   warning: the monthly series carries common time variation the specification
   cannot separate from the spread.
 
-So the coefficient is reported as **descriptive** — an association in the
-observable lower-bound process — not as an identified behavioural response.
-Nothing downstream treats it as identified: the kernel's central behavioural
-effect stays at zero and the fitted response enters only as a sensitivity band.
+So the coefficient is reported as descriptive: an association in the observed
+positive outstanding-value change process, not as an identified behavioural
+response. Nothing downstream treats it as identified. The kernel's central
+behavioural effect stays at zero and the fitted response enters only as a
+sensitivity band.
 
 The specification was frozen at `796c264` before fitting and estimated once.
 `docs/specification_log.md` records that: "Total specifications estimated: one."
@@ -100,25 +101,25 @@ The aggregation changes the estimator, not the specification.
 Artefacts: `data/processed/repricing/estimates/s1_coefficients.csv`,
 `s1_bootstrap_replicates.csv`, `s1_placebo.csv`.
 
-### The estimated kernel does not beat the benchmark out of sample
+### The scenario kernel is not a forecast winner
 
 Mean absolute error on the effective rate, basis points:
 
 | Cut | Scenario kernel | Proxy benchmark |
 | --- | --- | --- |
-| 2014 | **42.48** | 43.24 |
-| 2018 | **12.79** | 12.92 |
-| 2021 | **9.52** | 9.81 |
+| 2014 | **40.35** | 43.24 |
+| 2018 | **12.50** | 12.92 |
+| 2021 | 10.08 | **9.81** |
 
-**The scenario kernel is marginally ahead at all three cuts, by margins too
-small to mean anything** — under a basis point at 2018 and 2021, against error
-levels an order of magnitude larger. This is not evidence of forecasting skill,
-and the exercise is not a forecast: realised rate paths are fed in so that
-timing error can be separated from yield-path error, which is why it is now
-called conditional historical validation.
+The scenario kernel is marginally ahead at two of the three cuts, by margins
+too small to mean anything: under a basis point at 2014 and 2018. The WAM
+benchmark is ahead at 2021 by a similarly small amount. This is not evidence of
+forecasting skill, and the exercise is not a forecast: realised rate paths are
+fed in so that timing error can be separated from yield-path error, which is
+why it is now called conditional historical validation.
 
-**This ordering has changed four times, and that is the finding.** Kernel wins
-two of three; then loses all three; then wins one; now wins three. Each move
+This ordering has changed four times, and that is the finding. Kernel wins two
+of three; then loses all three; then wins one; now wins two again. Each move
 followed an implementation correction, not a change of specification:
 
 1. the kernel was built at zero shock, silencing the behavioural channel
@@ -141,10 +142,11 @@ Artefact: `data/processed/repricing/scenarios/backtest_summary.csv`.
 
 ### The redemption margin is not identified at all
 
-Only net stock is published, so a flat month is equally consistent with no
-activity and with large offsetting flows. The study estimates the subscription
-margin, where positive net flow bounds the repriced amount from below, and drops
-the redemption hazard rather than approximating it. See
+Only outstanding stock value is published, so a flat month is equally
+consistent with no activity and with large offsetting flows. A positive month
+can also include capitalised interest. The study therefore uses positive
+outstanding-value change as a descriptive retail outcome and drops the
+redemption hazard rather than approximating it. See
 `docs/repricing_data_model.md`.
 
 ---

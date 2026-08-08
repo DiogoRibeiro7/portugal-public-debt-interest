@@ -27,11 +27,13 @@ aggregated to one euro-weighted monthly series. The previous table read +0.0187
 (se 0.0148, p = 0.20) on 494 rows with R² 0.041, and concluded that no
 coefficient was distinguishable from zero.
 
-**The spread-widening coefficient is now statistically detectable. It is still
-not identified.** The falsification test no longer passes cleanly — see below —
-so the coefficient is reported as an association in the observable lower-bound
-process, not as a behavioural response. Nothing downstream treats it as
-identified: the kernel's central behavioural effect stays at zero.
+The spread-widening coefficient is now statistically detectable, but it is
+still not identified. The falsification test no longer passes cleanly, and the
+left-hand-side variable is a positive outstanding-value change that can include
+capitalised interest as well as new principal. The coefficient is therefore
+reported as a descriptive association, not as a structural household response.
+Nothing downstream treats it as identified: the kernel's central behavioural
+effect stays at zero.
 
 ## The three pre-registered predictions
 
@@ -101,9 +103,11 @@ percent between June 2022 and May 2023, and subscriptions stopped within months
 of the June 2023 terms change. That episode is real and visible without any
 model.
 
-What the frozen specification cannot do is attribute it to the competing-return
-spread with any precision. Three reasons, none of which a different
-specification would repair on its own:
+What the frozen specification cannot do is attribute it structurally to the
+competing-return spread. The relevant coefficients are precise in the corrected
+monthly estimator, but precision does not separate household behaviour from
+common time variation or accounting effects. Three reasons, none of which a
+different specification would repair on its own:
 
 1. **One episode.** The sample contains a single large widening event. A
    monthly regression cannot separate its timing from anything else moving at
@@ -112,16 +116,18 @@ specification would repair on its own:
    remuneration rate is not published machine-readably, so a short-rate index
    stands in for it. Attenuation toward zero is the expected consequence, and
    its size is unknown.
-3. **A bounded outcome.** The dependent variable is a one-sided lower bound on
-   repricing, not the repriced amount. Months of net outflow contribute zeros
-   that are not informative about subscriptions.
+3. **A stock-value outcome.** The dependent variable is the positive part of
+   outstanding-value change over opening stock. It can move because of
+   capitalised interest as well as principal flows, and net-outflow months do
+   not reveal the gross subscription and redemption flows underneath.
 
 ## What survives
 
-The weighted-average-maturity bias result does **not** depend on any of this.
-It needs the monthly average residual maturity series and the composition
-split, both of which were acquired cleanly. That remains the paper's headline,
-and it is unaffected by this null.
+The scenario-minus-WAM result does not depend on any structural interpretation
+of the retail coefficient. It needs the monthly average residual maturity
+series and the composition split, both of which were acquired cleanly. That
+remains the paper's headline, and it is unaffected by this identification
+limit.
 
 ## What must not happen next
 

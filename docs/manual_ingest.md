@@ -158,6 +158,10 @@ and subscription flows.
 - **What is needed**: for each maturity bracket, the share of the adjusted
   portfolio refixing or maturing within it, at a stated reference date.
 - **Expected file**: `data/raw/manual/igcp_refixing_profile.csv`
+- **Accepted sources**: labelled official bracket values, if published, or a
+  genuine digitisation of the official refixing-profile chart. Do not infer
+  values from the visual appearance of a chart without recording the
+  digitisation source and method.
 - **Expected schema**:
 
   | column | type | notes |

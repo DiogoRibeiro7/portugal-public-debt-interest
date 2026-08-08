@@ -123,6 +123,48 @@ def test_repricing_paper_states_the_current_bias_sign_pattern() -> None:
     assert "positive at the reported horizons" not in source
 
 
+def test_repricing_terms_do_not_revert_to_old_bias_language() -> None:
+    combined = "\n".join(
+        [
+            TEX_PATH.read_text(encoding="utf-8"),
+            (PAPER_DIR / "tables" / "kernel_bias.tex").read_text(encoding="utf-8"),
+            (PAPER_DIR / "tables" / "backtest_summary.tex").read_text(
+                encoding="utf-8"
+            ),
+        ]
+    )
+    for stale in (
+        "Scenario bias",
+        "Estimated share",
+        "Total bias (pp)",
+        "Out-of-sample backtest errors",
+        "estimated repricing kernel",
+        "not precise enough",
+        "similarly weak",
+        "observable lower-bound",
+        "one-sided bound",
+    ):
+        assert stale not in combined
+
+    assert "Scenario-minus-WAM repricing differences" in combined
+    assert "Scenario share" in combined
+    assert "Conditional historical validation errors" in combined
+    assert "statistically precise" in TEX_PATH.read_text(encoding="utf-8")
+    assert "precision is not identification" in TEX_PATH.read_text(encoding="utf-8")
+
+
+def test_backtest_prose_matches_current_winner_pattern() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    table = (PAPER_DIR / "tables" / "backtest_summary.tex").read_text(
+        encoding="utf-8"
+    )
+    assert "2014 & Scenario kernel" in table
+    assert "2018 & Scenario kernel" in table
+    assert "2021 & WAM benchmark" in table
+    assert "two of the three cut" in source
+    assert "lower mean absolute error at all three cut dates" not in source
+
+
 def test_current_repricing_reports_do_not_repeat_superseded_claims() -> None:
     combined = "\n".join(
         path.read_text(encoding="utf-8")
@@ -137,5 +179,8 @@ def test_current_repricing_reports_do_not_repeat_superseded_claims() -> None:
         "The sign is stable",
         "burden paper's flaw",
         "material correction to the earlier paper",
+        "observable lower-bound",
+        "Scenario bias",
+        "Estimated share",
     ):
         assert stale not in combined

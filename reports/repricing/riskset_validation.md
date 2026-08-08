@@ -9,7 +9,7 @@ Rows: 496. Instrument classes: 2.
 | unique_class_period | True | error | 0 duplicated instrument-class months |
 | non_negative_exposure | True | error | 0 negative exposures |
 | stock_flow_closure | True | error | largest opening-plus-flow residual 0.000000 EUR million |
-| repriced_share_in_range | True | warning | repriced share spans 0.0000 to 0.5846 |
+| positive_outstanding_value_change_share_in_range | True | warning | positive outstanding-value change share spans 0.0000 to 0.5846 |
 | coverage_reported | True | info | savings_certificates: 2001-02-28..2026-06-30 n=305; treasury_certificates: 2010-08-31..2026-06-30 n=191 |
 
 ## Reconciliation to the burden paper's debt stock

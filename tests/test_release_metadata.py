@@ -117,8 +117,14 @@ def test_final_audit_matches_current_release_metadata() -> None:
     version = next(iter(set(_declared_versions().values())))
     content = FINAL_AUDIT.read_text(encoding="utf-8")
     assert f"package version {version}" in content
-    for obsolete in ("147 passed", "232 passed", "0.1.2", "24 pages"):
+    for obsolete in ("147 passed", "232 passed", "0.1.2", "24 pages", "348 passed"):
         assert obsolete not in content
+
+
+def test_final_audit_records_the_clean_checkout_skip_count() -> None:
+    content = FINAL_AUDIT.read_text(encoding="utf-8")
+    assert "345 passed, 19 skipped" in content
+    assert "348 passed, 16 skipped" not in content
 
 
 def test_obsolete_final_audit_is_archived() -> None:

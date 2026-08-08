@@ -54,6 +54,7 @@ RESET_SHOCK_LOADING: Final[float] = 1.0
 #: retail variable block resets on a quarterly clock rather than the general
 #: wholesale one.
 RETAIL_RESET_CYCLE_YEARS: Final[float] = 0.25
+RETAIL_SPLIT_TOLERANCE: Final[float] = 1e-3
 
 
 @dataclass(frozen=True)
@@ -69,9 +70,9 @@ class KernelInputs:
     F indexed to three-month Euribor -- were removed from a track they were
     never in and counted in another.
 
-    They default to zero, which reproduces the old undifferentiated behaviour
-    for callers that have not been updated, but :meth:`partition` refuses to
-    produce overlapping classes.
+    They default to zero for older callers that only need input validation. A
+    partitioned kernel, however, requires the split to reconcile to the total
+    retail share within a small rounding tolerance.
     """
 
     average_residual_maturity_years: float
@@ -106,9 +107,16 @@ class KernelInputs:
         ``wholesale_floating`` reference-rate reset on the general cycle
         =====================  ===========================================
 
-        Raises when the shares imply a negative class, which happens if the
-        retail split is inconsistent with the published fixed-rate share.
+        Raises when the retail split does not add back to the retail total, or
+        when the shares imply a negative class.
         """
+        retail_split = self.retail_variable_share + self.retail_fixed_share
+        if abs(retail_split - self.retail_share_of_stock) > RETAIL_SPLIT_TOLERANCE:
+            raise ValidationError(
+                "retail split must sum to retail_share_of_stock within "
+                f"{RETAIL_SPLIT_TOLERANCE:g}: split={retail_split:.6f}, "
+                f"retail_share_of_stock={self.retail_share_of_stock:.6f}"
+            )
         wholesale_fixed = self.fixed_rate_share - self.retail_fixed_share
         wholesale_floating = (
             1.0 - self.fixed_rate_share
@@ -320,7 +328,7 @@ def fiscal_translation(
     return output
 
 
-#: Where a manually digitised IGCP refixing profile is expected.
+#: Where a labelled or digitised IGCP refixing profile is expected.
 REFIXING_PROFILE_PATH: Final[str] = "data/raw/manual/igcp_refixing_profile.csv"
 
 _REFIXING_COLUMNS: Final[tuple[str, ...]] = (
@@ -345,11 +353,11 @@ def refixing_comparison(
     refix or mature inside each maturity bracket -- which is the closest
     published object to what this kernel constructs.
 
-    The profile is published as a chart, so it has to be digitised by hand;
-    ``docs/manual_ingest.md`` specifies the file. This function exists so the
-    comparison runs the moment that file appears rather than waiting on further
-    code, and so the absence of the comparison is a missing input rather than a
-    missing method.
+    The profile may come from labelled official brackets or from a digitised
+    chart; ``docs/manual_ingest.md`` specifies the file. This function exists
+    so the comparison runs the moment that file appears rather than waiting on
+    further code, and so the absence of the comparison is a missing input
+    rather than a missing method.
 
     Returns one row per bracket with the published share, the share this
     kernel implies over the same bracket, and the difference in percentage
@@ -368,9 +376,14 @@ def refixing_comparison(
         upper = float(str(row.bracket_upper_years))
         # Cumulative kernel at each edge; the bracket share is the increment.
         edges = np.array([lower, min(upper, 1.0e6)], dtype=float)
+        if not (edges % 1 == 0).all():
+            raise ValidationError(
+                "refixing profile brackets must use integer-year edges; "
+                f"received {lower:g} to {upper:g}"
+            )
         cumulative = build_kernel(
             inputs,
-            horizons=tuple(edges.astype(int)) if (edges % 1 == 0).all() else (1, 2),
+            horizons=tuple(edges.astype(int)),
             reset_cycle_years=reset_cycle_years,
             retail_reset_cycle_years=retail_reset_cycle_years,
         )

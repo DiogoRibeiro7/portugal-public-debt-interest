@@ -4,9 +4,8 @@
 
 Date: 2026-08-08
 
-Audit subject: package version 0.6.0, source commit
-`1c3021c` plus the release bump in this
-working tree.
+Audit subject: package version 0.6.0, source commit `8c34f5b` plus the
+revision-6 changes in this working tree.
 
 ### Test status depends on the environment, and both are recorded
 
@@ -18,23 +17,24 @@ that need a git worktree. Those skips are expected, not failures.
 
 | Environment | Result |
 | --- | --- |
-| Author's populated working tree | 364 passed, 0 skipped |
-| Clean checkout, no pipeline run | 348 passed, 16 skipped |
+| Author's populated working tree after revision-6 fixes | 369 passed, 0 skipped |
+| Reviewer clean checkout of the prior revision-6 archive, no pipeline run | 345 passed, 19 skipped |
 
-Both runs collect 364 tests and report zero failures. A reviewer wanting
-the full suite should run `pt-debt all` and `pt-debt repricing all` first.
+Both runs reported zero failures. The clean-checkout row is retained because it
+corrects the release-note count a reviewer observed in the submitted archive.
+A reviewer wanting the full local suite should run `pt-debt all` and
+`pt-debt repricing build-panel` before `pt-debt repricing all`.
 
 Commands completed successfully in the author's environment:
 
-- `pytest`: 364 passed, 4 warnings.
+- `pytest`: 369 passed, 4 warnings.
 - `ruff check .`: passed.
 - `mypy src`: passed, no issues in 35 source files.
-- `poetry check --lock`: completed; Poetry reported warnings about duplicated
-  legacy `[tool.poetry]` metadata and static PEP 621 metadata.
-- `poetry install --with dev --no-interaction`: completed from `poetry.lock`.
-- `poetry run pytest tests/test_release_metadata.py`: 10 passed.
-- `python -m pt_debt_interest.cli tables`: completed.
+- `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py`: 70 passed.
+- `pt-debt repricing build-panel --config config/repricing.yaml`: completed.
+- `pt-debt repricing all --config config/repricing.yaml`: completed.
 - `pdflatex -interaction=nonstopmode -halt-on-error portugal_public_debt_interest_report.tex`: completed.
+- `pdflatex -interaction=nonstopmode -halt-on-error repricing_kernel.tex`: completed twice.
 
 The live source-acquisition workflow was not rerun during this audit pass. The
 committed release artefacts remain guarded by the burden-paper checksum baseline,
@@ -45,7 +45,7 @@ and live regeneration remains documented in `docs/reproducibility.md`.
 - Main PDF: `paper/portugal_public_debt_interest_report.pdf`.
 - Main PDF page count: 27.
 - Main PDF SHA-256:
-  `77760ab76bb66a289fded1783c657d23b7aae6ea68ab7c1b48748366c5f052ca`.
+  `7fefa676c86be29becff9547c671bc14e170de5e35dacc37811787111f9e5c23`.
 - Main LaTeX source: `paper/portugal_public_debt_interest_report.tex`.
 - Generated paper tables: `reports/tables/`.
 - Generated paper figures: committed PDF figures under `reports/figures/`.

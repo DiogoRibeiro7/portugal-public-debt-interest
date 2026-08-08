@@ -48,7 +48,7 @@ class TestMonthlyAggregation:
                         "instrument_class": cls,
                         "period": period,
                         "opening_outstanding_mio_eur": opening,
-                        "repriced_lower_bound_mio_eur": max(flow, 0.0),
+                        "outstanding_value_increase_mio_eur": max(flow, 0.0),
                         "spread_widening_pp": float(index),
                         "spread_narrowing_pp": 0.0,
                         "post_policy_break": False,
@@ -75,11 +75,16 @@ class TestMonthlyAggregation:
         """A small class must not move the outcome as much as a large one."""
         aggregated = monthly_retail_series(self._stacked())
         # Class a contributes 50 of repriced euros on 1000; class b nothing on 100.
-        assert aggregated["repriced_share"].iloc[0] == pytest.approx(50.0 / 1100.0)
+        assert aggregated["positive_outstanding_value_change_share"].iloc[
+            0
+        ] == pytest.approx(50.0 / 1100.0)
         # Averaging the two class shares equally would let the small, inactive
         # class halve the measured intensity. Weighting by euros does not.
         equally_weighted = (50.0 / 1000.0 + 0.0 / 100.0) / 2.0
-        assert float(aggregated["repriced_share"].iloc[0]) > equally_weighted
+        assert (
+            float(aggregated["positive_outstanding_value_change_share"].iloc[0])
+            > equally_weighted
+        )
 
     def test_a_covariate_differing_within_a_month_is_rejected(self) -> None:
         """Taking the first value would silently discard the difference."""
