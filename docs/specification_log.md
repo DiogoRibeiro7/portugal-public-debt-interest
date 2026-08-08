@@ -64,7 +64,7 @@ and is reported as such.
 
 | ID | Date | Description | Status |
 | --- | --- | --- | --- |
-| S1 | 2026-08-02 | Frozen baseline above | Frozen, then estimated once. Result: null. |
+| S1 | 2026-08-02 | Frozen baseline above | Frozen, then estimated once. Estimator corrected 2026-08-08; specification unchanged. |
 
 No other specification has been estimated. This table is appended to as work
 proceeds, including specifications that are tried and discarded.
@@ -74,9 +74,14 @@ proceeds, including specifications that are tried and discarded.
 Fitted once, on the frozen specification, at commit `796c264`. Result recorded
 in `reports/repricing/estimation.md`.
 
-No coefficient is distinguishable from zero. The asymmetry interval is
-[-0.0204, +0.0444] and covers zero. The placebo does not load, so the null is a
-precision problem rather than a contamination problem.
+Originally recorded as a null: no coefficient distinguishable from zero, with
+a placebo that did not load. Both statements were artefacts of estimating on
+a class-major stacked panel, and neither survives the corrected monthly
+estimator.
+
+Current reading: Several associations are precisely estimated after correcting the calendar-time estimator, but the behavioural interpretation is not identified: the asymmetry test remains unresolved and the placebo warns of common-time contamination. Spread widening is +0.0214 (p = 0.0004), the
+asymmetry interval [-0.016, +0.046] still covers zero, and the placebo loads
+at p = 0.07. The specification was not touched in either revision.
 
 **One specification has been estimated. No search was performed.** Any variant
 from here is an in-sample variant, reported alongside S1 rather than replacing

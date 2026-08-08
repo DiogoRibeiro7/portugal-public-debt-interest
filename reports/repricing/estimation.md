@@ -4,7 +4,7 @@ Specification frozen at commit `796c264` **before** fitting, per
 `docs/specification_log.md`. Nothing below was tuned toward the hypothesis, and
 no alternative specification was estimated.
 
-## Result: a well-measured null
+## Result: precise associations, unidentified behaviour
 
 | Term | Coefficient | HAC s.e. | t | p |
 | --- | --- | --- | --- | --- |
