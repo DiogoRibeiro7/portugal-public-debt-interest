@@ -142,8 +142,8 @@ def geometric_kernel(
 ) -> np.ndarray[Any, Any]:
     """The weighted-average-maturity benchmark: a discrete annual hazard.
 
-    This is exactly the burden paper's assumption, and the object this paper
-    argues is biased.
+    This is exactly the burden paper's assumption, and the benchmark this
+    paper treats as incomplete for horizon-specific refixing and pass-through.
     """
     hazard = 1.0 / mean_maturity_years
     return 1.0 - (1.0 - hazard) ** horizons
@@ -271,7 +271,7 @@ def bias_table(
     behavioural_high: float = 0.0,
     horizons: tuple[int, ...] = DEFAULT_HORIZONS,
 ) -> pd.DataFrame:
-    """Quantify how wrong the standard approximation is, with a band.
+    """Compare the WAM proxy with scenario pass-through exposure, with a band.
 
     The bias is decomposed into two mechanisms, separately quantified:
 
@@ -279,8 +279,9 @@ def bias_table(
     relative to a real profile with the same mean. This exists even with no
     behavioural response at all.
 
-    *Behaviour*: the shock-responsive retail component. Its band comes from the
-    estimation, which returned a null, so it spans zero.
+    *Behaviour*: the shock-responsive retail-flow exposure. Its coefficient is
+    statistically precise in the descriptive regression but not behaviourally
+    identified, so the reported band keeps zero in view.
     """
     benchmark = wam_implied_kernel(inputs, horizons)["repriced_share"].to_numpy()
 
@@ -303,9 +304,13 @@ def bias_table(
         {
             "horizon_years": list(horizons),
             "wam_implied_share": benchmark,
+            "scenario_exposure_share": central,
+            "scenario_exposure_share_low": low,
+            "scenario_exposure_share_high": high,
             "estimated_share": central,
             "estimated_share_low": low,
             "estimated_share_high": high,
+            "scenario_minus_wam_pp": (central - benchmark) * 100.0,
             "total_bias_pp": (central - benchmark) * 100.0,
             "shape_bias_pp": (shape_only - benchmark) * 100.0,
             "behaviour_bias_pp": (central - shape_only) * 100.0,

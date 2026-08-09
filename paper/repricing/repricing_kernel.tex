@@ -110,6 +110,13 @@ flows need their own clocks. Once those clocks are separated, the fiscal
 burden also needs an explicit GDP path, because the same euro interest bill can
 look quite different as a share of GDP.
 
+The contribution is not the conceptual distinction between maturity and
+refixing. Debt managers already make that distinction. The contribution is the
+Portugal-specific measurement exercise: a WAM-calibrated pass-through proxy is
+compared with the debt manager's published refixing-risk windows at the same
+date, with a composition-aware scenario, and with a fiscal burden translation
+that separates physical refixing from shock-weighted pass-through.
+
 \section{Related literature}
 \label{sec:literature}
 
@@ -133,6 +140,26 @@ budget according to weighted average maturity, it has already assumed that the
 portfolio is homogeneous enough for one maturity clock to stand in for all
 repricing clocks. The Portuguese data give a concrete way to check that
 assumption.
+
+The distinction itself is standard in debt-management risk practice. Jonasson
+and Papaioannou \cite{jonasson2018} describe Average Time to Re-fixing as a
+sovereign debt-portfolio interest-rate-risk measure: fixed-rate debt is exposed
+when it is refinanced, while floating-rate debt is exposed when coupons reset.
+The ESDM formula document \cite{esdm2022} formalises the same logic for
+Average Time to Next Refixing and one- and five-year refixing-risk indicators,
+adding fixed debt maturing inside the window to floating debt resetting inside
+the window. The empirical question here is therefore not whether refixing and
+maturity differ in principle. It is how much the WAM shortcut misses for
+Portugal at particular horizons, and how that physical refixing comparison
+differs from shock-weighted fiscal pass-through.
+
+Recent monetary-transmission evidence reinforces the relevance of the timing
+channel. Johns, Mehrotra and Zampolli \cite{johns2026} study advanced and
+emerging Europe and show that public-debt maturity affects monetary policy
+transmission in a horizon-dependent way. Their object is macroeconomic
+transmission, not a Portuguese debt-manager refixing table, but it makes the
+same broad point: the maturity structure of public liabilities changes when
+and how policy-rate shocks matter.
 
 The retail part of the design is closer to the deposit-rate literature than to
 standard sovereign bond pricing. Drechsler, Savov and Schnabl
@@ -168,11 +195,11 @@ rather than a contractual one.
 The 2022--2023 tightening provides a clean episode in the everyday sense, not
 in the econometric sense. Certificados de Aforro grew from EUR
 \RetailStockStartBn\ billion in June 2022 to EUR \RetailStockPeakBn\ billion
-by May 2023, a rise of \RetailGrowthPct\ percent, peaking at a monthly inflow
-of EUR \RetailPeakInflowMio\ million. That is a large movement in a visible
-instrument class, but it is also one episode, taking place while inflation,
-household liquidity, deposit competition, and policy communication were all
-moving.
+by May 2023, a rise of \RetailGrowthPct\ percent. The largest monthly increase
+in outstanding value was EUR \RetailPeakStockIncreaseMio\ million. That is a
+large movement in a visible instrument class, but it is also one episode,
+taking place while inflation, household liquidity, deposit competition, and
+policy communication were all moving.
 
 The direction of the movement is the useful clue. A simple behavioural story
 would say that tightening speeds pass-through because retail holders redeem
@@ -193,7 +220,7 @@ redemption hazard.
 Figure \ref{fig:retail-spread} is included because the shape of the episode is
 easier to understand visually than in coefficient form. The stock rises during
 tightening, then the change in terms offered on new subscriptions arrests the
-inflow. The figure is not causal evidence on its own, but it is enough to
+increase. The figure is not causal evidence on its own, but it is enough to
 discipline the empirical design: the paper should model the subscription
 margin and should not pretend to have observed gross redemptions.
 
@@ -474,14 +501,14 @@ separately.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/kernel_comparison.pdf}
-\caption{Weighted-average-maturity proxy and the composition-sensitive scenario kernel. The interval is the generated behavioural interval around that kernel. The kernel is model-implied under explicit portfolio assumptions, not estimated: its contractual profile, reset cycle and shock loading are imposed.}
+\caption{Weighted-average-maturity proxy and composition-sensitive pass-through exposure. The interval is the generated behavioural interval around that exposure. The scenario is model-implied under explicit portfolio assumptions, not estimated: its contractual profile, reset cycle and shock loading are imposed.}
 \label{fig:kernel-comparison}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.86\textwidth]{figures/kernel_bootstrap_band.pdf}
-\caption{Bootstrap uncertainty around the scenario kernel. The contractual profile, reset timing and shock loading are imposed; the bands propagate only the moving-block bootstrap draws for the behavioural response.}
+\caption{Bootstrap uncertainty around scenario pass-through exposure. The contractual profile, reset timing and shock loading are imposed; the bands propagate only the moving-block bootstrap draws for the behavioural response.}
 \label{fig:kernel-bootstrap}
 \end{figure}
 
@@ -722,13 +749,13 @@ and indexed liabilities matter, and that is exactly where a maturity-only proxy
 is least able to see them.
 
 The behavioural thesis is not supported in the strong form. The channel is
-visible in the raw data --- a \RetailGrowthPct\ percent inflow and an abrupt
-stop at a dated policy change --- but it is not identifiable at the precision
-published sources allow, principally because gross retail flows are not
-published and the contractual remuneration rate is not machine-readable. That
-is a useful negative result. It prevents the paper from turning an attractive
-Portuguese institutional episode into a broad claim about household portfolio
-elasticities.
+visible in the raw data --- a \RetailGrowthPct\ percent stock increase and an
+abrupt stop at a dated policy change --- but it is not identifiable at the
+precision published sources allow, principally because gross retail flows are
+not published and the contractual remuneration rate is not machine-readable.
+That is a useful negative result. It prevents the paper from turning an
+attractive Portuguese institutional episode into a broad claim about household
+portfolio elasticities.
 
 The limitations are therefore part of the argument rather than a disclaimer at
 the end. The contractual track rests on a stylised retirement profile in the
@@ -801,10 +828,23 @@ Drechsler, I., Savov, A., \& Schnabl, P. (2017). The Deposits Channel of
 Monetary Policy. \emph{The Quarterly Journal of Economics}, 132(4),
 1819--1876.
 
+\bibitem{esdm2022}
+Economic and Financial Committee, Sub-Committee on EU Sovereign Debt Markets
+(ESDM). (2022). \emph{Formula for Risk Indicators, as of January 2022}.
+
 \bibitem{greenwood2015}
 Greenwood, R., Hanson, S. G., \& Stein, J. C. (2015). A Comparative-Advantage
 Approach to Government Debt Maturity. \emph{The Journal of Finance}, 70(4),
 1683--1722. \doi{10.1111/jofi.12253}
+
+\bibitem{johns2026}
+Johns, C., Mehrotra, A., \& Zampolli, F. (2026). Public Debt and Monetary
+Policy Transmission: Evidence from Advanced and Emerging Europe. \emph{BIS
+Working Papers}, No. 1365. Bank for International Settlements.
+
+\bibitem{jonasson2018}
+Jonasson, T., \& Papaioannou, M. G. (2018). A Primer on Managing Sovereign
+Debt-Portfolio Risks. \emph{IMF Working Paper}, WP/18/74.
 
 \bibitem{missale1994}
 Missale, A., \& Blanchard, O. J. (1994). The Debt Burden and Debt Maturity.

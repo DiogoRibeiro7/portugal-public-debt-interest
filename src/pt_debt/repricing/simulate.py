@@ -445,6 +445,11 @@ def kernel_bootstrap_band(
         rows.append(
             {
                 "horizon_years": horizon,
+                "exposure_share_p05": series.quantile(0.05),
+                "exposure_share_p25": series.quantile(0.25),
+                "exposure_share_p50": series.quantile(0.50),
+                "exposure_share_p75": series.quantile(0.75),
+                "exposure_share_p95": series.quantile(0.95),
                 "repriced_share_p05": series.quantile(0.05),
                 "repriced_share_p25": series.quantile(0.25),
                 "repriced_share_p50": series.quantile(0.50),

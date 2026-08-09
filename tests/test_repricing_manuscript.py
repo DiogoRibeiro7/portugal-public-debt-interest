@@ -22,6 +22,8 @@ PAPER_DIR = Path("paper/repricing")
 TEX_PATH = PAPER_DIR / "repricing_kernel.tex"
 MACRO_PATH = PAPER_DIR / MACRO_FILENAME
 REPORT_DIR = Path("reports/repricing")
+KERNEL_SOURCE = Path("src/pt_debt/repricing/kernel.py")
+MANUSCRIPT_SOURCE = Path("src/pt_debt/repricing/manuscript.py")
 
 
 def test_manuscript_body_contains_no_hand_typed_results() -> None:
@@ -175,6 +177,45 @@ def test_repricing_paper_includes_the_official_refixing_benchmark() -> None:
     assert "WAM is closer in the five-year cumulative window" in normalised
     assert "none has been performed" not in source
     assert "not against the debt manager's own refixing view" not in source
+
+
+def test_repricing_paper_positions_contribution_against_refixing_practice() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    normalised = " ".join(source.split())
+    for citation in (r"\cite{jonasson2018}", r"\cite{esdm2022}", r"\cite{johns2026}"):
+        assert citation in source
+    assert "Debt managers already make that distinction" in source
+    assert "Portugal-specific measurement exercise" in source
+    assert "not whether refixing and maturity differ in principle" in normalised
+
+
+def test_repricing_paper_does_not_call_stock_change_an_inflow() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    normalised = " ".join(source.split())
+    reports = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted(REPORT_DIR.glob("*.md"))
+    )
+    assert "monthly inflow of EUR" not in source
+    assert "RetailPeakInflowMio" not in source
+    assert "largest monthly increase in outstanding value" in normalised
+    assert "peaking at EUR 3,549 million of inflow" not in reports
+
+
+def test_kernel_figures_use_exposure_semantics() -> None:
+    source = MANUSCRIPT_SOURCE.read_text(encoding="utf-8")
+    assert "Pass-through exposure, percent of opening debt" in source
+    assert "label=\"Scenario exposure\"" in source
+    assert "label=\"Exposure interval\"" in source
+    assert "Share repriced, percent" not in source
+
+
+def test_kernel_code_comments_match_current_identification_language() -> None:
+    source = KERNEL_SOURCE.read_text(encoding="utf-8")
+    assert "returned a null" not in source
+    assert "argues is biased" not in source
+    assert "statistically precise" in source
+    assert "not behaviourally" in source
 
 
 def test_backtest_prose_matches_current_winner_pattern() -> None:

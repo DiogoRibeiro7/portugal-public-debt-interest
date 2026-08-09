@@ -169,7 +169,8 @@ proxy.
 The study was designed around holders redeeming on demand and reinvesting at the
 new rate, accelerating pass-through. Portuguese households did the opposite:
 Certificados de Aforro grew **151 percent** between June 2022 and May 2023, from
-EUR 12.9bn to EUR 32.6bn, peaking at EUR 3,549 million of inflow in March 2023.
+EUR 12.9bn to EUR 32.6bn. The largest monthly increase in outstanding value was
+EUR 3,549 million in March 2023.
 Correlation between net flow and the household deposit rate is −0.20 over the
 full sample and −0.23 in the tightening window. The sign is against the
 hypothesis, not merely insignificant.

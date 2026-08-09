@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Reframed the repricing paper's contribution against established Average Time
+  to Re-fixing and ESDM refixing-risk practice, adding IMF, ESDM and BIS
+  references.
+- Corrected the Savings Certificate 2022--2023 headline to describe the EUR
+  3,549 million value as the largest monthly increase in outstanding value, not
+  an observed inflow.
+- Relabelled kernel figures and generated plotting code to use pass-through
+  exposure terminology where behavioural new-funding exposure enters the
+  plotted object.
+- Updated code comments and semantic tests to match the current descriptive,
+  not behaviourally identified, retail-flow interpretation.
+- Recorded the revision-8 clean source archive result in the final audit.
+
 ## v0.6.1 - 2026-08-09
 
 Revision-7 cleanup release after the same-date ESDM and opening-stock kernel
