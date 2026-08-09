@@ -124,6 +124,7 @@ def test_final_audit_matches_current_release_metadata() -> None:
 def test_final_audit_records_the_clean_checkout_skip_count() -> None:
     content = FINAL_AUDIT.read_text(encoding="utf-8")
     assert "345 passed, 19 skipped" in content
+    assert "354 passed, 19 skipped, 0 failed" in content
     assert "348 passed, 16 skipped" not in content
 
 

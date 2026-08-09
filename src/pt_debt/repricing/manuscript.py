@@ -289,7 +289,7 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
         _macro("RetailStockStartBn", f"{start / 1000.0:.1f}"),
         _macro("RetailStockPeakBn", f"{end / 1000.0:.1f}"),
         _macro("RetailGrowthPct", f"{(end / start - 1.0) * 100.0:.0f}"),
-        _macro("RetailPeakInflowMio", f"{retail.diff().max():,.0f}"),
+        _macro("RetailPeakStockIncreaseMio", f"{retail.diff().max():,.0f}"),
     ]
 
     # --- kernel bias
@@ -300,7 +300,10 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
             _macro(f"BiasShapeH{WORDS[horizon]}", f"{row['shape_bias_pp']:.2f}"),
             _macro(f"BiasBehaviourH{WORDS[horizon]}", f"{row['behaviour_bias_pp']:.2f}"),
             _macro(f"WamShareH{WORDS[horizon]}", f"{row['wam_implied_share']:.4f}"),
-            _macro(f"EstimatedShareH{WORDS[horizon]}", f"{row['estimated_share']:.4f}"),
+            _macro(
+                f"ScenarioExposureShareH{WORDS[horizon]}",
+                f"{row['scenario_exposure_share']:.4f}",
+            ),
         ]
     fiscal_one = _row(fiscal, "horizon_years", 1)
     macros += [
@@ -490,8 +493,8 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
         [
             f"{_as_int(row.horizon_years)}",
             _fmt(100.0 * _as_float(row.wam_implied_share), 2),
-            _fmt(100.0 * _as_float(row.estimated_share), 2),
-            _fmt(row.total_bias_pp, 2),
+            _fmt(100.0 * _as_float(row.scenario_exposure_share), 2),
+            _fmt(row.scenario_minus_wam_pp, 2),
             _fmt(row.shape_bias_pp, 2),
             _fmt(row.behaviour_bias_pp, 2),
         ]
@@ -742,17 +745,22 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     fig, ax = plt.subplots(figsize=(7.2, 4.4))
     x = bias["horizon_years"].astype(float)
     ax.plot(x, 100.0 * bias["wam_implied_share"], marker="o", label="WAM proxy")
-    ax.plot(x, 100.0 * bias["estimated_share"], marker="o", label="Scenario kernel")
+    ax.plot(
+        x,
+        100.0 * bias["scenario_exposure_share"],
+        marker="o",
+        label="Scenario exposure",
+    )
     ax.fill_between(
         x,
-        100.0 * bias["estimated_share_low"],
-        100.0 * bias["estimated_share_high"],
+        100.0 * bias["scenario_exposure_share_low"],
+        100.0 * bias["scenario_exposure_share_high"],
         color="#2563eb",
         alpha=0.16,
-        label="Estimated interval",
+        label="Exposure interval",
     )
     ax.set_xlabel("Horizon, years")
-    ax.set_ylabel("Share repriced, percent")
+    ax.set_ylabel("Pass-through exposure, percent of opening debt")
     ax.grid(True, alpha=0.25)
     ax.legend()
     written.append(_save_pdf(fig, figure_dir / "kernel_comparison.pdf"))
@@ -762,23 +770,23 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
     x_band = band["horizon_years"].astype(float).to_numpy()
     ax.fill_between(
         x_band,
-        100.0 * band["repriced_share_p05"].to_numpy(),
-        100.0 * band["repriced_share_p95"].to_numpy(),
+        100.0 * band["exposure_share_p05"].to_numpy(),
+        100.0 * band["exposure_share_p95"].to_numpy(),
         color="#4f46e5",
         alpha=0.16,
         label="5--95 percentile",
     )
     ax.fill_between(
         x_band,
-        100.0 * band["repriced_share_p25"].to_numpy(),
-        100.0 * band["repriced_share_p75"].to_numpy(),
+        100.0 * band["exposure_share_p25"].to_numpy(),
+        100.0 * band["exposure_share_p75"].to_numpy(),
         color="#4f46e5",
         alpha=0.28,
         label="25--75 percentile",
     )
     ax.plot(
         x_band,
-        100.0 * band["repriced_share_p50"].to_numpy(),
+        100.0 * band["exposure_share_p50"].to_numpy(),
         color="#312e81",
         marker="o",
         label="Bootstrap median",
@@ -790,7 +798,7 @@ def write_figures(processed_dir: Path, panel_path: Path, output_dir: Path) -> li
         label="WAM",
     )
     ax.set_xlabel("Horizon, years")
-    ax.set_ylabel("Share repriced, percent")
+    ax.set_ylabel("Pass-through exposure, percent of opening debt")
     ax.grid(True, alpha=0.25)
     ax.legend()
     written.append(_save_pdf(fig, figure_dir / "kernel_bootstrap_band.pdf"))
