@@ -98,7 +98,7 @@ def test_unknown_reason_not_replaced_with_speculation() -> None:
     # the validation passage: "because" is ordinary prose elsewhere.
     paper = _paper()
     start = paper.index("The empirical series passed every error-severity")
-    passage = paper[start : paper.index("\section", start)].lower()
+    passage = paper[start : paper.index(r"\section", start)].lower()
     assert "nothing in the data identifies which side moved" in passage
     assert r"\debtratiocausenineteenninetyseven" in passage
     for speculation in ("caused by", "is explained by", "results from a revision"):

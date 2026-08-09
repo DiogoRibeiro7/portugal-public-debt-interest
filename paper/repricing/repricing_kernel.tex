@@ -35,12 +35,12 @@ event. This paper separates the Portuguese debt stock into maturity-driven,
 reset-driven, and retail-flow components and asks how wide the plausible
 pass-through range becomes once those clocks are separated. The paper does not
 treat the behavioural coefficient as a central correction. The competing-return
-spread does carry a detectable positive association with retail repricing, but
-the falsification test loads at $p = \PlaceboP$ on a statistic no household
-observes, so the association is reported as descriptive rather than identified;
-the bootstrap interval for asymmetry is [\AsymmetryLow, \AsymmetryHigh]; and
-conditional historical validation gives no stable forecasting claim. In the
-current generated tables the scenario kernel is ahead at
+spread does carry a detectable positive association with positive retail
+outstanding-value change, but the falsification test loads at $p = \PlaceboP$
+on a statistic no household observes, so the association is reported as
+descriptive rather than identified; the bootstrap interval for asymmetry is
+[\AsymmetryLow, \AsymmetryHigh]; and conditional historical validation gives no
+stable forecasting claim. In the current generated tables the scenario kernel is ahead at
 \BacktestScenarioWins\ of three cut dates, but the margins are small and have
 moved with implementation corrections. The raw episode is nevertheless
 informative, because households moved money into certificates during the
@@ -425,8 +425,9 @@ signs relative to the constant-hazard benchmark.
 \label{sec:estimation}
 
 The specification was frozen before fitting and estimated once; no
-specification search was performed. The outcome is the repriced share of the
-opening stock. The regressors are the signed parts of the lagged
+specification search was performed. The outcome is the positive monthly change
+in retail certificate outstanding value, scaled by the relevant opening stock.
+The regressors are the signed parts of the lagged
 competing-return spread, an indicator for the June 2023 change in the terms
 offered on new subscriptions, and portfolio composition. Standard errors are
 Newey--West. Estimation is on the two retail classes aggregated to a single
@@ -441,8 +442,9 @@ effects.
 
 The spread-widening coefficient is \SpreadWideningCoef\ with a standard error
 of \SpreadWideningSe\ ($p = \SpreadWideningP$). Taken alone that is a
-detectable positive association between the competing-return spread and retail
-repricing. Two things stop it supporting a causal reading.
+detectable positive association between the competing-return spread and
+positive retail outstanding-value change. Two things stop it supporting a
+causal reading.
 
 First, the asymmetry the design turns on --- whether widening and narrowing
 load differently --- has a bootstrap interval of [\AsymmetryLow,

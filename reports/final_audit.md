@@ -4,8 +4,8 @@
 
 Date: 2026-08-09
 
-Audit subject: package version 0.6.2, release working tree after revision-8
-reviewer implementation and cleanup.
+Audit subject: package version 0.6.2, working tree after revision-9 reviewer
+terminology, API validation and audit cleanup.
 
 ### Test status depends on the environment, and both are recorded
 
@@ -21,6 +21,7 @@ that need a git worktree. Those skips are expected, not failures.
 | Reviewer clean checkout of the prior revision-6 archive, no pipeline run | 345 passed, 19 skipped |
 | Reviewer-reported revision-7 source archive check | 371 collected: 352 passed, 19 skipped, 0 failed |
 | Reviewer-reported revision-8 source archive check | 373 collected: 354 passed, 19 skipped, 0 failed |
+| Reviewer-reported revision-9 source archive check | 377 collected: 358 passed, 19 skipped, 0 failed |
 
 All recorded runs reported zero failures. The clean-checkout row is retained
 because it corrects the release-note count a reviewer observed in the submitted archive.
@@ -30,8 +31,8 @@ A reviewer wanting the full local suite should run `pt-debt all` and
 Commands completed successfully in the author's environment for this revision
 pass:
 
-- `pytest -q`: all 377 collected tests passed.
-- `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py -q`: all 78 collected tests passed.
+- `pytest -q`: all 378 collected tests passed.
+- `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py -q`: all 79 collected tests passed.
 - `ruff check src tests`: passed.
 - `mypy src`: passed, no issues in 35 source files.
 - `pt-debt repricing paper --config config/repricing.yaml`: regenerated repricing manuscript tables, figures, and macros; no hand-typed results found.
@@ -54,7 +55,7 @@ and live regeneration remains documented in `docs/reproducibility.md`.
   `paper/repricing/repricing_kernel.pdf`.
 - Repricing PDF page count: 17.
 - Repricing PDF SHA-256:
-  `2697b0f70ffeb4a490199a8639c152253735ddaca63175afcd945f4343f86c24`.
+  `5d0fb89e6c1293bbfe687fc5f2239c5b95b3eb2525aa75a658e61b1f5d534c14`.
 - Release metadata: `CITATION.cff`, `.zenodo.json`, `pyproject.toml`, and
   `CHANGELOG.md`.
 
@@ -102,6 +103,11 @@ not part of the submitted source archive.
   percentage-point or EUR 300 million claims, and the manuscript states that
   the central scenario-minus-WAM difference changes sign after the one-year
   horizon.
+- The repricing manuscript now describes the behavioural regression outcome as
+  positive retail outstanding-value change, not observed retail repricing, and
+  Table 4 is labelled as a pass-through exposure comparison.
+- The repricing kernel now validates the retail reset cycle and the discrete
+  annual WAM hazard domain used by the benchmark.
 
 ## Remaining Warnings
 
