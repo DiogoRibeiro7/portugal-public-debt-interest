@@ -503,7 +503,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     path = table_dir / "kernel_bias.tex"
     path.write_text(
         _table(
-            caption="Scenario-minus-WAM repricing differences, +100 bps",
+            caption="Scenario-minus-WAM pass-through exposure differences, +100 bps",
             label="tab:bias",
             columns="rrrrrr",
             header=[

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+### Corrected
+
+- Corrected the repricing paper's behavioural-estimation wording so the
+  outcome is positive retail outstanding-value change, not observed retail
+  repricing or opening-stock repricing.
+- Renamed the scenario-minus-WAM table as a pass-through exposure comparison.
+- Tightened repricing-kernel documentation and validation for the discrete
+  annual WAM hazard and retail reset cycle.
+- Recorded the revision-9 clean source archive result in the final audit and
+  fixed the invalid-escape warning in `tests/test_revisions.py`.
+
 ## v0.6.2 - 2026-08-09
 
 Revision-8 minor-review release.
