@@ -29,15 +29,24 @@ because it corrects the release-note count a reviewer observed in the submitted 
 A reviewer wanting the full local suite should run `pt-debt all` and
 `pt-debt repricing build-panel` before `pt-debt repricing all`.
 
-Commands completed successfully in the author's environment for this revision
-pass:
+Commands completed successfully in the author's environment for this
+revision-10 documentation pass:
 
 - `pytest -q`: all 378 collected tests passed.
 - `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py -q`: all 79 collected tests passed.
 - `ruff check src tests`: passed.
 - `mypy src`: passed, no issues in 35 source files.
-- `pt-debt repricing paper --config config/repricing.yaml`: regenerated repricing manuscript tables, figures, and macros; no hand-typed results found.
-- `pdflatex -interaction=nonstopmode -halt-on-error repricing_kernel.tex`: completed twice.
+
+The repricing manuscript and PDF were not regenerated in the revision-10
+documentation pass, because no manuscript source, generated table, figure or
+macro changed. The latest artifact-generating pass remains the revision-9
+release pass:
+
+- `pt-debt repricing paper --config config/repricing.yaml`: regenerated
+  repricing manuscript tables, figures, and macros; no hand-typed results
+  found.
+- `pdflatex -interaction=nonstopmode -halt-on-error repricing_kernel.tex`:
+  completed twice.
 
 The live source-acquisition workflow was not rerun during this audit pass. The
 committed release artefacts remain guarded by the burden-paper checksum baseline,
