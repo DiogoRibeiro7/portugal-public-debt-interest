@@ -4,8 +4,8 @@
 
 Date: 2026-08-09
 
-Audit subject: package version 0.6.0, working tree after revision-7 reviewer
-implementation, based on source commit `187193e`.
+Audit subject: package version 0.6.1, release working tree after revision-7
+reviewer implementation and cleanup.
 
 ### Test status depends on the environment, and both are recorded
 
@@ -51,9 +51,9 @@ and live regeneration remains documented in `docs/reproducibility.md`.
 - Generated paper figures: committed PDF figures under `reports/figures/`.
 - Repricing manuscript: `paper/repricing/repricing_kernel.tex` and
   `paper/repricing/repricing_kernel.pdf`.
-- Repricing PDF page count: 16.
+- Repricing PDF page count: 15.
 - Repricing PDF SHA-256:
-  `e5bd48424c12b68bec298c643de59c1f035cfc79b78040926dfb0a8fb3e83ae1`.
+  `84f32320ad52c33df3d991701e65d8868a32dd478b189b0b63d16f0c9184e3d1`.
 - Release metadata: `CITATION.cff`, `.zenodo.json`, `pyproject.toml`, and
   `CHANGELOG.md`.
 
@@ -92,7 +92,7 @@ not part of the submitted source archive.
   scenario-minus-ESDM columns.
 - The conditional historical validation language now reports the generated
   winner pattern as a fragile two-of-three comparison, with margins generated
-  from the CSV rather than described as out-of-sample forecast evidence.
+  from the CSV rather than described as forecast evidence.
 - Current repricing support reports no longer repeat the superseded 10.90
   percentage-point or EUR 300 million claims, and the manuscript states that
   the central scenario-minus-WAM difference changes sign after the one-year

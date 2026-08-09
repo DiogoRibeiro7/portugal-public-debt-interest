@@ -109,7 +109,7 @@ effective rate is:
 The scenario kernel wins two of the three cut dates, with margins that are
 small against the error levels. Reported in
 `reports/repricing/pass_through.md` as conditional historical validation, not
-as an out-of-sample forecast.
+as a forecast.
 
 These figures have been revised twice since this log was first written, and the
 specification was not touched either time. The original table

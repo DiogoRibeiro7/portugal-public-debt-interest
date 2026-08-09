@@ -334,12 +334,15 @@ before the paper turns to the simpler WAM benchmark.
 
 \input{tables/refixing_comparison.tex}
 
-The result sharpens rather than removes the paper's caution. A scalar maturity
-statistic does not identify a repricing path, and even a coarse refixing-risk
-profile does not identify shock-weighted pass-through without instrument-level
-reset dates, reference indices, loadings and subscription flows. The published
-ESDM windows are therefore used as an external check on the imposed shape, not
-as a substitute for the missing instrument-level schedule.
+The result sharpens rather than removes the paper's caution. The scenario
+kernel is closer to the official ESDM value in the one-year window, while WAM
+is closer in the five-year cumulative window. That mixed pattern is the point:
+a scalar maturity statistic does not identify a repricing path, and even a
+coarse refixing-risk profile does not identify shock-weighted pass-through
+without instrument-level reset dates, reference indices, loadings and
+subscription flows. The published ESDM windows are therefore used as an
+external check on the imposed shape, not as a substitute for the missing
+instrument-level schedule.
 
 The benchmark against which we measure is the standard proxy,
 \begin{equation}
@@ -650,12 +653,11 @@ understanding of interest-cost pass-through.
 \section{Conditional historical validation}
 \label{sec:backtest}
 
-This exercise is deliberately not called a backtest or an out-of-sample
-forecast. Realised future rate paths are fed into it on purpose, so that kernel
-timing error can be separated from yield-path error, and a forecast would not
-have them. What it can answer is narrower and still worth asking: given what
-rates actually did, did this kernel time the pass-through better than the
-maturity proxy?
+This exercise is conditional historical validation, not a forecast. Realised
+future rate paths are fed into it on purpose, so that kernel timing error can
+be separated from yield-path error, and a forecast would not have them. What it
+can answer is narrower and still worth asking: given what rates actually did,
+did this kernel time the pass-through better than the maturity proxy?
 
 We freeze the specification, reconstruct the portfolio state as it stood at
 each cut date, and roll forward from that state. The rate fed forward is the

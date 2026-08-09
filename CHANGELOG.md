@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.6.1 - 2026-08-09
+
+Revision-7 cleanup release after the same-date ESDM and opening-stock kernel
+fixes in v0.6.0.
+
+### Corrected
+
+- Removed remaining forecast-comparison wording from the repricing paper,
+  simulation docstring, specification log, and final audit. The historical
+  exercise is now described consistently as conditional historical validation.
+- Added a direct interpretation of the official ESDM comparison: the scenario
+  kernel is closer in the one-year window, while WAM is closer in the five-year
+  cumulative window. The paper now treats that mixed pattern as evidence that
+  weighted average maturity is not a sufficient statistic, not as a claim that
+  the scenario kernel is uniformly superior.
+- Updated release metadata and the Zenodo description so the reset-timing
+  result matches the generated sensitivity table: reported reset-timing
+  alternatives leave the one-year sign positive; weaker shock loading reverses
+  it.
+
+### Verification
+
+- Regenerated the repricing manuscript artefacts.
+- Rebuilt `paper/repricing/repricing_kernel.pdf`; the PDF is 15 pages and
+  retains only one harmless underfull bibliography line.
+- `pytest -q`, focused repricing tests, `ruff check src tests`, and `mypy src`
+  passed in the author working tree before release.
+
 ## v0.6.0 - 2026-08-08
 
 Fourth-round review. Five of six mandatory items on the repricing paper are

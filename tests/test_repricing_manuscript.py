@@ -159,6 +159,7 @@ def test_repricing_terms_do_not_revert_to_old_bias_language() -> None:
 
 def test_repricing_paper_includes_the_official_refixing_benchmark() -> None:
     source = TEX_PATH.read_text(encoding="utf-8")
+    normalised = " ".join(source.split())
     table = (PAPER_DIR / "tables" / "refixing_comparison.tex").read_text(
         encoding="utf-8"
     )
@@ -170,6 +171,8 @@ def test_repricing_paper_includes_the_official_refixing_benchmark() -> None:
     assert "portfolio-basis conventions" in table
     assert "25.2" in table
     assert "50.9" in table
+    assert "closer to the official ESDM value in the one-year window" in normalised
+    assert "WAM is closer in the five-year cumulative window" in normalised
     assert "none has been performed" not in source
     assert "not against the debt manager's own refixing view" not in source
 
@@ -184,6 +187,7 @@ def test_backtest_prose_matches_current_winner_pattern() -> None:
     assert "2021 & WAM benchmark" in table
     assert "two of the three cut" in source
     assert "out of sample" not in source
+    assert "out-of-sample" not in source
     assert "under a basis point at 2014 and 2018" not in source
     assert r"\BacktestMarginFourteen" in source
     assert r"\BacktestMarginEighteen" in source

@@ -286,12 +286,12 @@ def backtest_across_cuts(
 ) -> pd.DataFrame:
     """Run :func:`backtest` at each cut with that cut's portfolio state.
 
-    This is **conditional historical validation**, not an out-of-sample
-    forecast. Realised future rate paths are fed in deliberately so that kernel
-    timing error is isolated from yield-path error; a forecast would not have
-    them. The name matters because the exercise cannot answer "would this have
-    predicted the future", only "given what rates did, did this kernel time the
-    pass-through better than the maturity proxy".
+    This is **conditional historical validation**, not a forecast. Realised
+    future rate paths are fed in deliberately so that kernel timing error is
+    isolated from yield-path error; a forecast would not have them. The name
+    matters because the exercise cannot answer "would this have predicted the
+    future", only "given what rates did, did this kernel time the pass-through
+    better than the maturity proxy".
 
     Portfolio state is reconstructed at each cut and the observation it came
     from is recorded, so the no-look-ahead claim about *state* is checkable.
