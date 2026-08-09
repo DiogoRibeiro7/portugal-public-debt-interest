@@ -163,7 +163,10 @@ reconstructed_debt_ratio_change =
 
 6. **Refinancing assumptions are insufficiently documented.** Default shares are in configuration but no maturity-source evidence or sensitivity table accompanies them.
 
-7. **Correlation analysis is weak evidence.** The report contains a correlation table among persistent fiscal levels, mechanically related variables, and common-denominator ratios. This is not robust evidence for a short annual sample.
+7. Correlation analysis is weak evidence. The report contains a correlation
+table among persistent fiscal levels, accounting-linked variables, and
+common-denominator ratios. This is not strong evidence for a short annual
+sample.
 
 8. **Source-vintage and observation-status reporting is incomplete.** Row-level provenance exists, but headline report text and tables do not consistently mark provisional source flags or data vintages.
 

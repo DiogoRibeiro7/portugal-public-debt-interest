@@ -165,7 +165,7 @@ Archive metadata only. No code, results or manuscript text change.
 
 ## v0.5.0 - 2026-08-08
 
-**This release supersedes v0.4.0, whose release notes misstate two results.**
+This release supersedes v0.4.0, whose release notes misstate two results.
 v0.4.0 reported the backtest favouring the benchmark at every cut date and the
 behavioural estimation as a null. Both were artefacts of defects fixed here.
 Cite this release rather than v0.4.0.
