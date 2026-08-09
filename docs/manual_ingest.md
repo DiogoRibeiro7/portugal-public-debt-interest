@@ -11,11 +11,11 @@ A validated loader reads them; a file with the wrong schema fails loudly.
 
 ## 1. Dated contractual redemption schedule (Tier 1, blocking)
 
-**Why it matters.** This is the single most important missing input. The
-repricing kernel's contractual component is supposed to be read directly off a
-dated redemption profile, not estimated. Without it there is no deterministic
-track, and the contractual/stochastic split that the whole design rests on
-cannot be built from published data.
+This is the single most important missing input. The repricing kernel's
+contractual component is supposed to be read directly off a dated redemption
+profile, not estimated. Without it there is no deterministic track, and the
+contractual/stochastic split that the whole design rests on cannot be built
+from published data.
 
 - **Source**: IGCP, *Investor Presentation* or *Annual Report*, redemption
   profile chart, and the Monthly Bulletin's maturity profile table.
@@ -33,18 +33,18 @@ cannot be built from published data.
   | `amount_mio_eur` | float | contractual redemption in that year |
   | `source_page` | str | document page or chart reference |
 
-**Status**: not obtained. Published as a chart in PDF, not as a table.
+Status: not obtained. Published as a chart in PDF, not as a table.
 
 ---
 
 ## 2. Gross retail subscriptions and redemptions (Tier 1, blocking for the
    behavioural hazard)
 
-**Why it matters.** The acquired IGCP series gives the **net outstanding stock**
-of Certificados de Aforro and Certificados do Tesouro. A redemption hazard
-cannot be identified from net stock: a flat stock is equally consistent with no
-activity and with large subscriptions exactly offsetting large redemptions.
-Estimating a voluntary-redemption hazard requires the gross redemption flow.
+The acquired IGCP series gives the net outstanding stock of Certificados de
+Aforro and Certificados do Tesouro. A redemption hazard cannot be identified
+from net stock: a flat stock is equally consistent with no activity and with
+large subscriptions exactly offsetting large redemptions. Estimating a
+voluntary-redemption hazard requires the gross redemption flow.
 
 - **Source**: IGCP Monthly Bulletin, retail instruments section; or Banco de
   Portugal BPstat household financial accounts.
@@ -62,16 +62,16 @@ Estimating a voluntary-redemption hazard requires the gross redemption flow.
   | `gross_redemptions_mio_eur` | float | |
   | `outstanding_mio_eur` | float | reconciles against the acquired stock |
 
-**Status**: not obtained programmatically.
+Status: not obtained programmatically.
 
 ---
 
 ## 3. Retail remuneration rates and contractual rules by series (Tier 1)
 
-**Why it matters.** The return spread facing a holder is the paper's key
-covariate, and the lock-up and penalty structure is what the baseline duration
-dependence should reproduce. Both are contractual and knowable; they must be
-encoded exactly, not approximated.
+The return spread facing a holder is the paper's key covariate, and the lock-up
+and penalty structure is what the baseline duration dependence should
+reproduce. Both are contractual and knowable; they must be encoded exactly, not
+approximated.
 
 - **Source**: IGCP retail product pages and the dated announcements of rate
   formula changes.
@@ -83,16 +83,15 @@ encoded exactly, not approximated.
   `rate_formula`, `index_reference`, `cap_pct`, `lockup_months`,
   `penalty_rule`, `holding_cap_eur`, `source_reference`.
 
-**Status**: not obtained programmatically.
+Status: not obtained programmatically.
 
 ---
 
 ## 4. Per-ISIN instrument detail (Tier 1, desirable)
 
-**Why it matters.** ISIN-level issue date, maturity, coupon, and coupon type
-would allow the marketable-securities risk set to be built at instrument level
-rather than at class level, which materially strengthens the unit of
-observation.
+ISIN-level issue date, maturity, coupon, and coupon type would allow the
+marketable-securities risk set to be built at instrument level rather than at
+class level, which materially strengthens the unit of observation.
 
 - **Source**: IGCP securities pages; commercial terminals hold this in
   structured form.
@@ -101,15 +100,15 @@ observation.
   `maturity_date`, `coupon_pct`, `coupon_type`, `amount_outstanding_mio_eur`,
   `currency`.
 
-**Status**: not obtained. Not published as a machine-readable table.
+Status: not obtained. Not published as a machine-readable table.
 
 ---
 
 ## 5. Official-sector loan amortisation (Tier 1)
 
-**Why it matters.** EFSF and ESM early repayments are lumpy, discretionary, and
-policy-driven. They are carried as a documented discrete event series, not as an
-estimated hazard — there are far too few events for the latter.
+EFSF and ESM early repayments are lumpy, discretionary, and policy-driven. They
+are carried as a documented discrete event series, not as an estimated hazard;
+there are far too few events for the latter.
 
 - **Source**: IGCP Annual Report; EFSF and ESM published loan schedules.
 - **Expected file**: `data/raw/manual/official_loan_events.csv`
@@ -117,7 +116,7 @@ estimated hazard — there are far too few events for the latter.
   (`scheduled_amortisation` or `early_repayment`), `amount_mio_eur`,
   `source_reference`.
 
-**Status**: aggregate programme-loan stock is available in the acquired IGCP
+Status: aggregate programme-loan stock is available in the acquired IGCP
 indicators; tranche-level detail is not.
 
 ---
@@ -126,7 +125,7 @@ indicators; tranche-level detail is not.
 
 - **Source**: Eurostat `prc_hicp_midx` for prices; Banco de Portugal BPstat for
   household deposits and debt-securities holdings.
-- **Status**: not yet wired. Eurostat is already a dependency of the burden
+- Status: not yet wired. Eurostat is already a dependency of the burden
   pipeline and can be added without a new source family; BPstat requires
   assessment.
 
@@ -134,10 +133,10 @@ indicators; tranche-level detail is not.
 
 ## 7. IGCP refixing profile (Tier 1, validation of the imposed shape)
 
-**Why it matters.** The kernel's contractual and reset shapes are *imposed*: a
-linear retirement profile at the published weighted average maturity, an annual
-wholesale reset cycle, and a quarterly retail reset cycle. The ESDM refixing
-risk windows provide an external benchmark against the debt manager's own view.
+The kernel's contractual and reset shapes are imposed: a linear retirement
+profile at the published weighted average maturity, an annual wholesale reset
+cycle, and a quarterly retail reset cycle. The ESDM refixing risk windows
+provide an external benchmark against the debt manager's own view.
 
 IGCP publishes that view in its investor presentation. Its risk framework
 monitors interest-rate refixing explicitly, and the presentation reports ESDM
@@ -171,7 +170,7 @@ not provide a dated instrument-level schedule.
   | `source_url` | str | stable source URL |
   | `source_detail` | str | slide and chart detail |
 
-**Status**: obtained for the two official ESDM windows. The comparison is
+Status: obtained for the two official ESDM windows. The comparison is
 implemented in `refixing_comparison` in `src/pt_debt/repricing/kernel.py` and
 is included in the generated manuscript tables. Gross retail subscriptions and
 redemptions remain unavailable.

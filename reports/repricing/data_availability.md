@@ -1,6 +1,6 @@
 # Repricing data availability
 
-What was actually acquired, at what frequency, over what span — and what was
+What was actually acquired, at what frequency, over what span, and what was
 not. Generated coverage figures come from the cached payloads under
 `data/raw/repricing/`; every payload has a provenance sidecar recording its
 source URL, retrieval timestamp, size, and SHA-256.
@@ -9,7 +9,7 @@ Acquire with `pt-debt repricing acquire --config config/repricing.yaml`.
 
 ---
 
-## Tier 1 — the stock and its composition
+## Tier 1: the stock and its composition
 
 ### Obtained, machine-readable
 
@@ -59,7 +59,7 @@ schema.
 
 ---
 
-## Tier 2 — covariates driving the behavioural hazard
+## Tier 2: covariates driving the behavioural hazard
 
 Source: ECB Data Portal REST API, SDMX-JSON. All fetched successfully.
 
@@ -86,7 +86,7 @@ were added as the closest substitute for an on-demand redeemable certificate.
 
 ---
 
-## Tier 3 — context
+## Tier 3: context
 
 Household financial accounts (deposits and debt-securities holdings) from Banco
 de Portugal BPstat: **not assessed.** BPstat's programmatic interface has not

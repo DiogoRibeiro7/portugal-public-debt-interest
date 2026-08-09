@@ -6,7 +6,7 @@ recorded in ``docs/repricing_design_revision.md``.
 
 Unit of observation
 -------------------
-Instrument class by month. **Not** individual holders, and **not** ISIN level.
+Instrument class by month; not individual holders, and not ISIN level.
 Retail certificate data is published as an aggregate stock, so the unit is a
 class-month cell. An aggregate cell is not an individual-level model and the
 manuscript must not describe it as one.
@@ -105,9 +105,9 @@ def build_repricing_panel(
         #
         # Worse for the estimation, capitalisation tracks the remuneration
         # formula, which for Series F is indexed to three-month Euribor. The
-        # outcome can therefore move with rates through pure accounting, which
-        # is a mechanical channel running in the same direction as the
-        # behavioural one being tested. The name records what the quantity is.
+        # outcome can therefore move with rates through pure accounting, in
+        # the same direction as the behavioural channel being tested. The name
+        # records what the quantity is.
         panel["outstanding_value_increase_mio_eur"] = panel["net_flow_mio_eur"].clip(
             lower=0.0
         )

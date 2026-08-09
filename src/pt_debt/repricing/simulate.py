@@ -2,14 +2,14 @@
 
 Two fixes to the burden paper's scenario section are built in.
 
-**Nominal GDP is not held fixed in every scenario.** The burden paper freezes
-GDP and the debt ratio to isolate refinancing arithmetic. Growth paths are
-explicit here so the denominator sensitivity can be inspected rather than
-treated as an empirical correction.
+Nominal GDP is not held fixed in every scenario. The burden paper freezes GDP
+and the debt ratio to isolate refinancing arithmetic. Growth paths are explicit
+here so the denominator sensitivity can be inspected rather than treated as an
+empirical correction.
 
-**The stock is not homogeneous.** The kernel differentiates instrument classes,
-and that differentiation is preserved through the simulation rather than
-collapsed to an aggregate hazard at the last step.
+The stock is not homogeneous. The kernel differentiates instrument classes, and
+that differentiation is preserved through the simulation rather than collapsed
+to an aggregate hazard at the last step.
 
 Everything is reported as a difference against the zero-shock baseline. Plotting
 total burden paths would confound the shock with the starting level.

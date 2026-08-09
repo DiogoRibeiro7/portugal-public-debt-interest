@@ -53,9 +53,8 @@ the study says so rather than reporting the one-year number alone.
 
 At +100bps and five years the incremental burden is 0.475 percent of GDP under
 the companion paper's frozen-GDP assumption and 0.391 under central nominal
-growth. The roughly 18 percent reduction follows mechanically from the assumed
-growth path and is reported as a denominator sensitivity, not as an empirical
-correction.
+growth. The roughly 18 percent reduction follows from the assumed growth path
+and is reported as a denominator sensitivity, not as an empirical correction.
 
 Artefact: `data/processed/repricing/scenarios/pass_through_paths.csv`.
 
@@ -65,11 +64,11 @@ Artefact: `data/processed/repricing/scenarios/pass_through_paths.csv`.
 
 ### The behavioural channel is detectable but not identified
 
-**This section changed after the estimator was corrected.** Estimation now runs
-on the two retail classes aggregated to one monthly series. Previously it ran
-on the stacked class-month panel, which is sorted by class and then period, so
-calendar time jumped backwards at the class boundary — a twelve-month bootstrap
-block could straddle a fifteen-year gap, and the Newey–West lag structure did
+This section changed after the estimator was corrected. Estimation now runs on
+the two retail classes aggregated to one monthly series. Previously it ran on
+the stacked class-month panel, which is sorted by class and then period, so
+calendar time jumped backwards at the class boundary. A twelve-month bootstrap
+block could straddle a fifteen-year gap, and the Newey-West lag structure did
 not correspond to month-to-month dependence. Aggregating also weights each
 class by the euros it carries instead of giving a small and a large class equal
 influence.
@@ -82,8 +81,8 @@ That is *not* a finding, for two reasons:
 
 - The asymmetry the design turns on still has a bootstrap interval of
   **[−0.016, +0.046]** over 1,000 moving-block replicates and covers zero.
-- **The placebo no longer passes cleanly.** The fixed-rate share — a portfolio
-  statistic no household observes — now loads at −0.00051 (**p = 0.07**),
+- The placebo no longer passes cleanly. The fixed-rate share, a portfolio
+  statistic no household observes, now loads at −0.00051 (**p = 0.07**),
   against p = 0.86 before. That is close enough to significance to read as a
   warning: the monthly series carries common time variation the specification
   cannot separate from the spread.
@@ -129,7 +128,7 @@ followed an implementation correction, not a change of specification:
 3. the portfolio state came from the end of the sample rather than the cut date;
 4. the behavioural coefficient was driven by the gap between the ten-year
    benchmark and the effective rate, when it had been estimated against the
-   competing-return spread — a different object in different units.
+   competing-return spread. That is a different object in different units.
 
 A ranking this sensitive to implementation is not one to rely on. It is
 reported because it bounds what the exercise can support, which is: the timing
@@ -153,15 +152,15 @@ redemption hazard rather than approximating it. See
 
 ## Results that are artefacts, labelled as such
 
-**The half-life asymmetry between rate rises and falls is manufactured by the
-model, not measured.** The behavioural response is clipped at zero, which
+The half-life asymmetry between rate rises and falls is manufactured by the
+model, not measured. The behavioural response is clipped at zero, which
 prevents a rate fall producing a negative contribution. The estimated asymmetry
 does not separate from zero. The manuscript labels this in the body.
 
-**The behavioural band runs from zero at every horizon**, because the estimate
+The behavioural band runs from zero at every horizon because the estimate
 behind it is not identified, for the reasons above. Reporting the central path
-without that band would
-be the same overconfidence the study criticises in the proxy.
+without that band would be the same overconfidence the study criticises in the
+proxy.
 
 ---
 
@@ -172,7 +171,7 @@ new rate, accelerating pass-through. Portuguese households did the opposite:
 Certificados de Aforro grew **151 percent** between June 2022 and May 2023, from
 EUR 12.9bn to EUR 32.6bn, peaking at EUR 3,549 million of inflow in March 2023.
 Correlation between net flow and the household deposit rate is −0.20 over the
-full sample and −0.23 in the tightening window — the sign is against the
+full sample and −0.23 in the tightening window. The sign is against the
 hypothesis, not merely insignificant.
 
 The mechanism is not mysterious: the certificate's remuneration formula tracked

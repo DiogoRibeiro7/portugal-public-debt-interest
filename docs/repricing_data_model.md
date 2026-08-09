@@ -6,7 +6,8 @@ discovered in review. The design revision that produced this model is in
 
 ## Unit of observation
 
-**Instrument class by month.** Not individual holders, and not ISIN level.
+The observation is an instrument class by month, not an individual holder and
+not an ISIN.
 
 Retail certificate data is published only as an aggregate outstanding stock, so
 the finest available cell is a class-month. This is a real limitation and the
@@ -20,7 +21,7 @@ Tesouro, 2010-08 onward, 191 months).
 
 ## Clock
 
-**Calendar time only.** There is no duration clock.
+The panel uses calendar time only. There is no duration clock.
 
 The original design indexed hazards by time since subscription, because
 lock-up and penalty structures are indexed to it. That clock belongs to a
@@ -69,10 +70,10 @@ household-level subscription or repricing model.
 | `average_residual_term_years` | IGCP, monthly |
 | `share_fixed_rate_pct` | IGCP, monthly; gives the reset-track residual |
 
-**The spread is a proxy.** The certificate's own remuneration rate is not
-published machine-readably, so a short-rate index stands in for the certificate
-leg, on the grounds that the formula tracked short rates. Every result resting
-on the spread inherits that caveat. The contractual rate is specified in
+The spread is a proxy. The certificate's own remuneration rate is not published
+machine-readably, so a short-rate index stands in for the certificate leg, on
+the grounds that the formula tracked short rates. Every result resting on the
+spread inherits that caveat. The contractual rate is specified in
 `docs/manual_ingest.md` as the input that would sharpen it.
 
 Covariates are lagged one month, uniformly, so no estimate uses information a
@@ -80,10 +81,10 @@ household could not have observed at the decision point.
 
 ## The policy break
 
-**2023-06.** Dated from the data rather than assumed: net flow falls from
-+3,549 million in March 2023 to +670 in June, +39 by October, and turns
-negative in November. A discrete change in the terms offered on new
-subscriptions switched the channel off.
+The policy-break date is 2023-06. It is dated from the data rather than
+assumed: net flow falls from +3,549 million in March 2023 to +670 in June, +39
+by October, and turns negative in November. A discrete change in the terms
+offered on new subscriptions switched the channel off.
 
 ## Validation
 

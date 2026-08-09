@@ -14,17 +14,17 @@ no alternative specification was estimated.
 | `post_policy_break` | **−0.0250** | 0.0079 | −3.16 | 0.002 |
 | `average_residual_term_years` | +0.0031 | 0.0010 | 3.25 | 0.001 |
 
-Observations 304. R² 0.343. Newey–West standard errors, 12 monthly lags.
+Observations 304. R² 0.343. Newey-West standard errors, 12 monthly lags.
 
-**These numbers changed when the estimator was corrected.** The fit previously
-ran on the stacked class-month panel, which is sorted by instrument class then
+These numbers changed when the estimator was corrected. The fit previously ran
+on the stacked class-month panel, which is sorted by instrument class then
 period: every month of one class preceded every month of the other, so calendar
 time jumped backwards at the boundary. A twelve-month bootstrap block could
-straddle a fifteen-year gap and the Newey–West lag structure did not correspond
+straddle a fifteen-year gap and the Newey-West lag structure did not correspond
 to month-to-month dependence. Each class-month also carried equal weight
-regardless of the euros behind it. Estimation now runs on the two retail classes
-aggregated to one euro-weighted monthly series. The previous table read +0.0187
-(se 0.0148, p = 0.20) on 494 rows with R² 0.041, and concluded that no
+regardless of the euros behind it. Estimation now runs on the two retail
+classes aggregated to one euro-weighted monthly series. The previous table read
++0.0187 (se 0.0148, p = 0.20) on 494 rows with R² 0.041, and concluded that no
 coefficient was distinguishable from zero.
 
 The spread-widening coefficient is now statistically detectable, but it is
@@ -37,13 +37,13 @@ effect stays at zero.
 
 ## The three pre-registered predictions
 
-**1. Widening draws subscriptions — direction right, and now precise.**
+1. Widening draws subscriptions: direction right, and now precise.
 The coefficient is positive, as predicted, and it is the largest in the
 specification. A one percentage point wider spread is associated with 2.1
 percent more of the opening stock repriced per month (se 0.6). Precision is no
 longer the binding problem; identification is.
 
-**2. Asymmetry — not detectable.**
+2. Asymmetry: not detectable.
 
 | Quantity | Value |
 | --- | --- |
@@ -53,10 +53,10 @@ longer the binding problem; identification is.
 
 From 1,000 moving-block bootstrap replicates, 12-month blocks, seed 20260802.
 The point estimate has the predicted sign. The interval covers zero comfortably
-and is wide relative to the estimate. **This is the paper's sharpest prediction
-and the data does not support it.**
+and is wide relative to the estimate. This is the paper's sharpest prediction,
+and the data does not support it.
 
-**3. The policy break — direction right, and precise.**
+3. The policy break: direction right, and precise.
 Negative and the second-largest term, as predicted, at p = 0.002.
 
 ## Falsification
@@ -68,13 +68,13 @@ does not observe and has no reason to respond to. It should not load.
 | --- | --- | --- |
 | `share_fixed_rate_pct` | −0.00051 | 0.07 |
 
-**It now loads, marginally, and that is the most important number in this
-report.** Under the previous stacked-panel estimator it sat at −0.00019 with
-p = 0.86 and was read as reassurance. On the corrected monthly series it is
-close enough to conventional significance to be a warning instead.
+It now loads, marginally, and that is the most important number in this report.
+Under the previous stacked-panel estimator it sat at −0.00019 with p = 0.86 and
+was read as reassurance. On the corrected monthly series it is close enough to
+conventional significance to be a warning instead.
 
-A statistic no household observes should carry no weight. That it does — at the
-same time as the main coefficient became significant — is the signature of
+A statistic no household observes should carry no weight. That it does, at the
+same time as the main coefficient became significant, is the signature of
 common time variation the specification cannot separate from the spread. Both
 terms are picking up something that moves with the calendar.
 

@@ -14,19 +14,19 @@ explicitly labelled as in-sample variants.
 
 ---
 
-## S1 — frozen baseline
+## S1: frozen baseline
 
-- **Frozen at**: commit `0b5b063`, 2026-08-02, before any estimation was run.
-- **Status**: frozen. This is the specification the conditional validation
+- Frozen at: commit `0b5b063`, 2026-08-02, before any estimation was run.
+- Status: frozen. This is the specification the conditional validation
   exercise will use.
 
-**Outcome.** `positive_outstanding_value_change_share`, the positive part of
-the monthly outstanding-value change divided by opening stock (see
+Outcome: `positive_outstanding_value_change_share`, the positive part of the
+monthly outstanding-value change divided by opening stock (see
 `docs/repricing_data_model.md`). The legacy `repriced_share` column is retained
 as an alias for old artefacts, but the outcome is no longer interpreted as a
 lower bound on gross repricing.
 
-**Regressors.**
+Regressors:
 
 | Term | Reason |
 | --- | --- |
@@ -35,21 +35,22 @@ lower bound on gross repricing.
 | `post_policy_break` | The June 2023 terms change, dated from the data |
 | `average_residual_term_years` | Portfolio composition control |
 
-**Estimator.** OLS with heteroskedasticity- and autocorrelation-consistent
-(Newey–West) standard errors, 12 monthly lags.
+Estimator: OLS with heteroskedasticity- and autocorrelation-consistent
+(Newey-West) standard errors, 12 monthly lags.
 
-**Why not cluster-robust.** The panel has two instrument classes. Cluster-robust
-inference with two clusters is not valid, and reporting it would be worse than
-not reporting it. HAC on the time dimension is the honest choice given a short
-panel with many periods and few units. Stated in the manuscript.
+Cluster-robust inference is not used because the panel has two instrument
+classes. Two clusters are not enough for valid cluster-robust inference, and
+reporting it would be worse than not reporting it. HAC on the time dimension is
+the honest choice given a short panel with many periods and few units. Stated
+in the manuscript.
 
-**Why not a hazard model.** The redemption margin is not identified from net
-stock. Recorded in `docs/repricing_design_revision.md`.
+The hazard model is dropped because the redemption margin is not identified
+from net stock. Recorded in `docs/repricing_design_revision.md`.
 
-**Sample.** Savings certificates and Treasury certificates, monthly, from the
-first month with a lagged covariate.
+Sample: Savings certificates and Treasury certificates, monthly, from the first
+month with a lagged covariate.
 
-**Pre-registered predictions.**
+Pre-registered predictions:
 
 1. `spread_widening_pp` loads positively: a wider spread in the certificate's
    favour draws subscriptions, repricing the stock faster.
@@ -86,9 +87,9 @@ Current reading: Several associations are precisely estimated after correcting t
 asymmetry interval [-0.016, +0.046] still covers zero, and the placebo loads
 at p = 0.07. The specification was not touched in either revision.
 
-**One specification has been estimated. No search was performed.** Any variant
-from here is an in-sample variant, reported alongside S1 rather than replacing
-it, and appended to the table above when it is run.
+One specification has been estimated. No search was performed. Any variant from
+here is an in-sample variant, reported alongside S1 rather than replacing it,
+and appended to the table above when it is run.
 
 ## Conditional historical validation, run on the frozen specification
 
@@ -114,11 +115,11 @@ These figures have been revised twice since this log was first written, and the
 specification was not touched either time. The original table
 (52.44/55.69, 47.81/45.16, 14.24/14.66) came from a backtest that applied each
 year's yield to the entire cumulative repriced share rather than to the cohort
-that repriced, built its kernel at zero shock — which silences the behavioural
-channel whatever response is supplied — and used the end-of-sample portfolio
+that repriced, built its kernel at zero shock, which silences the behavioural
+channel whatever response is supplied, and used the end-of-sample portfolio
 state at every cut. The second revision followed from feeding the model named
 after the estimate the fitted response instead of zero. Both were
 implementation defects, not specification changes, which is why the count below
 still reads one.
 
-**Total specifications estimated: one.**
+Total specifications estimated: one.

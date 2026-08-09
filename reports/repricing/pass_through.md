@@ -37,7 +37,7 @@ The negative finding is informative because of *where* it leaves the
 contribution. The WAM benchmark is hard to beat on a four-year horizon because
 both kernels are anchored to the same published maturity and fed the same
 realised yields. What differs between them is shape, and shape matters most in
-the first year — which a four-observation backtest barely sees.
+the first year, which a four-observation backtest barely sees.
 
 So the comparison result in `reports/repricing/kernel.md` and this null are
 consistent: the standard proxy differs materially from the composition-sensitive
@@ -54,10 +54,10 @@ The simulated half-lives differ by direction:
 | +50, +100, +200 bps | 2 years |
 | −50, −100, −200 bps | 3 years |
 
-This asymmetry is mechanical, not estimated. The behavioural track clips its
-response at zero, so a rate fall cannot produce a negative behavioural
-contribution. The clip is a modelling choice, and it manufactures exactly the
-asymmetry the original design predicted.
+This asymmetry comes from the modelling rule, not from estimation. The
+behavioural track clips its response at zero, so a rate fall cannot produce a
+negative behavioural contribution. The clip is a modelling choice, and it
+manufactures exactly the asymmetry the original design predicted.
 
 The estimated asymmetry was a null with a 95 percent interval of
 [−0.020, +0.044]. Any asymmetry in these paths is an artefact of the clip and is
@@ -94,4 +94,4 @@ is why the cumulative euro column is identical across paths.
    horizons where this backtest has least power.
 3. The apparent asymmetry in half-lives is a modelling artefact.
 4. Replacing fixed GDP with an illustrative central growth path cuts the
-   five-year burden ratio by 18 percent mechanically through the denominator.
+   five-year burden ratio by 18 percent through the denominator.

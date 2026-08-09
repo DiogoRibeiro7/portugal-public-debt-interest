@@ -35,22 +35,22 @@ paper is about.
 Two facts follow, and both matter more than anything a hazard regression would
 have told us.
 
-**1. The retail channel ran in the opposite direction to the hypothesis.** The
+First, the retail channel ran in the opposite direction to the hypothesis. The
 original claim was that a rate rise accelerates its own pass-through because
 holders redeem on demand and reinvest at the new rate. In the one large
 tightening episode in the sample, Portuguese households did the reverse: the
 retail stock grew 151 percent between June 2022 and May 2023, from 12.9 to 32.6
 billion euro. Correlation between net flow and the household deposit rate is
-**−0.20** over the full sample and **−0.23** in the tightening window. The sign
-is against the hypothesis, not merely insignificant.
+−0.20 over the full sample and −0.23 in the tightening window. The sign is
+against the hypothesis, not merely insignificant.
 
 The mechanism is not mysterious. The certificate's remuneration formula tracked
 short rates, so when policy tightened the certificate out-competed bank
 deposits rather than being out-competed by them. The competing-return spread
 moved in the certificate's favour.
 
-**2. There is a sharp, dateable policy break in June 2023.** Subscriptions stop
-almost immediately: +3,549 in March, +670 in June, +39 by October, and the
+Second, there is a sharp, dateable policy break in June 2023. Subscriptions
+stop almost immediately: +3,549 in March, +670 in June, +39 by October, and the
 stock is flat to slightly negative from November 2023 onward. A discrete change
 in the terms offered on new subscriptions switched the channel off. That break
 is a far cleaner identification lever than a smoothly estimated hazard.
@@ -59,7 +59,7 @@ is a far cleaner identification lever than a smoothly estimated hazard.
 
 ## What is and is not identifiable
 
-**Not identifiable, and to be dropped rather than fudged:**
+Not identifiable, and to be dropped rather than fudged:
 
 - *The voluntary redemption hazard.* Net stock is subscriptions minus
   redemptions. A flat month is equally consistent with no activity and with
@@ -71,7 +71,7 @@ is a far cleaner identification lever than a smoothly estimated hazard.
 - *The contractual track read off a dated schedule.* Only summary maturity
   statistics exist.
 
-**Identifiable, and arguably better identified than the original design:**
+Identifiable, and arguably better identified than the original design:
 
 - *The positive stock-value margin.* The published stock is outstanding value,
   so positive monthly changes mix principal flows and capitalised interest.
@@ -98,7 +98,7 @@ is a far cleaner identification lever than a smoothly estimated hazard.
 
 Three options, in descending order of what they claim.
 
-### Option A — subscription-margin repricing with a policy break (recommended)
+### Option A: subscription-margin repricing with a policy break (recommended)
 
 Replace the competing-risks frame with a repricing-flow model on the margin the
 data actually observes.
@@ -116,26 +116,28 @@ data actually observes.
   response in the widening direction, and honest silence about the narrowing
   direction, which the sample does not contain.
 
-**What it claims:** the repricing kernel can be made sensitive to the rate path,
-and the retail episode is visible in aggregate stock-value data. The behavioural
-coefficient remains descriptive because the gross-flow and accounting
-decomposition is missing.
-**What it gives up:** the competing-risks machinery, the redemption hazard, and
-the survival-analysis framing.
+What it claims: the repricing kernel can be made sensitive to the rate path,
+and the retail episode is visible in aggregate stock-value data. The
+behavioural coefficient remains descriptive because the gross-flow and
+accounting decomposition is missing.
 
-### Option B — WAM comparison only
+What it gives up: the competing-risks machinery, the redemption hazard, and the
+survival-analysis framing.
+
+### Option B: WAM comparison only
 
 Drop the behavioural component entirely. Quantify the difference in the
 weighted-average-maturity approximation using the shape argument alone: a
 memoryless hazard with the same mean maturity retires far less of the stock over
 a decade than a realistic profile does.
 
-**What it claims:** a methodological result about a standard proxy, with a
-fiscal magnitude attached.
-**What it gives up:** the entire behavioural contribution, which was the
-paper's original point of novelty.
+What it claims: a methodological result about a standard proxy, with a fiscal
+magnitude attached.
 
-### Option C — proceed as designed, with the missing inputs manually ingested
+What it gives up: the entire behavioural contribution, which was the paper's
+original point of novelty.
+
+### Option C: proceed as designed, with the missing inputs manually ingested
 
 Still available if the redemption profile and gross flows can be obtained from
 IGCP directly. The manual-ingest specifications are written and the loaders are
@@ -145,12 +147,12 @@ specified; only the files are missing.
 
 ## Recommendation
 
-**Option A.** The finding that the retail stock rose during tightening is not a
-setback; it is the more interesting empirical episode, and it is firmly in the
-data rather than in a model. A paper that says "the standard proxy is
-incomplete, the retail episode is visible, and the behavioural coefficient is
-descriptive rather than identified" is stronger than the original design would
-have produced.
+Option A is the recommended design. The finding that the retail stock rose
+during tightening is not a setback; it is the more interesting empirical
+episode, and it is firmly in the data rather than in a model. A paper that says
+"the standard proxy is incomplete, the retail episode is visible, and the
+behavioural coefficient is descriptive rather than identified" is stronger than
+the original design would have produced.
 
 The original hypothesis should be stated in the paper and reported as
 contradicted. That is a result, and burying it would be the one genuinely

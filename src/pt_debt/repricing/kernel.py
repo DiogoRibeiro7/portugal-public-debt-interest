@@ -16,7 +16,7 @@ average maturity, and this one is not.
 On the shape counterfactual
 ---------------------------
 A memoryless hazard with mean maturity ``m`` leaves ``exp(-h/m)`` unrepriced at
-horizon ``h`` — a long right tail. A real redemption profile with the *same
+horizon ``h``: a long right tail. A real redemption profile with the *same
 mean* retires far more by ``h``. Since no dated schedule is published (see
 ``docs/manual_ingest.md``), the contrast uses a linear retirement profile with
 the same mean, which is a stylised standard shape and **not** IGCP's actual
@@ -273,11 +273,11 @@ def bias_table(
 
     The bias is decomposed into two mechanisms, separately quantified:
 
-    *Shape* — a memoryless hazard has a long right tail, so it under-retires
+    *Shape*: a memoryless hazard has a long right tail, so it under-retires
     relative to a real profile with the same mean. This exists even with no
     behavioural response at all.
 
-    *Behaviour* — the shock-responsive retail component. Its band comes from the
+    *Behaviour*: the shock-responsive retail component. Its band comes from the
     estimation, which returned a null, so it spans zero.
     """
     benchmark = wam_implied_kernel(inputs, horizons)["repriced_share"].to_numpy()

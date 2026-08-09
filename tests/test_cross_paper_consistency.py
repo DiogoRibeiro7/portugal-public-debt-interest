@@ -33,7 +33,7 @@ def test_growth_path_correction_matches_the_scenario_artefact() -> None:
     assert not paths.empty
     text = _paper_text()
     assert "denominator sensitivity, not a forecast" in text
-    assert "mechanically on the chosen growth\npath" in text
+    assert "follows directly from the chosen growth path" in text
 
 
 def test_the_shape_reversal_caveat_is_present() -> None:
