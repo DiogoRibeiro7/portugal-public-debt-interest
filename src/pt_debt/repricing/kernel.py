@@ -16,12 +16,13 @@ average maturity, and this one is not.
 
 On the shape counterfactual
 ---------------------------
-A memoryless hazard with mean maturity ``m`` leaves ``exp(-h/m)`` unrepriced at
-horizon ``h``: a long right tail. A real redemption profile with the *same
-mean* retires far more by ``h``. Since no dated schedule is published (see
-``docs/manual_ingest.md``), the contrast uses a linear retirement profile with
-the same mean, which is a stylised standard shape and **not** IGCP's actual
-schedule. That substitution is stated wherever the shape bias is reported.
+A discrete memoryless annual hazard with mean maturity ``m`` leaves
+``(1 - 1 / m) ** h`` unrepriced at horizon ``h``: a long right tail. The chosen
+linear retirement profile with the same mean retires more quickly at early
+horizons than that geometric benchmark. Since no dated schedule is published
+(see ``docs/manual_ingest.md``), the contrast is a stylised standard shape and
+**not** IGCP's actual schedule. That substitution is stated wherever the shape
+bias is reported.
 """
 
 from __future__ import annotations
@@ -83,8 +84,11 @@ class KernelInputs:
     retail_fixed_share: float = 0.0
 
     def __post_init__(self) -> None:
-        if self.average_residual_maturity_years <= 0:
-            raise ValidationError("average residual maturity must be positive")
+        if self.average_residual_maturity_years < 1.0:
+            raise ValidationError(
+                "average residual maturity must be at least one year for the "
+                "discrete annual WAM hazard"
+            )
         for name, value in (
             ("fixed_rate_share", self.fixed_rate_share),
             ("retail_share_of_stock", self.retail_share_of_stock),
@@ -145,6 +149,10 @@ def geometric_kernel(
     This is exactly the burden paper's assumption, and the benchmark this
     paper treats as incomplete for horizon-specific refixing and pass-through.
     """
+    if mean_maturity_years < 1.0:
+        raise ValidationError(
+            "mean maturity must be at least one year for the discrete annual WAM hazard"
+        )
     hazard = 1.0 / mean_maturity_years
     return 1.0 - (1.0 - hazard) ** horizons
 
@@ -180,6 +188,8 @@ def build_kernel(
     """
     if reset_cycle_years <= 0.0:
         raise ValidationError("reset cycle must be positive")
+    if retail_reset_cycle_years <= 0.0:
+        raise ValidationError("retail reset cycle must be positive")
 
     grid = np.asarray(horizons, dtype=float)
     classes = inputs.partition()
