@@ -4,7 +4,7 @@
 
 Date: 2026-08-09
 
-Audit subject: package version 0.6.2, working tree after revision-9 reviewer
+Audit subject: package version 0.6.3, working tree after revision-9 reviewer
 terminology, API validation and audit cleanup.
 
 ### Test status depends on the environment, and both are recorded
