@@ -216,6 +216,15 @@ def _row(frame: pd.DataFrame, column: str, value: str | int) -> pd.Series:
     return match.iloc[0]
 
 
+def _profile_reference_date(profile: pd.DataFrame) -> pd.Timestamp:
+    if "reference_date" not in profile.columns:
+        raise ValidationError("refixing profile is missing reference_date")
+    dates = pd.Series(pd.to_datetime(profile["reference_date"]).dropna()).drop_duplicates()
+    if len(dates) != 1:
+        raise ValidationError("refixing profile must have one reference_date")
+    return pd.Timestamp(dates.iloc[0])
+
+
 def _refixing_rows(profile: pd.DataFrame, inputs: KernelInputs) -> list[list[str]]:
     comparison = refixing_comparison(profile, inputs)
     rows: list[list[str]] = []
@@ -227,8 +236,10 @@ def _refixing_rows(profile: pd.DataFrame, inputs: KernelInputs) -> list[list[str
             [
                 label,
                 _fmt(100.0 * _as_float(row.published_share), 1),
+                _fmt(100.0 * _as_float(row.wam_implied_share), 1),
                 _fmt(100.0 * _as_float(row.kernel_implied_share), 1),
-                _fmt(row.difference_pp, 1),
+                _fmt(row.wam_minus_published_pp, 1),
+                _fmt(row.kernel_minus_published_pp, 1),
             ]
         )
     return rows
@@ -325,14 +336,23 @@ def build_macros(processed_dir: Path, panel_path: Path) -> list[str]:
     ]
 
     # --- backtest
+    scenario_wins = 0
     for cut in (2014, 2018, 2021):
         window = backtest.loc[backtest["cut_year"].eq(cut)]
+        est = float(_row(window, "model", "estimated_kernel")["mean_abs_error_bps"])
+        wam = float(_row(window, "model", "wam_benchmark")["mean_abs_error_bps"])
+        if est < wam:
+            scenario_wins += 1
         for model, label in (
             ("estimated_kernel", "Est"),
             ("wam_benchmark", "Wam"),
         ):
             value = _row(window, "model", model)["mean_abs_error_bps"]
             macros.append(_macro(f"Backtest{label}{WORDS[cut]}", f"{value:.2f}"))
+        macros.append(
+            _macro(f"BacktestMargin{WORDS[cut]}", f"{abs(wam - est):.2f}")
+        )
+    macros.append(_macro("BacktestScenarioWins", f"{scenario_wins}"))
 
     # --- growth-path correction
     at_five = paths.loc[paths["shock_bps"].eq(100) & paths["horizon_years"].eq(5)]
@@ -486,13 +506,16 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
             header=[
                 "Horizon",
                 "Proxy share (\\%)",
-                "Scenario share (\\%)",
+                "Scenario exposure (\\%)",
                 "Difference (pp)",
                 "Shape (pp)",
                 "Behaviour (pp)",
             ],
             rows=bias_rows,
-            notes="Source: author calculations. Shape and behaviour sum to the total.",
+            notes=(
+                "Source: author calculations. Shape and behaviour sum to the "
+                "reported pass-through exposure difference."
+            ),
             resize=True,
         ),
         encoding="utf-8",
@@ -502,25 +525,33 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
     refixing_path = Path(REFIXING_PROFILE_PATH)
     if refixing_path.is_file():
         profile = pd.read_csv(refixing_path)
-        reference = str(profile["reference_date"].iloc[0])
+        reference_date = _profile_reference_date(profile)
+        reference = reference_date.strftime("%Y-%m-%d")
+        refixing_inputs = _kernel_inputs_from_panel(panel, as_of=reference_date)
         path = table_dir / "refixing_comparison.tex"
         path.write_text(
             _table(
-                caption="Official ESDM refixing benchmark and scenario kernel",
+                caption="Official ESDM refixing benchmark, WAM proxy, and scenario kernel",
                 label="tab:refixing-comparison",
-                columns="lrrr",
+                columns="lrrrrr",
                 header=[
                     "Window, years",
                     "ESDM share (\\%)",
+                    "WAM share (\\%)",
                     "Scenario share (\\%)",
-                    "Difference (pp)",
+                    "WAM minus ESDM (pp)",
+                    "Scenario minus ESDM (pp)",
                 ],
-                rows=_refixing_rows(profile, inputs),
+                rows=_refixing_rows(profile, refixing_inputs),
                 notes=(
                     "Official shares are Portugal's ESDM refixing-risk "
                     f"windows at {reference}, as published by IGCP. The "
-                    "comparison uses the same cumulative windows."
+                    "WAM and scenario columns use the monthly panel state at "
+                    "or before that date and the same cumulative windows. "
+                    "The comparison is qualified by different denominator and "
+                    "portfolio-basis conventions across sources."
                 ),
+                resize=True,
             ),
             encoding="utf-8",
         )
@@ -565,7 +596,7 @@ def write_tables(processed_dir: Path, panel_path: Path, output_dir: Path) -> lis
             header=[
                 "Scenario",
                 "One-year difference (pp)",
-                "Five-year repriced share (\\%)",
+                "Five-year pass-through exposure (\\%)",
                 "Five-year burden (\\% GDP)",
             ],
             rows=sensitivity_rows,

@@ -47,12 +47,12 @@ def test_geometric_benchmark_is_memoryless() -> None:
 
 def test_kernel_components_sum_to_the_total() -> None:
     kernel = build_kernel(INPUTS, shock_bps=100, behavioural_response=0.0187)
-    parts = (
-        kernel["contractual_share"]
-        + kernel["reset_share"]
-        + kernel["behavioural_share"]
-    )
+    parts = kernel["contractual_share"] + kernel["reset_share"]
     assert parts.to_numpy() == pytest.approx(kernel["repriced_share"].to_numpy())
+    exposure = parts + kernel["new_funding_share"]
+    assert exposure.to_numpy() == pytest.approx(
+        kernel["shock_weighted_share"].to_numpy()
+    )
     assert (kernel["repriced_share"] <= 1.0).all()
     assert (kernel["repriced_share"] >= 0.0).all()
 
@@ -79,11 +79,17 @@ def test_behavioural_band_is_open_at_zero() -> None:
 
 
 def test_kernel_responds_to_the_shock() -> None:
-    """The kernel is a function of the shock, not a portfolio constant."""
-    unshocked = build_kernel(INPUTS, 0, 0.0187)["repriced_share"]
-    shocked = build_kernel(INPUTS, 100, 0.0187)["repriced_share"]
+    """The fiscal exposure is a function of the shock, not a portfolio constant."""
+    unshocked = build_kernel(INPUTS, 0, 0.0187)["shock_weighted_share"]
+    shocked = build_kernel(INPUTS, 100, 0.0187)["shock_weighted_share"]
     assert (shocked >= unshocked).all()
-    assert (shocked > unshocked).any(), "the kernel is insensitive to the shock"
+    assert (shocked > unshocked).any(), "the exposure is insensitive to the shock"
+
+
+def test_behaviour_is_not_opening_stock_repricing() -> None:
+    flat = build_kernel(INPUTS, 150.0, 0.0)["repriced_share"]
+    responsive = build_kernel(INPUTS, 150.0, 0.5)["repriced_share"]
+    assert responsive.equals(flat)
 
 
 def test_fiscal_translation_scales_with_the_shock() -> None:
@@ -249,9 +255,13 @@ class TestRefixingComparison:
     def test_it_reports_one_row_per_bracket(self) -> None:
         result = refixing_comparison(self._profile(), self.INPUTS)
         assert len(result) == 3
-        assert {"published_share", "kernel_implied_share", "difference_pp"} <= set(
-            result.columns
-        )
+        assert {
+            "published_share",
+            "wam_implied_share",
+            "kernel_implied_share",
+            "wam_minus_published_pp",
+            "kernel_minus_published_pp",
+        } <= set(result.columns)
 
     def test_missing_columns_are_rejected(self) -> None:
         """A half-digitised chart must fail loudly, not compare against nothing."""

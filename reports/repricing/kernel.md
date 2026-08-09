@@ -9,7 +9,7 @@ average maturity.
 
 ## Scenario-minus-WAM differences at +100 bps
 
-| Horizon | WAM-implied share | Scenario share | Difference | Shape | Behaviour |
+| Horizon | WAM-implied share | Scenario exposure | Difference | Shape | Behaviour |
 | --- | --- | --- | --- | --- | --- |
 | 1 year | 13.30% | 19.89% | +6.60 pp | +6.60 | 0.00 |
 | 3 years | 34.83% | 31.31% | -3.52 pp | -3.52 | 0.00 |
@@ -38,10 +38,12 @@ retained as a sensitivity band, not as the central result.
 IGCP's May 2026 investor presentation reports Portugal's ESDM refixing-risk
 windows at end-March 2026. The official windows are now recorded in
 `data/raw/manual/igcp_refixing_profile.csv` and included in the manuscript as a
-generated comparison table. The benchmark is coarser than the model: it checks
-cumulative one-year and five-year refixing windows, but it does not supply
-instrument-level reset dates, reference-index loadings or retail gross-flow
-decomposition.
+generated comparison table against both WAM and the scenario kernel evaluated
+from the monthly panel state available at the same reference date. The
+benchmark is coarser than the model and uses the debt manager's adjusted
+portfolio basis: it checks cumulative one-year and five-year refixing windows,
+but it does not supply instrument-level reset dates, reference-index loadings
+or retail gross-flow decomposition.
 
 ## Fiscal translation
 

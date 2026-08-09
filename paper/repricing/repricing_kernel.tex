@@ -39,13 +39,16 @@ spread does carry a detectable positive association with retail repricing, but
 the falsification test loads at $p = \PlaceboP$ on a statistic no household
 observes, so the association is reported as descriptive rather than identified;
 the bootstrap interval for asymmetry is [\AsymmetryLow, \AsymmetryHigh]; and
-the kernel beats the maturity benchmark at only one of three cut dates out of
-sample. The raw episode is nevertheless informative, because
-households moved money into certificates during the 2022--2023 tightening
-rather than redeeming them. The defensible result is a bounded sensitivity
-exercise. Portuguese aggregate data are enough to show that weighted average
-maturity does not pin down one-year pass-through, but not enough to identify a
-single behavioural correction or a single fiscal euro amount.
+conditional historical validation gives no stable forecasting claim. In the
+current generated tables the scenario kernel is ahead at
+\BacktestScenarioWins\ of three cut dates, but the margins are small and have
+moved with implementation corrections. The raw episode is nevertheless
+informative, because households moved money into certificates during the
+2022--2023 tightening rather than redeeming them. The defensible result is a
+bounded sensitivity exercise. Portuguese aggregate data are enough to show
+that weighted average maturity does not pin down one-year pass-through, but
+not enough to identify a single behavioural correction or a single fiscal euro
+amount.
 \end{abstract}
 
 \section{Introduction}
@@ -194,6 +197,13 @@ inflow. The figure is not causal evidence on its own, but it is enough to
 discipline the empirical design: the paper should model the subscription
 margin and should not pretend to have observed gross redemptions.
 
+IGCP's May 2026 investor presentation gives an external check on that reading:
+its retail net-subscription chart shows the same 2022--2023 inflow episode and
+subsequent cooling \cite{igcp2026}. I use that chart qualitatively. It is not
+digitised into the regression sample, and it does not replace the missing
+gross subscription and redemption series that would be needed to estimate a
+redemption hazard.
+
 \section{Data construction}
 \label{sec:data}
 
@@ -252,13 +262,15 @@ what changes when part of the stock reprices without maturing?
 \section{Kernel framework}
 \label{sec:framework}
 
-Let $K(h)$ be the share of the stock outstanding at the horizon origin that
-carries a repriced rate by horizon $h$. The notation is simple, but the
-interpretation is important. A euro can join $K(h)$ because it matures and is
-reissued, because it resets while staying outstanding, or because new retail
-money arrives on the offered rate. Those are different clocks. Putting them
-into one hazard is convenient, but it hides the part of the mechanism this
-paper is trying to measure.
+Let $K_{\mathrm{stock}}(h)$ be the share of the stock outstanding at the
+horizon origin that carries a repriced rate by horizon $h$. The notation is
+simple, but the interpretation is important. A euro can join
+$K_{\mathrm{stock}}(h)$ because it matures and is reissued, or because it
+resets while staying outstanding. New retail money arriving on the offered
+rate is different: it can affect fiscal exposure to the shock, but it is not a
+repricing event for the opening stock. Putting those objects into one hazard is
+convenient, but it hides the part of the mechanism this paper is trying to
+measure.
 
 The contractual component is debt that reprices by maturing and being reissued.
 This is the component for which a maturity clock is conceptually appropriate.
@@ -309,13 +321,16 @@ maturity statistic, and the imposed contractual and reset shapes should be
 checked against it.
 
 That check is now included. IGCP's investor presentation reports the ESDM
-refixing-risk windows for Portugal, and Table
-\ref{tab:refixing-comparison} compares those published windows with the
-scenario kernel. This is a benchmark, not a full calibration. The ESDM chart is
-cumulative and coarse, while the model still has to impose reset timing,
-contractual shape and shock loading. The comparison is useful precisely because
-it asks whether the scenario kernel is in the neighbourhood of the debt
-manager's own refixing view before the paper turns to the WAM benchmark.
+refixing-risk windows for Portugal at end-March 2026, and Table
+\ref{tab:refixing-comparison} compares those published windows with both the
+WAM proxy and the scenario kernel evaluated from the monthly panel state
+available at that same date. This is a benchmark, not a full calibration. The
+ESDM chart is cumulative and coarse, and the denominator is the debt manager's
+adjusted portfolio rather than the exact portfolio basis used in the monthly
+panel. The model still has to impose reset timing, contractual shape and shock
+loading. The comparison is useful precisely because it asks whether the
+scenario kernel is in the neighbourhood of the debt manager's own refixing view
+before the paper turns to the simpler WAM benchmark.
 
 \input{tables/refixing_comparison.tex}
 
@@ -336,36 +351,45 @@ the discrete annual constant-hazard formula used in the companion burden paper.
 It is memoryless: it implies a long right tail, leaving a substantial share
 unrepriced after a decade.
 
-The scenario kernel is
+The opening-stock scenario kernel is
 \begin{equation}
-  K(h,\Delta)
+  K_{\mathrm{stock}}(h)
   =
   K^{C}(h)
-  +
-  K^{R}(h)
-  +
-  K^{B}(h,\Delta),
+  + K^{R}(h),
   \label{eq:kernel}
 \end{equation}
-where $K^{C}$ is contractual repricing, $K^{R}$ is reset repricing, and
-$K^{B}$ is behavioural repricing under shock $\Delta$. The difference relative
-to the maturity proxy is then
+where $K^{C}$ is contractual repricing and $K^{R}$ is reset repricing. The
+fiscal pass-through exposure used in shock translations is
 \begin{equation}
-  B(h,\Delta) = K(h,\Delta) - K^{\mathrm{WAM}}(h).
+  P(h,\Delta)
+  =
+  K^{C}(h)
+  + \lambda K^{R}(h)
+  + F^{N}(h,\Delta)/D_{0},
+  \label{eq:pass-through}
+\end{equation}
+where $\lambda$ is the shock loading on reset instruments,
+$F^{N}(h,\Delta)$ is new retail funding attracted at the prevailing rate, and
+$D_{0}$ is the opening debt stock. The difference relative to the maturity
+proxy is then
+\begin{equation}
+  B(h,\Delta) = P(h,\Delta) - K^{\mathrm{WAM}}(h).
   \label{eq:bias}
 \end{equation}
 The decomposition reported in the tables splits $B$ into a shape component and
 a behavioural component. Neither is an identified estimate. The shape component
 combines observed portfolio composition with an \emph{imposed} linear
 retirement track and an \emph{imposed} reset cycle, because the dated
-redemption schedule is not published; the paper shows below that a two-year
-reset assumption reverses the sign at one year. The behavioural component uses
-a subscription response that is precisely estimated but not identified. Both
-are therefore model-based sensitivities. The claim this paper defends is not
-that the difference equals a particular number, but that weighted average
-maturity and a mean do not determine a unique repricing path: plausible
-composition and timing assumptions generate materially different paths, of
-different signs relative to the constant-hazard benchmark.
+redemption schedule is not published; the paper shows below that the sign is
+robust to the reported reset-timing alternatives but not to weaker shock
+loading. The behavioural component uses a subscription response that is
+precisely estimated but not identified. Both are therefore model-based
+sensitivities. The claim this paper defends is not that the difference equals a
+particular number, but that weighted average maturity and a mean do not
+determine a unique repricing path: plausible composition, timing, loading and
+new-funding assumptions generate materially different paths, of different
+signs relative to the constant-hazard benchmark.
 
 \section{Estimation}
 \label{sec:estimation}
@@ -573,13 +597,14 @@ The one-year difference range across those checks is \SensitivityRangeHOne\
 percentage points. Two rows matter most because they attack the compositional
 claim directly, and they do so through different assumptions. If reset
 instruments are assumed to take longer to receive the new rate, the first-year
-correction changes sign. It also changes sign if they receive the rate on
-schedule but absorb only half the shock: the reset-loading rows hold timing
-fixed and vary transmission alone, and that is enough to move the one-year
-result from positive to negative on its own. Timing and loading are therefore
-both first-order, which is the sharpest form of the paper's argument --- a
-published maturity statistic constrains neither, so it cannot pin down the sign
-of the one-year correction, let alone its size. The behavioural
+correction remains positive in the reported slow-reset and fast-reset
+alternatives, although its size moves. The sign changes only when the reset
+block receives the new rate on schedule but absorbs less of the shock:
+the reset-loading rows hold timing fixed and vary transmission alone, and that
+is enough to move the one-year result from positive to negative. Timing and
+loading are therefore both first-order, which is the sharpest form of the
+paper's argument --- a published maturity statistic constrains neither, so it
+cannot pin down the sign of the one-year correction, let alone its size. The behavioural
 rows matter less for the central conclusion. They widen or narrow the total,
 but they do not remove the reason the WAM proxy is incomplete. The defensible
 claim is therefore about non-identification by WAM alone, not systematic
@@ -656,11 +681,12 @@ rather than driven by a stand-in.
 \input{tables/model_comparison.tex}
 
 The scenario kernel has the lower mean absolute error at two of the three cut
-dates, by \emph{very} small margins: under a basis point at 2014 and 2018,
-while the WAM benchmark is better at 2021 by a similarly small amount. That
-ordering should not be read as forecasting skill. Three cut dates with between
-four and eleven annual observations each, separated by margins this size,
-cannot distinguish two timing assumptions.
+dates, by small and unstable margins: \BacktestMarginFourteen\ basis points at
+the 2014 cut and \BacktestMarginEighteen\ basis points at the 2018 cut, while
+the WAM benchmark is better at 2021 by \BacktestMarginTwentyOne\ basis points.
+That ordering should not be read as forecasting skill. Three cut dates with
+between four and eleven annual observations each, separated by margins this
+size, cannot distinguish two timing assumptions.
 
 The ordering has also moved every time an implementation defect was corrected,
 which is itself the most useful thing this section reports. Earlier versions
@@ -707,10 +733,13 @@ the end. The contractual track rests on a stylised retirement profile in the
 absence of a published schedule; the unit of observation is a class-month, not
 a holder; and the sample contains a single large tightening episode. The model
 also treats reset instruments as repricing within the first year rather than
-modelling their exact reset dates. The overlap between retail instruments and
-fixed-rate instruments is not identified from the aggregate margins alone. A
-stronger design would need mutually exclusive instrument categories, gross
-retail subscriptions and redemptions, and cohort-level repricing weights.
+modelling their exact reset dates. The four-way split between wholesale fixed,
+wholesale floating, retail fixed and retail variable instruments is now
+explicit and guarded in the code, so the remaining limitation is not an
+unresolved overlap in the opening-stock categories. It is the coarseness of the
+published aggregates: a stronger design would need ISIN- or cohort-level reset
+schedules, gross retail subscriptions and redemptions, and observed repricing
+weights.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -787,6 +816,10 @@ Monetary Fund, Technical Notes and Manuals 10/02.
 \bibitem{igcp2024}
 Ag\^{e}ncia de Gest\~{a}o da Tesouraria e da D\'{\i}vida P\'{u}blica (IGCP)
 (2025). \emph{Annual Report 2024}. Lisbon: IGCP.
+
+\bibitem{igcp2026}
+Ag\^{e}ncia de Gest\~{a}o da Tesouraria e da D\'{\i}vida P\'{u}blica (IGCP)
+(2026). \emph{Investor Presentation, May 2026}. Lisbon: IGCP.
 
 \end{thebibliography}
 

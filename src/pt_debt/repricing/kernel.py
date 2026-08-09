@@ -5,9 +5,10 @@ Three components, combined rather than conflated:
 1. **Contractual.** Debt that matures on schedule. No estimation.
 2. **Reset.** Floating-rate and inflation-linked debt reprices without exiting.
    Not a survival event; carried on its own track.
-3. **Behavioural.** Retail subscriptions onto the prevailing rate. Estimated,
+3. **New funding.** Retail subscriptions onto the prevailing rate. Estimated,
    and the estimate is not identified, so its central value is set to zero
-   and its band is reported as a sensitivity.
+   and its band is reported as a sensitivity. This is a flow exposure, not a
+   repricing event for the opening stock.
 
 The kernel is a *function of the shock*, not a scalar. That is the whole point:
 the burden paper's kernel is a constant hazard calibrated to published weighted
@@ -170,7 +171,7 @@ def build_kernel(
     reset_shock_loading: float = RESET_SHOCK_LOADING,
     retail_reset_cycle_years: float = RETAIL_RESET_CYCLE_YEARS,
 ) -> pd.DataFrame:
-    """Repriced share by horizon, decomposed into its three components.
+    """Repriced opening-stock share and shock exposure by horizon.
 
     ``behavioural_response`` is the monthly repricing response per percentage
     point of spread, from the estimation step. The estimate is precise but not
@@ -207,11 +208,9 @@ def build_kernel(
         grid / retail_reset_cycle_years, 0.0, 1.0
     )
 
-    # Behavioural: new retail money arriving on the prevailing rate. This is a
-    # flow, not a repricing of the opening stock, so it is additive to the
-    # partition rather than carved out of it -- the earlier construction gave
-    # the retail block a contractual base of its own, which double counted it
-    # against the tracks above.
+    # New funding: retail money arriving on the prevailing rate. This is a
+    # flow, not a repricing of the opening stock, so it enters the fiscal
+    # exposure calculation but not K_stock(h), the opening-stock kernel.
     spread_pp = shock_bps / 100.0
     monthly_boost = behavioural_response * spread_pp
     # Fall back to the undifferentiated retail share when the split is absent,
@@ -221,19 +220,19 @@ def build_kernel(
         classes["retail_variable"] + classes["retail_fixed"]
         or inputs.retail_share_of_stock
     )
-    behavioural = retail_stock * np.clip(monthly_boost * 12.0 * grid, 0.0, 1.0)
+    new_funding = retail_stock * np.clip(monthly_boost * 12.0 * grid, 0.0, 1.0)
 
-    total = np.clip(contractual + reset + behavioural, 0.0, 1.0)
+    opening_stock = np.clip(contractual + reset, 0.0, 1.0)
 
     # Physical repricing and shock transmission are not the same quantity. A
     # reset instrument reprices on schedule whatever the loading, but it only
-    # passes through the part of the shock its formula tracks. `repriced_share`
-    # answers "how much of the stock has a new rate"; `shock_weighted_share`
-    # answers "how much of the shock has reached the stock", and a rate
-    # translation wants the second. They coincide at unit loading, which is the
-    # default, so this column changes no existing result.
+    # passes through the part of the shock its formula tracks. New funding is
+    # added here as a flow exposure. `repriced_share` answers "how much of the
+    # opening stock has a new rate"; `shock_weighted_share` answers "how much
+    # of the shock has reached the portfolio basis used in the fiscal
+    # scenario."
     shock_weighted = np.clip(
-        contractual + reset * reset_shock_loading + behavioural, 0.0, 1.0
+        contractual + reset * reset_shock_loading + new_funding, 0.0, 1.0
     )
     return pd.DataFrame(
         {
@@ -241,8 +240,11 @@ def build_kernel(
             "shock_bps": float(shock_bps),
             "contractual_share": contractual,
             "reset_share": reset,
-            "behavioural_share": behavioural,
-            "repriced_share": total,
+            "new_funding_share": new_funding,
+            "behavioural_share": new_funding,
+            "opening_stock_repriced_share": opening_stock,
+            "repriced_share": opening_stock,
+            "pass_through_exposure_share": shock_weighted,
             "shock_weighted_share": shock_weighted,
         }
     )
@@ -288,10 +290,14 @@ def bias_table(
     ].to_numpy()
 
     central = build_kernel(inputs, shock_bps, behavioural_response, horizons)[
-        "repriced_share"
+        "shock_weighted_share"
     ].to_numpy()
-    low = build_kernel(inputs, shock_bps, behavioural_low, horizons)["repriced_share"].to_numpy()
-    high = build_kernel(inputs, shock_bps, behavioural_high, horizons)["repriced_share"].to_numpy()
+    low = build_kernel(inputs, shock_bps, behavioural_low, horizons)[
+        "shock_weighted_share"
+    ].to_numpy()
+    high = build_kernel(inputs, shock_bps, behavioural_high, horizons)[
+        "shock_weighted_share"
+    ].to_numpy()
 
     return pd.DataFrame(
         {
@@ -358,9 +364,9 @@ def refixing_comparison(
     the comparison executable and rejects ambiguous bracket definitions rather
     than silently substituting different horizons.
 
-    Returns one row per bracket with the published share, the share this
-    kernel implies over the same bracket, and the difference in percentage
-    points.
+    Returns one row per bracket with the published share, the share implied by
+    the WAM benchmark, the opening-stock scenario kernel over the same bracket,
+    and both differences in percentage points.
     """
     missing = [name for name in _REFIXING_COLUMNS if name not in profile.columns]
     if missing:
@@ -380,14 +386,22 @@ def refixing_comparison(
                 "refixing profile brackets must use integer-year edges; "
                 f"received {lower:g} to {upper:g}"
             )
-        cumulative = build_kernel(
+        kernel_cumulative = build_kernel(
             inputs,
             horizons=tuple(edges.astype(int)),
             reset_cycle_years=reset_cycle_years,
             retail_reset_cycle_years=retail_reset_cycle_years,
         )
-        implied = float(
-            cumulative["repriced_share"].iloc[-1] - cumulative["repriced_share"].iloc[0]
+        wam_cumulative = wam_implied_kernel(
+            inputs, horizons=tuple(edges.astype(int))
+        )
+        kernel_implied = float(
+            kernel_cumulative["repriced_share"].iloc[-1]
+            - kernel_cumulative["repriced_share"].iloc[0]
+        )
+        wam_implied = float(
+            wam_cumulative["repriced_share"].iloc[-1]
+            - wam_cumulative["repriced_share"].iloc[0]
         )
         published = float(str(row.share_of_portfolio))
         rows.append(
@@ -395,8 +409,11 @@ def refixing_comparison(
                 "bracket_lower_years": lower,
                 "bracket_upper_years": upper,
                 "published_share": published,
-                "kernel_implied_share": implied,
-                "difference_pp": (implied - published) * 100.0,
+                "wam_implied_share": wam_implied,
+                "kernel_implied_share": kernel_implied,
+                "wam_minus_published_pp": (wam_implied - published) * 100.0,
+                "kernel_minus_published_pp": (kernel_implied - published) * 100.0,
+                "difference_pp": (kernel_implied - published) * 100.0,
             }
         )
     return pd.DataFrame(rows)

@@ -4,7 +4,8 @@
 
 Date: 2026-08-09
 
-Audit subject: package version 0.6.0, source commit `187193e`.
+Audit subject: package version 0.6.0, working tree after revision-7 reviewer
+implementation, based on source commit `187193e`.
 
 ### Test status depends on the environment, and both are recorded
 
@@ -16,23 +17,23 @@ that need a git worktree. Those skips are expected, not failures.
 
 | Environment | Result |
 | --- | --- |
-| Author's populated working tree at commit `187193e` | 371 passed, 0 skipped |
+| Author's populated working tree after revision-7 implementation | 373 passed, 0 skipped |
 | Reviewer clean checkout of the prior revision-6 archive, no pipeline run | 345 passed, 19 skipped |
+| Reviewer-reported revision-7 source archive check | 371 collected: 352 passed, 19 skipped, 0 failed |
 
-Both runs reported zero failures. The clean-checkout row is retained because it
-corrects the release-note count a reviewer observed in the submitted archive.
+All recorded runs reported zero failures. The clean-checkout row is retained
+because it corrects the release-note count a reviewer observed in the submitted archive.
 A reviewer wanting the full local suite should run `pt-debt all` and
 `pt-debt repricing build-panel` before `pt-debt repricing all`.
 
-Commands completed successfully in the author's environment:
+Commands completed successfully in the author's environment for this revision
+pass:
 
-- `pytest`: 371 passed, 4 warnings.
-- `ruff check .`: passed.
+- `pytest -q`: all 373 collected tests passed.
+- `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py -q`: all 74 collected tests passed.
+- `ruff check src tests`: passed.
 - `mypy src`: passed, no issues in 35 source files.
-- `pytest tests/test_repricing_kernel.py tests/test_repricing_estimate.py tests/test_repricing_simulate.py tests/test_repricing_manuscript.py tests/test_release_metadata.py`: 70 passed.
-- `pt-debt repricing build-panel --config config/repricing.yaml`: completed.
-- `pt-debt repricing all --config config/repricing.yaml`: completed.
-- `pdflatex -interaction=nonstopmode -halt-on-error portugal_public_debt_interest_report.tex`: completed.
+- `pt-debt repricing paper --config config/repricing.yaml`: regenerated repricing manuscript tables, figures, and macros; no hand-typed results found.
 - `pdflatex -interaction=nonstopmode -halt-on-error repricing_kernel.tex`: completed twice.
 
 The live source-acquisition workflow was not rerun during this audit pass. The
@@ -50,9 +51,9 @@ and live regeneration remains documented in `docs/reproducibility.md`.
 - Generated paper figures: committed PDF figures under `reports/figures/`.
 - Repricing manuscript: `paper/repricing/repricing_kernel.tex` and
   `paper/repricing/repricing_kernel.pdf`.
-- Repricing PDF page count: 15.
+- Repricing PDF page count: 16.
 - Repricing PDF SHA-256:
-  `6a5d3f9fed21166a6bf6bfdf7ff62675508ad41168fd201db322c47ce2446812`.
+  `e5bd48424c12b68bec298c643de59c1f035cfc79b78040926dfb0a8fb3e83ae1`.
 - Release metadata: `CITATION.cff`, `.zenodo.json`, `pyproject.toml`, and
   `CHANGELOG.md`.
 
@@ -82,6 +83,16 @@ not part of the submitted source archive.
 - The repricing manuscript now frames weighted average maturity as an
   incomplete timing statistic and presents uncertainty rather than a single
   identified behavioural correction.
+- The repricing manuscript separates the opening-stock kernel
+  `K_stock(h)` from the fiscal pass-through exposure `P(h, Delta)`, so new
+  retail funding is no longer stored as an opening-stock repricing share.
+- The official ESDM refixing comparison now evaluates WAM and the scenario
+  kernel from the monthly panel state at or before the ESDM reference date
+  2026-03-31, and it reports ESDM, WAM, scenario, WAM-minus-ESDM, and
+  scenario-minus-ESDM columns.
+- The conditional historical validation language now reports the generated
+  winner pattern as a fragile two-of-three comparison, with margins generated
+  from the CSV rather than described as out-of-sample forecast evidence.
 - Current repricing support reports no longer repeat the superseded 10.90
   percentage-point or EUR 300 million claims, and the manuscript states that
   the central scenario-minus-WAM difference changes sign after the one-year

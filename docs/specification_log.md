@@ -102,9 +102,9 @@ effective rate is:
 
 | Cut | Scenario kernel | WAM benchmark |
 | --- | --- | --- |
-| 2014 | **42.48** | 43.24 |
-| 2018 | **12.79** | 12.92 |
-| 2021 | 9.52 | **9.81** |
+| 2014 | **40.35** | 43.24 |
+| 2018 | **12.50** | 12.92 |
+| 2021 | 10.08 | **9.81** |
 
 The scenario kernel wins two of the three cut dates, with margins that are
 small against the error levels. Reported in

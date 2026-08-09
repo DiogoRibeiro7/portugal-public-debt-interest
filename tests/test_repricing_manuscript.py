@@ -151,7 +151,7 @@ def test_repricing_terms_do_not_revert_to_old_bias_language() -> None:
         assert stale not in combined
 
     assert "Scenario-minus-WAM repricing differences" in combined
-    assert "Scenario share" in combined
+    assert "Scenario exposure" in combined
     assert "Conditional historical validation errors" in combined
     assert "statistically precise" in TEX_PATH.read_text(encoding="utf-8")
     assert "precision is not identification" in TEX_PATH.read_text(encoding="utf-8")
@@ -164,6 +164,10 @@ def test_repricing_paper_includes_the_official_refixing_benchmark() -> None:
     )
     assert r"\input{tables/refixing_comparison.tex}" in source
     assert "Official ESDM refixing benchmark" in table
+    assert "WAM share" in table
+    assert "Scenario minus ESDM" in table
+    assert "monthly panel state at or before that date" in table
+    assert "portfolio-basis conventions" in table
     assert "25.2" in table
     assert "50.9" in table
     assert "none has been performed" not in source
@@ -179,7 +183,24 @@ def test_backtest_prose_matches_current_winner_pattern() -> None:
     assert "2018 & Scenario kernel" in table
     assert "2021 & WAM benchmark" in table
     assert "two of the three cut" in source
+    assert "out of sample" not in source
+    assert "under a basis point at 2014 and 2018" not in source
+    assert r"\BacktestMarginFourteen" in source
+    assert r"\BacktestMarginEighteen" in source
+    assert r"\BacktestMarginTwentyOne" in source
     assert "lower mean absolute error at all three cut dates" not in source
+
+
+def test_repricing_paper_matches_revision7_sensitivity_and_limitations() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    normalised = " ".join(source.split())
+    assert "the sign is robust to the reported reset-timing alternatives" in normalised
+    assert "reset assumption reverses the sign" not in source
+    assert "two-year reset assumption reverses" not in source
+    assert "mutually exclusive instrument categories" not in source
+    assert "four-way split" in source
+    assert "new retail funding" in source
+    assert "not a repricing event for the opening stock" in normalised
 
 
 def test_current_repricing_reports_do_not_repeat_superseded_claims() -> None:

@@ -67,8 +67,9 @@ def simulate_paths(
     horizons = tuple(range(1, horizon_years + 1))
 
     baseline = {
-        name: build_kernel(inputs, 0, behavioural_response, horizons)["repriced_share"]
-        .to_numpy()
+        name: build_kernel(inputs, 0, behavioural_response, horizons)[
+            "shock_weighted_share"
+        ].to_numpy()
         for name in ("kernel",)
     }["kernel"]
 
@@ -77,7 +78,7 @@ def simulate_paths(
         for shock in shocks_bps:
             repriced = build_kernel(
                 inputs, shock, behavioural_response, horizons
-            )["repriced_share"].to_numpy()
+            )["shock_weighted_share"].to_numpy()
             shock_pct = shock / 100.0
 
             # Effective rate: the repriced portion carries the shocked rate.
@@ -229,7 +230,7 @@ def backtest(
 
     estimated = build_kernel(
         inputs, behavioural_shock_bps, behavioural_response, horizons
-    )["repriced_share"].to_numpy()
+    )["shock_weighted_share"].to_numpy()
     wam = geometric_kernel(
         np.asarray(horizons, dtype=float), inputs.average_residual_maturity_years
     )
@@ -436,7 +437,7 @@ def kernel_bootstrap_band(
                     shock_bps=shock_bps,
                     behavioural_response=response,
                     horizons=(horizon,),
-                )["repriced_share"].iloc[0]
+                )["shock_weighted_share"].iloc[0]
             )
             for response in draws
         ]
@@ -485,7 +486,7 @@ def scenario_fan_chart(
             behavioural_response=float(response),
             horizons=horizons,
         )
-        repriced = kernel["repriced_share"].to_numpy()
+        repriced = kernel["shock_weighted_share"].to_numpy()
         shock_pct = shock / 100.0
         years = np.asarray(horizons, dtype=float)
         gdp = nominal_gdp_mio_eur * (1.0 + growth) ** years

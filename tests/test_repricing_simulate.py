@@ -89,13 +89,15 @@ class TestBehaviouralChannelIsLive:
 
     def test_the_kernel_is_inert_at_zero_shock(self) -> None:
         """Why the old backtest was silently behaviour-free."""
-        at_zero = build_kernel(INPUTS, 0.0, 0.0, (1, 3))["repriced_share"]
-        responsive = build_kernel(INPUTS, 0.0, 0.5, (1, 3))["repriced_share"]
+        at_zero = build_kernel(INPUTS, 0.0, 0.0, (1, 3))["shock_weighted_share"]
+        responsive = build_kernel(INPUTS, 0.0, 0.5, (1, 3))["shock_weighted_share"]
         assert at_zero.equals(responsive)
 
     def test_a_nonzero_shock_makes_the_response_matter(self) -> None:
-        flat = build_kernel(INPUTS, 150.0, 0.0, (1, 3))["repriced_share"]
-        responsive = build_kernel(INPUTS, 150.0, 0.5, (1, 3))["repriced_share"]
+        flat = build_kernel(INPUTS, 150.0, 0.0, (1, 3))["shock_weighted_share"]
+        responsive = build_kernel(INPUTS, 150.0, 0.5, (1, 3))[
+            "shock_weighted_share"
+        ]
         assert (responsive >= flat).all() and not responsive.equals(flat)
 
     def test_backtest_predictions_move_with_the_response(self) -> None:

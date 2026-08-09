@@ -111,11 +111,11 @@ Mean absolute error on the effective rate, basis points:
 | 2021 | 10.08 | **9.81** |
 
 The scenario kernel is marginally ahead at two of the three cuts, by margins
-too small to mean anything: under a basis point at 2014 and 2018. The WAM
-benchmark is ahead at 2021 by a similarly small amount. This is not evidence of
-forecasting skill, and the exercise is not a forecast: realised rate paths are
-fed in so that timing error can be separated from yield-path error, which is
-why it is now called conditional historical validation.
+too small to mean much: 2.88 basis points at 2014 and 0.42 basis points at
+2018. The WAM benchmark is ahead at 2021 by 0.27 basis points. This is not
+evidence of forecasting skill, and the exercise is not a forecast: realised
+rate paths are fed in so that timing error can be separated from yield-path
+error, which is why it is now called conditional historical validation.
 
 This ordering has changed four times, and that is the finding. Kernel wins two
 of three; then loses all three; then wins one; now wins two again. Each move
