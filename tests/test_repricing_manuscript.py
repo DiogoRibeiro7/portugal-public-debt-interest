@@ -152,7 +152,8 @@ def test_repricing_terms_do_not_revert_to_old_bias_language() -> None:
     ):
         assert stale not in combined
 
-    assert "Scenario-minus-WAM repricing differences" in combined
+    assert "Scenario-minus-WAM pass-through exposure differences" in combined
+    assert "Scenario-minus-WAM repricing differences" not in combined
     assert "Scenario exposure" in combined
     assert "Conditional historical validation errors" in combined
     assert "statistically precise" in TEX_PATH.read_text(encoding="utf-8")
@@ -214,8 +215,25 @@ def test_kernel_code_comments_match_current_identification_language() -> None:
     source = KERNEL_SOURCE.read_text(encoding="utf-8")
     assert "returned a null" not in source
     assert "argues is biased" not in source
+    assert "exp(-h/m)" not in source
+    assert "A real redemption profile with the *same" not in source
     assert "statistically precise" in source
     assert "not behaviourally" in source
+
+
+def test_retail_estimation_outcome_is_not_called_repricing() -> None:
+    source = TEX_PATH.read_text(encoding="utf-8")
+    normalised = " ".join(source.split())
+    abstract = source.split(r"\begin{abstract}", 1)[1].split(r"\end{abstract}", 1)[0]
+    estimation = source.split(r"\section{Estimation}", 1)[1].split(r"\section", 1)[0]
+    assert "positive retail outstanding-value change" in " ".join(abstract.split())
+    assert (
+        "The outcome is the positive monthly change in retail certificate "
+        "outstanding value, scaled by the relevant opening stock."
+    ) in normalised
+    assert "competing-return spread and positive retail outstanding-value change" in normalised
+    assert "The outcome is the repriced share of the opening stock" not in estimation
+    assert "retail repricing. Two things stop" not in estimation
 
 
 def test_backtest_prose_matches_current_winner_pattern() -> None:

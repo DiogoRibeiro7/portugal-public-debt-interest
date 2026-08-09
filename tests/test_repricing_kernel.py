@@ -111,8 +111,14 @@ def test_benchmark_matches_the_burden_paper_assumption() -> None:
 def test_invalid_inputs_are_refused() -> None:
     with pytest.raises(ValidationError):
         KernelInputs(0.0, 0.8, 0.1)
+    with pytest.raises(ValidationError, match="at least one year"):
+        KernelInputs(0.5, 0.8, 0.1)
     with pytest.raises(ValidationError):
         KernelInputs(7.5, 1.2, 0.1)
+    with pytest.raises(ValidationError, match="at least one year"):
+        geometric_kernel(np.array([1.0]), 0.5)
+    with pytest.raises(ValidationError, match="retail reset cycle"):
+        build_kernel(INPUTS, retail_reset_cycle_years=0.0)
 
 
 class TestResetShockLoading:
