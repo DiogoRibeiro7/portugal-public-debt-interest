@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Corrected
+
+- Cleaned the final Revision-10 audit and internal docstrings: the kernel shape
+  note now refers to the imposed linear comparison, the behavioural-band test
+  no longer calls the fitted association a null, and the clean-source reviewer
+  result is recorded in the final audit.
+
 ## v0.6.3 - 2026-08-09
 
 Revision-9 minor-review release.

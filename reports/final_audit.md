@@ -4,8 +4,8 @@
 
 Date: 2026-08-09
 
-Audit subject: package version 0.6.3, working tree after revision-9 reviewer
-terminology, API validation and audit cleanup.
+Audit subject: package version 0.6.3, working tree after revision-10 reviewer
+documentation and audit cleanup.
 
 ### Test status depends on the environment, and both are recorded
 
@@ -17,11 +17,12 @@ that need a git worktree. Those skips are expected, not failures.
 
 | Environment | Result |
 | --- | --- |
-| Author's populated working tree after revision-8 implementation | 377 passed, 0 skipped |
+| Author's populated working tree after revision-10 cleanup | 378 passed, 0 skipped |
 | Reviewer clean checkout of the prior revision-6 archive, no pipeline run | 345 passed, 19 skipped |
 | Reviewer-reported revision-7 source archive check | 371 collected: 352 passed, 19 skipped, 0 failed |
 | Reviewer-reported revision-8 source archive check | 373 collected: 354 passed, 19 skipped, 0 failed |
 | Reviewer-reported revision-9 source archive check | 377 collected: 358 passed, 19 skipped, 0 failed |
+| Reviewer-reported revision-10 source archive check | 378 collected: 359 passed, 19 skipped, 0 failed |
 
 All recorded runs reported zero failures. The clean-checkout row is retained
 because it corrects the release-note count a reviewer observed in the submitted archive.

@@ -285,9 +285,9 @@ def bias_table(
 
     The bias is decomposed into two mechanisms, separately quantified:
 
-    *Shape*: a memoryless hazard has a long right tail, so it under-retires
-    relative to a real profile with the same mean. This exists even with no
-    behavioural response at all.
+    *Shape*: in the imposed comparison, the linear retirement profile retires
+    more debt at early horizons than the discrete geometric WAM benchmark.
+    This exists even with no behavioural response at all.
 
     *Behaviour*: the shock-responsive retail-flow exposure. Its coefficient is
     statistically precise in the descriptive regression but not behaviourally

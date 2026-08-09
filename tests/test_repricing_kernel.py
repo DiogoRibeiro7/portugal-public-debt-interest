@@ -66,7 +66,7 @@ def test_shape_bias_exists_without_any_behavioural_response() -> None:
 
 
 def test_behavioural_band_is_open_at_zero() -> None:
-    """The estimate is a null, so the low path must contribute nothing."""
+    """The central behavioural effect is zero by design, not a fitted null."""
     bias = bias_table(
         INPUTS,
         shock_bps=100,
