@@ -121,7 +121,11 @@ data/processed/eurostat_panel_metrics.csv
 
 ## Methodological defects
 
-1. **Ambiguous implicit-rate column.** The earlier implementation calculated both previous-debt and average-debt rates but also wrote the selected configured value into a generic rate column. With the default average-debt denominator, debt-dynamics outputs used the average-debt rate even though the discrete identity requires interest divided by previous-period debt.
+1. Ambiguous implicit-rate column. The earlier implementation calculated both
+previous-debt and average-debt rates but also wrote the selected configured
+value into a generic rate column. With the default average-debt denominator,
+debt-dynamics outputs used the average-debt rate even though the discrete
+identity requires interest divided by previous-period debt.
 
 Current formulas:
 
@@ -153,28 +157,46 @@ reconstructed_debt_ratio_change =
   interest_growth_contribution + primary_balance_contribution + stock_flow_adjustment
 ```
 
-2. **Debt-dynamics outputs are incomplete.** The project does not expose observed debt-ratio change, primary-balance contribution with correct decomposition sign, reconstructed change, or reconciliation error.
+2. Debt-dynamics outputs are incomplete. The project does not expose observed
+debt-ratio change, primary-balance contribution with correct decomposition
+sign, reconstructed change, or reconciliation error.
 
-3. **No exact interest-burden decomposition.** The report narrates debt exposure and rate effects but does not decompose changes in `b_t = I_t / Y_t` into exact average-rate and average-debt-exposure contributions.
+3. No exact interest-burden decomposition. The report narrates debt exposure
+and rate effects but does not decompose changes in `b_t = I_t / Y_t` into
+exact average-rate and average-debt-exposure contributions.
 
-4. **1960-1994 extension is under-analysed.** The paper and data include a 1960-2025 table, but the report mainly analyses 1995-2025. The linked AMECO accounting basis is documented but not visually separated in a dedicated historical chart.
+4. 1960-1994 extension is under-analysed. The paper and data include a
+1960-2025 table, but the report mainly analyses 1995-2025. The linked AMECO
+accounting basis is documented but not visually separated in a dedicated
+historical chart.
 
-5. **Comparator selection is arbitrary.** `config/default.yaml` lists Portugal, Spain, Italy, Greece, Ireland, EA20, Germany, and the Netherlands. Rankings are therefore rankings within a hand-selected panel, not the euro-area distribution.
+5. Comparator selection is arbitrary. `config/default.yaml` lists Portugal,
+Spain, Italy, Greece, Ireland, EA20, Germany, and the Netherlands. Rankings are
+therefore rankings within a hand-selected panel, not the euro-area
+distribution.
 
-6. **Refinancing assumptions are insufficiently documented.** Default shares are in configuration but no maturity-source evidence or sensitivity table accompanies them.
+6. Refinancing assumptions are insufficiently documented. Default shares are in
+configuration but no maturity-source evidence or sensitivity table accompanies
+them.
 
 7. Correlation analysis is weak evidence. The report contains a correlation
 table among persistent fiscal levels, accounting-linked variables, and
 common-denominator ratios. This is not strong evidence for a short annual
 sample.
 
-8. **Source-vintage and observation-status reporting is incomplete.** Row-level provenance exists, but headline report text and tables do not consistently mark provisional source flags or data vintages.
+8. Source-vintage and observation-status reporting is incomplete. Row-level
+provenance exists, but headline report text and tables do not consistently mark
+provisional source flags or data vintages.
 
-9. **Replication metadata is incomplete.** At the baseline audit date there was
+9. Replication metadata is incomplete. At the baseline audit date there was
 no tracked lock file, no generated replication metadata, no report commit hash,
 no dirty-tree status, and no PDF/source checksum appendix.
 
-10. **Publication quality issues remain.** Figure generation now includes vector PDF output, mixed-axis charts have been replaced by stacked-panel figures, LaTeX layout warnings have been cleared, analytical tables are generated from processed data, and recurring paper headline values are generated as LaTeX macros.
+10. Publication quality issues remain. Figure generation now includes vector
+PDF output, mixed-axis charts have been replaced by stacked-panel figures,
+LaTeX layout warnings have been cleared, analytical tables are generated from
+processed data, and recurring paper headline values are generated as LaTeX
+macros.
 
 ## File-by-file implementation plan
 
