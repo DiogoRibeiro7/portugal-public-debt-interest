@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.6.2 - 2026-08-09
+
+Revision-8 minor-review release.
 
 ### Changed
 
