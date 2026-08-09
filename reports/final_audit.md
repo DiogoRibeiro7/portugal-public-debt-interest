@@ -2,10 +2,9 @@
 
 ## Verification Run
 
-Date: 2026-08-08
+Date: 2026-08-09
 
-Audit subject: package version 0.6.0, source commit `8c34f5b` plus the
-revision-6 changes in this working tree.
+Audit subject: package version 0.6.0, source commit `187193e`.
 
 ### Test status depends on the environment, and both are recorded
 
@@ -17,7 +16,7 @@ that need a git worktree. Those skips are expected, not failures.
 
 | Environment | Result |
 | --- | --- |
-| Author's populated working tree after refixing benchmark fix | 371 passed, 0 skipped |
+| Author's populated working tree at commit `187193e` | 371 passed, 0 skipped |
 | Reviewer clean checkout of the prior revision-6 archive, no pipeline run | 345 passed, 19 skipped |
 
 Both runs reported zero failures. The clean-checkout row is retained because it
@@ -45,12 +44,15 @@ and live regeneration remains documented in `docs/reproducibility.md`.
 - Main PDF: `paper/portugal_public_debt_interest_report.pdf`.
 - Main PDF page count: 27.
 - Main PDF SHA-256:
-  `7fefa676c86be29becff9547c671bc14e170de5e35dacc37811787111f9e5c23`.
+  `4d588e6e17bb322292611e548f43124b1edbcfc4e2dd0275cf126eb199fd0dd9`.
 - Main LaTeX source: `paper/portugal_public_debt_interest_report.tex`.
 - Generated paper tables: `reports/tables/`.
 - Generated paper figures: committed PDF figures under `reports/figures/`.
 - Repricing manuscript: `paper/repricing/repricing_kernel.tex` and
   `paper/repricing/repricing_kernel.pdf`.
+- Repricing PDF page count: 15.
+- Repricing PDF SHA-256:
+  `6a5d3f9fed21166a6bf6bfdf7ff62675508ad41168fd201db322c47ce2446812`.
 - Release metadata: `CITATION.cff`, `.zenodo.json`, `pyproject.toml`, and
   `CHANGELOG.md`.
 
@@ -75,6 +77,8 @@ not part of the submitted source archive.
   10.90 percentage-point or EUR 300 million point claims.
 - Refinancing scenarios are labelled as stylised deterministic scenarios and
   disclose that the central path uses the IGCP 2024 average-maturity statistic.
+- The burden paper cites the companion repricing paper under its current title:
+  `What Reprices and How Fast in Weighted-Average-Maturity Pass-Through`.
 - The repricing manuscript now frames weighted average maturity as an
   incomplete timing statistic and presents uncertainty rather than a single
   identified behavioural correction.
@@ -87,8 +91,8 @@ not part of the submitted source archive.
 
 - The validation report retains a warning for the debt-ratio reconciliation in
   1997 and 1998. The paper now reports and interprets that warning.
-- The main LaTeX build reports one small overfull line in the research-question
-  paragraph, about 1.43 pt. The PDF builds successfully.
+- The current LaTeX builds report no overfull boxes and no undefined
+  references. The repricing bibliography retains one harmless underfull line.
 - Dependency resolution is locked by `poetry.lock`. Platform-specific wheel
   resolution should still be recorded through `pip freeze` in CI and release
   logs.
