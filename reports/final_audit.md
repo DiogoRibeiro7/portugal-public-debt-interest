@@ -55,7 +55,7 @@ and live regeneration remains documented in `docs/reproducibility.md`.
   `paper/repricing/repricing_kernel.pdf`.
 - Repricing PDF page count: 17.
 - Repricing PDF SHA-256:
-  `5d0fb89e6c1293bbfe687fc5f2239c5b95b3eb2525aa75a658e61b1f5d534c14`.
+  `07ec1f095000a1c1d7ff4518bd1781cb997dff7e7a6b12e455a179938925ea28`.
 - Release metadata: `CITATION.cff`, `.zenodo.json`, `pyproject.toml`, and
   `CHANGELOG.md`.
 
